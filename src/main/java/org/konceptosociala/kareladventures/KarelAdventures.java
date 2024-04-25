@@ -1,43 +1,78 @@
 package org.konceptosociala.kareladventures;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.shape.Box;
+import java.awt.*;
 
-/**
- * This is the Main Class of your Game. It should boot up your game and do initial initialisation
- * Move your Logic into AppStates or Controls or other java classes
- */
+import org.konceptosociala.kareladventures.states.MainMenuState;
+
+import com.jme3.app.SimpleApplication;
+import com.jme3.renderer.RenderManager;
+import com.jme3.system.AppSettings;
+
+import jme.video.player.MovieSettings;
+import jme.video.player.MovieState;
+
 public class KarelAdventures extends SimpleApplication {
+    private AppSettings appSettings = new AppSettings(true);
+    private MovieState movieState;
+
+    public KarelAdventures() {
+        super();
+        setFullscreen();
+        setDisplayStatView(false);
+        setDisplayFps(false);
+        setShowSettings(false);
+        setSettings(appSettings);
+    }
 
     public static void main(String[] args) {
         KarelAdventures app = new KarelAdventures();
-        app.setShowSettings(false); //Settings dialog not supported on mac
         app.start();
     }
 
     @Override
     public void simpleInitApp() {
-        Box b = new Box(1, 1, 1);
-        Geometry geom = new Geometry("Box", b);
+        try {
+            String path = "bin/main/Videos/Intro/mp4/acm.mp4";
+            MovieSettings movie = new MovieSettings(path, cam.getWidth(), cam.getHeight(), 1.0f, true);
+            movieState = new MovieState(movie);
+            stateManager.attach(movieState);
 
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.Blue);
-        geom.setMaterial(mat);
-
-        rootNode.attachChild(geom);
+            flyCam.setEnabled(false);
+            inputManager.setCursorVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void simpleUpdate(float tpf) {
-        //this method will be called every game tick and can be used to make updates
+        if (movieState.isStopped()) {
+            stateManager.detach(movieState);
+
+            flyCam.setMoveSpeed(50);
+            flyCam.setEnabled(true);
+            inputManager.setCursorVisible(false);
+
+            stateManager.attach(new MainMenuState());
+        }
     }
 
     @Override
     public void simpleRender(RenderManager rm) {
-        //add render code here (if any)
+
+    }
+
+    public AppSettings getSettings() {
+        return appSettings;
+    }
+    
+    private void setFullscreen() {
+        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        DisplayMode[] modes = device.getDisplayModes();
+        int i = 0;
+        appSettings.setResolution(modes[i].getWidth(), modes[i].getHeight());
+        appSettings.setFrequency(modes[i].getRefreshRate());
+        appSettings.setBitsPerPixel(modes[i].getBitDepth());
+        appSettings.setFullscreen(device.isFullScreenSupported());
     }
 }
