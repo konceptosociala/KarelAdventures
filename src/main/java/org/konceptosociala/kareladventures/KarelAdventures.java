@@ -1,19 +1,18 @@
 package org.konceptosociala.kareladventures;
 
 import java.awt.*;
-
-import org.konceptosociala.kareladventures.states.MainMenuState;
-
+import org.konceptosociala.kareladventures.state.IntroState;
+import org.konceptosociala.kareladventures.state.MainMenuState;
 import com.jme3.app.SimpleApplication;
-import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
+import lombok.Getter;
 
-import jme.video.player.MovieSettings;
-import jme.video.player.MovieState;
-
+@Getter
 public class KarelAdventures extends SimpleApplication {
     private AppSettings appSettings = new AppSettings(true);
-    private MovieState movieState;
+
+    private IntroState introState;
+    private MainMenuState mainMenuState;
 
     public KarelAdventures() {
         super();
@@ -23,47 +22,25 @@ public class KarelAdventures extends SimpleApplication {
         setShowSettings(false);
         setSettings(appSettings);
     }
+    
+    @Override
+    public void simpleInitApp() {
+        try {
+            flyCam.setEnabled(false);
+
+            introState = new IntroState(cam.getWidth(), cam.getHeight());
+            mainMenuState = new MainMenuState();
+
+            stateManager.attach(introState);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
 
     public static void main(String[] args) {
         KarelAdventures app = new KarelAdventures();
         app.start();
-    }
-
-    @Override
-    public void simpleInitApp() {
-        try {
-            String path = "bin/main/Videos/Intro/mp4/acm.mp4";
-            MovieSettings movie = new MovieSettings(path, cam.getWidth(), cam.getHeight(), 1.0f, true);
-            movieState = new MovieState(movie);
-            stateManager.attach(movieState);
-
-            flyCam.setEnabled(false);
-            inputManager.setCursorVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void simpleUpdate(float tpf) {
-        if (movieState.isStopped()) {
-            stateManager.detach(movieState);
-
-            flyCam.setMoveSpeed(50);
-            flyCam.setEnabled(true);
-            inputManager.setCursorVisible(false);
-
-            stateManager.attach(new MainMenuState());
-        }
-    }
-
-    @Override
-    public void simpleRender(RenderManager rm) {
-
-    }
-
-    public AppSettings getSettings() {
-        return appSettings;
     }
     
     private void setFullscreen() {

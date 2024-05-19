@@ -1,11 +1,12 @@
 plugins {
     id 'application'
     id 'java-library'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'java'
-    id "de.undercouch.download" version "5.1.0"
     id 'idea'
-    id "io.github.0ffz.github-packages" version "1.2.1" // Plugin for anonymous inclusion of artifacts hosted in github package registry
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id "de.undercouch.download" version "5.1.0"
+    id "io.github.0ffz.github-packages" version "1.2.1"
+    id 'org.graalvm.buildtools.native' version '0.10.1'
 }
 
 javafx {
@@ -44,6 +45,8 @@ application {
 }
 
 dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
     implementation "org.jmonkeyengine:jme3-awt-dialogs:" + jmonkeyengineVersion
     implementation 'org.jmonkeyengine:jme3-core:' + jmonkeyengineVersion
     implementation 'org.jmonkeyengine:jme3-desktop:' + jmonkeyengineVersion
@@ -71,7 +74,6 @@ distZip {
     includeEmptyDirs(false)
 }
 
-//See https://api.adoptium.net/v3/assets/feature_releases/11/ga?image_type=jre for jre urls
 def windowsJreUrl = "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6%2B10/OpenJDK17U-jre_x64_windows_hotspot_17.0.6_10.zip"
 def linuxJreUrl = "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6%2B10/OpenJDK17U-jre_x64_linux_hotspot_17.0.6_10.tar.gz"
 def macJreUrl = "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6%2B10/OpenJDK17U-jre_x64_mac_hotspot_17.0.6_10.tar.gz"
@@ -79,13 +81,7 @@ def macJreUrl = "https://github.com/adoptium/temurin17-binaries/releases/downloa
 tasks.withType(JavaExec) { // Java runtime options:
     args = []
     classpath sourceSets.main.runtimeClasspath
-    //debug true
     enableAssertions true
-    //jvmArgs '-verbose:gc'
-    //jvmArgs '-Xbatch'
-    //jvmArgs '-Xms256m', '-Xmx256m'
-    //jvmArgs '-XX:+PrintCompilation'
-    //jvmArgs '-XX:+UseConcMarkSweepGC'
     jvmArgs '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=10'
     jvmArgs = ['--add-opens=javafx.media/javafx.scene.media=ALL-UNNAMED',
                '--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
@@ -239,5 +235,21 @@ task cleanSOs(type: Delete) {
 task fund(){
     doLast {
        java.awt.Desktop.desktop.browse "https://start.jmonkeyengine.org/#!funding=JME_DESKTOP,JME_TERRAIN,JME_EFFECTS,JME_NIFTY,LOG4J2,22975%2F2930932e-7688-493a-ad00-bc473df0f076,JME_JBULLET".toURI()
+    }
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = "Karel Adventures"
+            mainClass = "org.konceptosociala.kareladventures.KarelAdventures"
+            buildArgs.add("-O4")
+        }
+        test {
+            buildArgs.add("-O0")
+        }
+    }
+    binaries.all {
+        buildArgs.add("--verbose")
     }
 }
