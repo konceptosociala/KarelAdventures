@@ -29,7 +29,7 @@ public class IntroState extends MovieState {
         super.update(tpf);
         if (isStopped()) {
             stateManager.detach(this);
-            stateManager.attach(app.getMainMenuState());
+            // stateManager.attach(app.getMainMenuState());
         }
     }
 }
