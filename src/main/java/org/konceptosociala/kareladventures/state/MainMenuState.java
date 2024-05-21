@@ -40,19 +40,19 @@ public class MainMenuState extends BaseAppState {
 
         Nifty nifty = initNifty();
 
-        nifty.addScreen("Screen_ID", new ScreenBuilder("Hello Nifty Screen") {{
+        nifty.addScreen("main_menu_screen", new ScreenBuilder("Hello Nifty Screen") {{
             controller(new DefaultScreenController());
 
-            layer(new LayerBuilder("Layer_ID") {{
+            layer(new LayerBuilder("main_menu_layer") {{
                 childLayoutVertical();
 
-                panel(new PanelBuilder("Panel_ID") {{
+                panel(new PanelBuilder("main_menu_panel") {{
                     childLayoutCenter();
 
-                    control(new ButtonBuilder("Button_ID", "Hello Nifty"){{
+                    control(new ButtonBuilder("main_menu_play_button", "Play"){{
                         alignCenter();
                         valignCenter();
-                        width("5%");
+                        width("15%");
                         height("15%");
                     }});
                     
