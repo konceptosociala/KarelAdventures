@@ -1,96 +1,77 @@
 package org.konceptosociala.kareladventures.state;
 
+import javax.annotation.Nonnull;
+
 import org.konceptosociala.kareladventures.KarelAdventures;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.asset.AssetManager;
-import com.jme3.audio.AudioRenderer;
 import com.jme3.input.InputManager;
-import com.jme3.niftygui.NiftyJmeDisplay;
-import com.jme3.renderer.ViewPort;
 
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.builder.LayerBuilder;
-import de.lessvoid.nifty.builder.PanelBuilder;
-import de.lessvoid.nifty.builder.ScreenBuilder;
-import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
-import de.lessvoid.nifty.screen.DefaultScreenController;
+import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.screen.ScreenController;
 
-public class MainMenuState extends BaseAppState {
+public class MainMenuState extends BaseAppState implements ScreenController {
     private KarelAdventures app;
-    private AssetManager assetManager;
-    private AudioRenderer audioRenderer;
+    private AppStateManager stateManager;
     private InputManager inputManager;
-    private ViewPort guiViewPort;
+    private Nifty nifty;
 
     @Override
     protected void initialize(Application app) {
         this.app = (KarelAdventures) app;
-        this.assetManager = this.app.getAssetManager();
-        this.audioRenderer = this.app.getAudioRenderer();
+        this.stateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
-        this.guiViewPort = this.app.getGuiViewPort();
+        this.nifty = this.app.getNifty();
     }
 
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(true);
-
-        Nifty nifty = initNifty();
-
-        nifty.addScreen("main_menu_screen", new ScreenBuilder("Hello Nifty Screen") {{
-            controller(new DefaultScreenController());
-
-            layer(new LayerBuilder("main_menu_layer") {{
-                childLayoutVertical();
-
-                panel(new PanelBuilder("main_menu_panel") {{
-                    childLayoutCenter();
-
-                    control(new ButtonBuilder("main_menu_play_button", "Play"){{
-                        alignCenter();
-                        valignCenter();
-                        width("15%");
-                        height("15%");
-                    }});
-                    
-                }});
-                
-            }});
-            
-        }}.build(nifty));
-        
-        nifty.gotoScreen("Screen_ID");
+        nifty.gotoScreen("main_menu_screen");
     }
+
+    // UI callbacks
+
+    public void playGame() {
+        this.setEnabled(false);
+        stateManager.attach(new GameState());
+    }
+
+    public void openSettings() {
+        
+    }
+
+    public void quitGame() {
+        app.stop();
+    }
+
+    // Other methods
 
     @Override
     protected void onDisable() {
-
     }
     
     @Override
     protected void cleanup(Application app) {
-
     }
 
-    private Nifty initNifty() {
-        NiftyJmeDisplay niftyDisplay = NiftyJmeDisplay.newNiftyJmeDisplay(
-            assetManager, 
-            inputManager,
-            audioRenderer,
-            guiViewPort
-        );
-
-        Nifty nifty = niftyDisplay.getNifty();
-        guiViewPort.addProcessor(niftyDisplay);
-        ((SimpleApplication) getApplication()).getFlyByCamera().setDragToRotate(true);
-
-        nifty.loadStyleFile("nifty-default-styles.xml");
-        nifty.loadControlFile("nifty-default-controls.xml");
-
-        return nifty;
+    @Override
+    public void bind(@Nonnull final Nifty nifty, @Nonnull final Screen screen) {
+        this.nifty = nifty;
     }
-    
+
+    @Override
+    public void onStartScreen() {
+    }
+
+    @Override
+    public void onEndScreen() {
+    }
+
+    public void gotoScreen(@Nonnull final String screenId) {
+        nifty.gotoScreen(screenId);
+    }
 }

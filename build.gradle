@@ -67,6 +67,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
     implementation 'org.luaj:luaj-jme:3.0.1'
     implementation files('libs/jme-video-player.jar')
+    runtimeOnly files('assets/')
 }
 
 distZip {

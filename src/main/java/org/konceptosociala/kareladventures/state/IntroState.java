@@ -8,7 +8,7 @@ import jme.video.player.MovieSettings;
 import jme.video.player.MovieState;
 
 public class IntroState extends MovieState {
-    private static final String INTRO_PATH = "bin/main/Videos/Intro/Intro.mp4";
+    private static final String INTRO_PATH = "assets/Videos/Intro/Intro.mp4";
 
     private KarelAdventures app;
     private AppStateManager stateManager;

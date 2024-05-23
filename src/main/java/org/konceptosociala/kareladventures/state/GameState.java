@@ -26,6 +26,7 @@ public class GameState extends BaseAppState {
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(false);
+        app.getRootNode().attachChild(player);
     }
 
     @Override
