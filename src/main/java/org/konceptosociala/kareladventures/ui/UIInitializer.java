@@ -19,6 +19,9 @@ public class UIInitializer {
             layer(new LayerBuilder("main_menu_layer") {{
                 childLayoutVertical();
 
+                panel(Margin.vertical("10%"));
+                panel(new Logo("main_logo", "Textures/logo.png", "80%"));
+                panel(Margin.vertical("15%"));
                 panel(new ImageButton("main_menu_play_button", "Play", "playGame()"));
                 panel(new ImageButton("main_menu_play_button", "Settings", "openSettings()"));
                 panel(new ImageButton("main_menu_quit_button", "Quit", "quitGame()"));

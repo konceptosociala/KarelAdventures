@@ -19,7 +19,7 @@ public class ImageButton extends PanelBuilder {
             interactOnClick(onClick);
         }}); 
 
-        image(new ImageBuilder(){{
+        image(new ImageBuilder(id+"_image"){{
             filename("Textures/button_idle.png");
             width("328px");
             height("54px");
@@ -28,7 +28,7 @@ public class ImageButton extends PanelBuilder {
         text(new TextBuilder(id+"_label"){{
             text(label);
             font("Interface/Fonts/Default.fnt");
-            height("100%");
+            height("100px");
             width("100%");
         }});
     }
