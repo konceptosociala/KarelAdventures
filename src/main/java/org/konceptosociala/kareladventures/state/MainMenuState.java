@@ -37,13 +37,13 @@ public class MainMenuState extends BaseAppState implements ScreenController {
         inputManager.setCursorVisible(true);
 
         nifty.addScreen("main_menu_screen", new ScreenBuilder("Main menu screen") {{
-            controller(app.getMainMenuState());
+            controller(MainMenuState.this);
 
             layer(new LayerBuilder("main_menu_layer") {{
                 childLayoutVertical();
 
                 panel(Margin.vertical("10%"));
-                panel(new Logo("main_logo", "Textures/logo.png", "80%"));
+                panel(new Logo("main_logo", "Textures/ui/logo.png", "80%"));
                 panel(Margin.vertical("15%"));
                 panel(new ImageButton("main_menu_play_button", "Play", "playGame()"));
                 panel(new ImageButton("main_menu_play_button", "Settings", "openSettings()"));

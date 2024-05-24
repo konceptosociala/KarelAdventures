@@ -1,7 +1,6 @@
 package org.konceptosociala.kareladventures.game.inventory;
 
-import com.jme3.texture.Texture;
-
+import de.lessvoid.nifty.render.NiftyImage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,5 +9,5 @@ import lombok.Getter;
 public class Item {
     public final ItemId id;
     public final String name;
-    public final Texture itemIcon;
+    public final NiftyImage icon;
 }

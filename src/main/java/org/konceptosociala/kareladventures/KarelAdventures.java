@@ -37,6 +37,8 @@ public class KarelAdventures extends SimpleApplication implements ActionListener
     @Override
     public void simpleInitApp() {
         try {
+            inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
+
             bulletAppState = new BulletAppState();
             bulletAppState.setDebugEnabled(true);
             stateManager.attach(bulletAppState);
