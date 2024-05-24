@@ -3,20 +3,22 @@ package org.konceptosociala.kareladventures;
 import java.awt.*;
 import org.konceptosociala.kareladventures.state.IntroState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
-import org.konceptosociala.kareladventures.ui.UIInitializer;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.input.controls.ActionListener;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
 import lombok.Getter;
 
 @Getter
-public class KarelAdventures extends SimpleApplication {
+public class KarelAdventures extends SimpleApplication implements ActionListener {
     private Nifty nifty;
     private AppSettings appSettings = new AppSettings(true);
     private IntroState introState;
     private MainMenuState mainMenuState;
+    private BulletAppState bulletAppState;
 
     public static void main(String[] args) {
         KarelAdventures app = new KarelAdventures();
@@ -35,12 +37,13 @@ public class KarelAdventures extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         try {
-            flyCam.setEnabled(false);
+            bulletAppState = new BulletAppState();
+            bulletAppState.setDebugEnabled(true);
+            stateManager.attach(bulletAppState);
 
             introState = new IntroState(cam.getWidth(), cam.getHeight());
             mainMenuState = new MainMenuState();
             nifty = initNifty();
-            UIInitializer.initUI(this);
 
             stateManager.attach(introState);
         } catch (Exception e) {
@@ -75,5 +78,10 @@ public class KarelAdventures extends SimpleApplication {
         nifty.loadControlFile("nifty-default-controls.xml");
 
         return nifty;
+    }
+
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {
+        
     }
 }

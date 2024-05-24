@@ -22,6 +22,7 @@ public class IntroState extends MovieState {
         super.initialize(app);
         this.app = (KarelAdventures) app;
         this.stateManager = getStateManager();
+        this.app.getFlyByCamera().setEnabled(false);
     }
     
     @Override
