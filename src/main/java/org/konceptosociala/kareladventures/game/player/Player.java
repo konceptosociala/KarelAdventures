@@ -35,7 +35,7 @@ public class Player extends Node {
 
         health = new Health(100);
         energy = new Energy(100);
-        inventory = new Inventory();
+        inventory = Inventory.test();
     }
     
     public boolean isAlive() {

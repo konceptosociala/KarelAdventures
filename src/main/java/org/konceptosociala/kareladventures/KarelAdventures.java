@@ -3,17 +3,17 @@ package org.konceptosociala.kareladventures;
 import java.awt.*;
 import org.konceptosociala.kareladventures.state.IntroState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
+import org.konceptosociala.kareladventures.ui.inventory_cell_id.InventoryCellId.NamedCell;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.input.controls.ActionListener;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
 import lombok.Getter;
 
 @Getter
-public class KarelAdventures extends SimpleApplication implements ActionListener {
+public class KarelAdventures extends SimpleApplication {
     private Nifty nifty;
     private AppSettings appSettings = new AppSettings(true);
     private IntroState introState;
@@ -80,10 +80,5 @@ public class KarelAdventures extends SimpleApplication implements ActionListener
         nifty.loadControlFile("nifty-default-controls.xml");
 
         return nifty;
-    }
-
-    @Override
-    public void onAction(String name, boolean isPressed, float tpf) {
-        
     }
 }

@@ -1,39 +1,41 @@
 package org.konceptosociala.kareladventures.state;
 
+import java.util.Optional;
+
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
-import org.konceptosociala.kareladventures.game.inventory.Item;
-import org.konceptosociala.kareladventures.game.inventory.Weapon;
-import org.konceptosociala.kareladventures.game.inventory.armor.Boots;
-import org.konceptosociala.kareladventures.game.inventory.armor.Chestplate;
-import org.konceptosociala.kareladventures.game.inventory.armor.Helmet;
-import org.konceptosociala.kareladventures.game.inventory.armor.Leggings;
 import org.konceptosociala.kareladventures.ui.InventoryCell;
+import org.konceptosociala.kareladventures.ui.inventory_cell_id.InvalidCellIdException;
+import org.konceptosociala.kareladventures.ui.inventory_cell_id.InventoryCellId;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
-
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
+import de.lessvoid.nifty.elements.render.PanelRenderer;
+import de.lessvoid.nifty.render.NiftyImage;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
+import de.lessvoid.nifty.tools.Color;
 
 public class InventoryState extends BaseAppState implements ActionListener, ScreenController {
     private KarelAdventures app;
     private InputManager inputManager;
     private Nifty nifty;
     private Inventory inventory;
+    private Optional<InventoryCellId> selectedItemId;
 
     public InventoryState(Inventory inventory) {
         this.inventory = inventory;
+        this.selectedItemId = Optional.empty();
     }
 
     @Override
@@ -43,7 +45,6 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
         this.nifty = this.app.getNifty();
     }
 
-    @SuppressWarnings("null")
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(true);
@@ -63,61 +64,65 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                         height("800px");
                     }});
 
-                    panel(new PanelBuilder("inventory_columns_panel"){{
-                        childLayoutHorizontal();
+                    try {
+                        panel(new PanelBuilder("inventory_columns_panel"){{
+                            childLayoutHorizontal();
 
-                        marginTop("84px");
+                            marginTop("84px");
 
-                        panel(new PanelBuilder("inv_col_1"){{
-                            childLayoutVertical();
+                            panel(new PanelBuilder("inv_col_0"){{
+                                childLayoutVertical();
 
-                            panel(new InventoryCell("inv_cell_1_1", 0, Helmet.class));
-                            panel(new InventoryCell("inv_cell_1_2", 1, Chestplate.class));
-                            panel(new InventoryCell("inv_cell_1_3", 2, Leggings.class));
-                            panel(new InventoryCell("inv_cell_1_4", 3, Boots.class));
-                            panel(new InventoryCell("inv_cell_1_5", 4, Weapon.class));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_helmet"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_chestplate"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_leggings"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_boots"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_weapon"), inventory));
+                            }});
+
+                            panel(new PanelBuilder("inv_col_1"){{
+                                childLayoutVertical();
+
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_1"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_2"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_3"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_4"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_5"), inventory));
+                            }});
+
+                            panel(new PanelBuilder("inv_col_2"){{
+                                childLayoutVertical();
+
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_1"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_2"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_3"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_4"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_5"), inventory));
+                            }});
+
+                            panel(new PanelBuilder("inv_col_3"){{
+                                childLayoutVertical();
+
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_1"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_2"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_3"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_4"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_5"), inventory));
+                            }});
+
+                            panel(new PanelBuilder("inv_col_4"){{
+                                childLayoutVertical();
+
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_1"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_2"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_3"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_4"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_5"), inventory));
+                            }});
                         }});
-
-                        panel(new PanelBuilder("inv_col_2"){{
-                            childLayoutVertical();
-
-                            panel(new InventoryCell("inv_cell_2_1", 0, Item.class));
-                            panel(new InventoryCell("inv_cell_2_2", 1, Item.class));
-                            panel(new InventoryCell("inv_cell_2_3", 2, Item.class));
-                            panel(new InventoryCell("inv_cell_2_4", 3, Item.class));
-                            panel(new InventoryCell("inv_cell_2_5", 4, Item.class));
-                        }});
-
-                        panel(new PanelBuilder("inv_col_3"){{
-                            childLayoutVertical();
-
-                            panel(new InventoryCell("inv_cell_3_1", 5, Item.class));
-                            panel(new InventoryCell("inv_cell_3_2", 6, Item.class));
-                            panel(new InventoryCell("inv_cell_3_3", 7, Item.class));
-                            panel(new InventoryCell("inv_cell_3_4", 8, Item.class));
-                            panel(new InventoryCell("inv_cell_3_5", 9, Item.class));
-                        }});
-
-                        panel(new PanelBuilder("inv_col_4"){{
-                            childLayoutVertical();
-
-                            panel(new InventoryCell("inv_cell_4_1", 10, Item.class));
-                            panel(new InventoryCell("inv_cell_4_2", 11, Item.class));
-                            panel(new InventoryCell("inv_cell_4_3", 12, Item.class));
-                            panel(new InventoryCell("inv_cell_4_4", 13, Item.class));
-                            panel(new InventoryCell("inv_cell_4_5", 14, Item.class));
-                        }});
-
-                        panel(new PanelBuilder("inv_col_5"){{
-                            childLayoutVertical();
-
-                            panel(new InventoryCell("inv_cell_5_1", 15, Item.class));
-                            panel(new InventoryCell("inv_cell_5_2", 16, Item.class));
-                            panel(new InventoryCell("inv_cell_5_3", 17, Item.class));
-                            panel(new InventoryCell("inv_cell_5_4", 18, Item.class));
-                            panel(new InventoryCell("inv_cell_5_5", 19, Item.class));
-                        }});
-                    }});
+                    } catch (InvalidCellIdException e) {
+                        e.printStackTrace();
+                    }
                 }});
                 
             }});
@@ -125,23 +130,64 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
         }}.build(nifty));
 
         nifty.gotoScreen("inventory_screen");
+    }
 
-        var screen = nifty.getScreen("inventory_screen");
-        screen
-            .findElementById("inv_cell_1_1_icon")
-            .getRenderer(ImageRenderer.class)
-            .setImage(
-                nifty.getRenderEngine().createImage(
-                    screen, 
-                    "Textures/ui/items/java.png", 
-                    true
-                )
-            );
+    public void selectCell(String cellId) {
+        try {
+            var id = new InventoryCellId(cellId);
+            var cell = getCell(cellId);
+
+            if (selectedItemId.isPresent()) {
+                if (id.equals(selectedItemId.get())) {
+                    cell.setBackgroundColor(new Color(0, 0, 0, 0));
+                    selectedItemId = Optional.empty();
+                } else {
+                    var selectedItem = inventory.getItem(selectedItemId.get()).get();
+                    var selectedItemCell = getCell(selectedItemId.get().toString());
+                    selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
+
+                    var selectedItemIcon = getCellIcon(selectedItemId.get().toString());
+                    var newItemIcon = getCellIcon(id.toString());
+
+                    var itemToReplace = inventory.getItem(id);
+                    if (itemToReplace.isEmpty()) {
+                        inventory.setItem(selectedItem, id);
+                        inventory.removeItem(selectedItemId.get());
+
+                        selectedItemId = Optional.empty();
+                    } else {
+                        inventory.setItem(selectedItem, id);
+                        inventory.setItem(itemToReplace.get(), selectedItemId.get());
+                    }
+
+                    selectedItemIcon.setImage(createImage(InventoryCell.TRANSPARENT_ICON));
+                    newItemIcon.setImage(createImage(selectedItem.getIconPath()));
+                }
+            } else {
+                var itemToReplace = inventory.getItem(id);
+                if (itemToReplace.isEmpty())
+                    return;
+
+                cell.setBackgroundColor(new Color(1, 1, 1, 0.1f));
+                selectedItemId = Optional.of(id);
+            }
+        } catch (InvalidCellIdException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
-        
+
+    }
+
+    @Override
+    public void bind(@Nonnull final Nifty nifty, @Nonnull final Screen screen) {
+        this.nifty = nifty;
+    }
+
+    public void gotoScreen(@Nonnull final String screenId) {
+        nifty.gotoScreen(screenId);
     }
 
     @Override
@@ -155,11 +201,6 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     }
 
     @Override
-    public void bind(@Nonnull final Nifty nifty, @Nonnull final Screen screen) {
-        this.nifty = nifty;
-    }
-
-    @Override
     public void onStartScreen() {
     }
 
@@ -167,8 +208,30 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     public void onEndScreen() {
     }
 
-    public void gotoScreen(@Nonnull final String screenId) {
-        nifty.gotoScreen(screenId);
+    @SuppressWarnings("null")
+    private PanelRenderer getCell(String cellId) {
+        var screen = nifty.getScreen("inventory_screen");
+        return screen
+            .findElementById(cellId)
+            .getRenderer(PanelRenderer.class);
+    }
+
+    @SuppressWarnings("null")
+    private ImageRenderer getCellIcon(String cellId) {
+        var screen = nifty.getScreen("inventory_screen");
+        return screen
+            .findElementById(cellId+"_icon")
+            .getRenderer(ImageRenderer.class);
+    }
+
+    @SuppressWarnings("null")
+    private NiftyImage createImage(String path) {
+        var screen = nifty.getScreen("inventory_screen");
+        return nifty.getRenderEngine().createImage(
+            screen, 
+            path, 
+            true
+        );
     }
     
 }

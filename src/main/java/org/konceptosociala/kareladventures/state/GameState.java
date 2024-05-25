@@ -2,7 +2,6 @@ package org.konceptosociala.kareladventures.state;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.player.Player;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
@@ -16,7 +15,6 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
@@ -33,7 +31,6 @@ public class GameState extends BaseAppState implements ActionListener {
     private BulletAppState bulletAppState;
     private InventoryState inventoryState;
     private Nifty nifty;
-
     private ChaseCamera chaseCam;
     private DirectionalLight sun;
     private Player player;
@@ -46,7 +43,6 @@ public class GameState extends BaseAppState implements ActionListener {
         this.inputManager = this.app.getInputManager();
         this.bulletAppState = this.app.getBulletAppState();
         this.nifty = this.app.getNifty();
-
         this.player = new Player(assetManager, bulletAppState);
         this.sun = new DirectionalLight(new Vector3f(-.5f,-.5f,-.5f).normalizeLocal(), ColorRGBA.White);
         this.chaseCam = initChaseCam();

@@ -110,6 +110,10 @@ task downloadAndUnzipWindowsJre(dependsOn: downloadWindowsJre, type: Copy) {
     }
 }
 
+run {
+    enableAssertions = true
+}
+
 task buildWindowsDistribution(dependsOn: [distZip, downloadAndUnzipWindowsJre], type: Copy) {
     group 'distribution'
     from files("${projectDir}/scripts/desktopDeployment/KarelAdventures.bat"), zipTree(distZip.archiveFile), "${buildDir}/jres/windowsJre"

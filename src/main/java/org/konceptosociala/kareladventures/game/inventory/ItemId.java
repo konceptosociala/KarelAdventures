@@ -5,7 +5,7 @@ import java.util.regex.*;
 import lombok.Getter;
 
 public class ItemId {
-    public static final Pattern ITEM_ID_REGEX = Pattern.compile("karel\\.item\\.[a-z_]+");
+    public static final Pattern ITEM_ID_REGEX = Pattern.compile("karel\\.item\\.[a-z_0-9]+");
 
     @Getter
     private String value;

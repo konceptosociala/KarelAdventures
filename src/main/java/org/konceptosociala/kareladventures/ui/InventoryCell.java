@@ -1,46 +1,46 @@
 package org.konceptosociala.kareladventures.ui;
 
 import java.util.Optional;
+
+import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.game.inventory.Item;
+import org.konceptosociala.kareladventures.ui.inventory_cell_id.InventoryCellId;
 
 import de.lessvoid.nifty.builder.*;
+import de.lessvoid.nifty.tools.Color;
 import lombok.Getter;
 
 @Getter
 public class InventoryCell extends PanelBuilder {
-    private Class<? extends Item> cellType;
-    private Optional<Item> cellItem;
-    private int idx;
+    public static final String TRANSPARENT_ICON = "Textures/ui/transparent.png";
 
-    public InventoryCell(String id, int idx, Class<? extends Item> cellType) {
-        super(id);
+    private InventoryCellId cellId;
+    private Optional<Item> cellItem;
+
+    public InventoryCell(InventoryCellId id, Inventory inventory) {
+        super(id.toString());
         this.cellItem = Optional.empty();
-        this.cellType = cellType;
-        this.idx = idx;
 
         childLayoutCenter();
-        width("81px");
-        height("81px");
+        width("80px");
+        height("80px");
         marginTop("2px");
         marginBottom("2px");
         marginLeft("2px");
         marginRight("2px");
+        interactOnClick("selectCell("+id+")");
+        backgroundColor(new Color(0, 0, 0, 0));
 
         image(new ImageBuilder(id+"_icon"){{
-            width("72px");
-            height("72px");
+            width("64px");
+            height("64px");
+
+            var item = inventory.getItem(id);
+            if (item.isPresent())
+                filename(item.get().getIconPath());
+            else
+                filename(TRANSPARENT_ICON);
+                
         }});
-    }
-
-    public boolean putItem(Item item) {
-        if (item.getClass() != cellType && item.getClass().getSuperclass() != cellType)
-            return false;
-
-        cellItem = Optional.of(item);
-        return true;
-    }
-
-    public void clearItem() {
-        cellItem = Optional.empty();
     }
 }
