@@ -28,7 +28,7 @@ public class KarelAdventures extends SimpleApplication implements ActionListener
     public KarelAdventures() {
         super();
         setFullscreen();
-        setDisplayStatView(false);
+        setDisplayStatView(true);
         setDisplayFps(false);
         setShowSettings(false);
         setSettings(appSettings);
@@ -48,6 +48,7 @@ public class KarelAdventures extends SimpleApplication implements ActionListener
             nifty = initNifty();
 
             stateManager.attach(introState);
+            //stateManager.
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);

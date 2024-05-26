@@ -1,5 +1,11 @@
 package org.konceptosociala.kareladventures.state;
 
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.scene.Spatial;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.player.Player;
 
@@ -25,7 +31,7 @@ import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.DefaultScreenController;
 
-public class GameState extends BaseAppState implements ActionListener {    
+public class GameState extends BaseAppState  {
     private KarelAdventures app;
     private AssetManager assetManager;
     private AppStateManager appStateManager;
@@ -41,27 +47,40 @@ public class GameState extends BaseAppState implements ActionListener {
     @Override
     protected void initialize(Application app) {
         this.app = (KarelAdventures) app;
+        this.app.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
         this.assetManager = this.app.getAssetManager();
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
         this.bulletAppState = this.app.getBulletAppState();
         this.nifty = this.app.getNifty();
 
-        this.player = new Player(assetManager, bulletAppState);
-        this.sun = new DirectionalLight(new Vector3f(-.5f,-.5f,-.5f).normalizeLocal(), ColorRGBA.White);
-        this.chaseCam = initChaseCam();
-
-        this.app.getRootNode().attachChild(player);
-        this.app.getRootNode().addLight(sun);
+        initPlayer();
+        initEnvironment();
 
         inventoryState = new InventoryState(player.getInventory());
         appStateManager.attach(inventoryState);
         inventoryState.setEnabled(false);
 
-        inputManager.addMapping("inventory", new KeyTrigger(KeyInput.KEY_E));
-        inputManager.addListener(this, new String[]{
-            "inventory",
-        });
+        initKeys();
+    }
+    private void initEnvironment(){
+        this.sun = new DirectionalLight(new Vector3f(-.5f,-.5f,-.5f).normalizeLocal(), ColorRGBA.White);
+        this.app.getRootNode().addLight(sun);
+        Spatial scene = assetManager.loadModel("Scenes/basic scene.glb");
+        scene.scale(5);
+        CollisionShape sceneShape =
+                CollisionShapeFactory.createMeshShape(scene);
+        RigidBodyControl landscape = new RigidBodyControl(sceneShape, 0);
+        scene.addControl(landscape);
+        this.app.getRootNode().attachChild(scene);
+        bulletAppState.getPhysicsSpace().addAll(scene);
+    }
+    private void initPlayer(){
+        this.player = new Player(assetManager,new Vector3f(10,100,10));
+        this.app.getRootNode().attachChild(player.getPlayerRoot());
+        chaseCam = initChaseCam();
+        bulletAppState.getPhysicsSpace().add(player.getCharacterControl());
+        bulletAppState.getPhysicsSpace().addAll(player.getPlayerRoot());
     }
 
     @Override
@@ -94,19 +113,39 @@ public class GameState extends BaseAppState implements ActionListener {
 
         nifty.gotoScreen("hud_screen");
     }
-
-    @Override
-    public void onAction(String action, boolean isPressed, float tpf) {
-        switch (action) {
-            case "inventory":
-                if (isPressed) 
-                    inventoryState.setEnabled(!inventoryState.isEnabled());
-                break;
-        
-            default:
-                break;
-        }
+    private void initKeys(){
+        inputManager.addMapping("EXIT", new KeyTrigger(KeyInput.KEY_F4));
+        inputManager.addMapping("INVENTORY", new KeyTrigger(KeyInput.KEY_E));
+        //player mappings
+        inputManager.addMapping("FORWARD", new KeyTrigger(KeyInput.KEY_W));
+        inputManager.addMapping("BACKWARD", new KeyTrigger(KeyInput.KEY_S));
+        inputManager.addMapping("LEFTWARD", new KeyTrigger(KeyInput.KEY_A));
+        inputManager.addMapping("RIGHTWARD", new KeyTrigger(KeyInput.KEY_D));
+        inputManager.addMapping("JUMP", new KeyTrigger(KeyInput.KEY_SPACE));
+        inputManager.addMapping("INTERACT", new KeyTrigger(KeyInput.KEY_F));
+        inputManager.addMapping("DASH", new KeyTrigger(KeyInput.KEY_LSHIFT));
+        inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(actionListener, new String[]{
+                "EXIT","INVENTORY","FORWARD","BACKWARD","LEFTWARD","RIGHTWARD","JUMP","INTERACT","DASH","ATTACK"
+        });
     }
+    final private ActionListener actionListener = new ActionListener() {
+        public void onAction(String action, boolean isPressed, float tpf) {
+            switch (action) {
+                case "EXIT":
+                    if (isPressed){
+                        System.exit(0);
+                    }
+                case "INVENTORY":
+                    if (isPressed)
+                        inventoryState.setEnabled(!inventoryState.isEnabled());
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    };
 
     @SuppressWarnings("null")
     @Override
@@ -126,6 +165,7 @@ public class GameState extends BaseAppState implements ActionListener {
 
     @Override
     protected void onDisable() {
+
     }
     
     @Override
@@ -133,9 +173,10 @@ public class GameState extends BaseAppState implements ActionListener {
     }
 
     private ChaseCamera initChaseCam() {
-        var chaseCam = new ChaseCamera(this.app.getCamera(), player, inputManager);
+        var chaseCam = new ChaseCamera(this.app.getCamera(), player.getModel(), inputManager);
         chaseCam.setSmoothMotion(true);
         chaseCam.setDragToRotate(false);
+        chaseCam.setDefaultDistance(3);
         return chaseCam;
     }
 }
