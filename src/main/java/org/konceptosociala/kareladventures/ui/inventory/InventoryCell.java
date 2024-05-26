@@ -1,11 +1,9 @@
-package org.konceptosociala.kareladventures.ui;
+package org.konceptosociala.kareladventures.ui.inventory;
 
 import java.util.Optional;
 
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.game.inventory.Item;
-import org.konceptosociala.kareladventures.ui.inventory_cell_id.InventoryCellId;
-
 import de.lessvoid.nifty.builder.*;
 import de.lessvoid.nifty.tools.Color;
 import lombok.Getter;

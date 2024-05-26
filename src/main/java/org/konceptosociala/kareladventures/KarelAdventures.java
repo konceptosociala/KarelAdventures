@@ -3,8 +3,6 @@ package org.konceptosociala.kareladventures;
 import java.awt.*;
 import org.konceptosociala.kareladventures.state.IntroState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
-import org.konceptosociala.kareladventures.ui.inventory_cell_id.InventoryCellId.NamedCell;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.niftygui.NiftyJmeDisplay;
@@ -27,7 +25,7 @@ public class KarelAdventures extends SimpleApplication {
 
     public KarelAdventures() {
         super();
-        setFullscreen();
+        // setFullscreen();
         setDisplayStatView(false);
         setDisplayFps(false);
         setShowSettings(false);
