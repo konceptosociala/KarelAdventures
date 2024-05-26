@@ -35,20 +35,11 @@ public class Player implements IUpdatable{
         playerRoot =new Node();
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
         model.setLocalTranslation(10,10,10);
-        characterControl = new BetterCharacterControl(1f, 1f, 1f);
-        characterControl.setJumpForce(new Vector3f(0, 10, 10));
-        //model.setLocalTranslation(position);
-        //characterControl.setSpatial(model);
-        //playerRoot.setLocalTranslation(position);
+        characterControl = new BetterCharacterControl(1f, 1f, 1000f);
+        characterControl.setJumpForce(new Vector3f(0, 10, 0));
+        characterControl.setPhysicsDamping(1f);
         model.addControl(characterControl);
         playerRoot.attachChild(model);
-        //playerRoot.setLocalTranslation();
-        //playerRoot.attachChild(model);
-
-        //playerRoot.attachChild(characterControl.getSpatial());
-
-        /*bulletAppState.getPhysicsSpace().add(characterControl);
-        bulletAppState.getPhysicsSpace().addAll(this);*/
 
         health = new Health(100);
         energy = new Energy(100);
@@ -60,9 +51,11 @@ public class Player implements IUpdatable{
         return health.getValue() > 0;
     }
 
-    @Override
     public void update() {
 
+    }
+    public void jump(){
+        characterControl.jump();
     }
 
 }

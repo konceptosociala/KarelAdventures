@@ -71,6 +71,8 @@ public class GameState extends BaseAppState  {
         CollisionShape sceneShape =
                 CollisionShapeFactory.createMeshShape(scene);
         RigidBodyControl landscape = new RigidBodyControl(sceneShape, 0);
+        landscape.setKinematic(true);
+        landscape.setGravity(new Vector3f(0,0,0));
         scene.addControl(landscape);
         this.app.getRootNode().attachChild(scene);
         bulletAppState.getPhysicsSpace().addAll(scene);
@@ -105,6 +107,15 @@ public class GameState extends BaseAppState  {
                         text("Energy: ???");
                         font("Interface/Fonts/Default.fnt");
                     }});
+                    text(new TextBuilder("x:"){{
+                        text("Health: ???");
+                        font("Interface/Fonts/Default.fnt");
+                    }});
+
+                    text(new TextBuilder("y:"){{
+                        text("Energy: ???");
+                        font("Interface/Fonts/Default.fnt");
+                    }});
                 }});
                 
             }});
@@ -131,18 +142,24 @@ public class GameState extends BaseAppState  {
     }
     final private ActionListener actionListener = new ActionListener() {
         public void onAction(String action, boolean isPressed, float tpf) {
-            switch (action) {
-                case "EXIT":
-                    if (isPressed){
-                        System.exit(0);
-                    }
-                case "INVENTORY":
-                    if (isPressed)
-                        inventoryState.setEnabled(!inventoryState.isEnabled());
-                    break;
+            if (action.equals("EXIT") && !isPressed) {
+                System.exit(0);
+            }
+            if (action.equals("INVENTORY") && isPressed) {
+                inventoryState.setEnabled(!inventoryState.isEnabled());
+            }
+            if (action.equals("JUMP") && isPressed) {
+                player.jump();
+            }
+            if (action.equals("FORWARD") && isPressed) {
 
-                default:
-                    break;
+            }else if (action.equals("BACKWARD") && isPressed) {
+
+            }
+            if (action.equals("RIGHTWARD") && isPressed) {
+
+            }else if (action.equals("LEFTWARD") && isPressed) {
+
             }
         }
     };
@@ -161,6 +178,16 @@ public class GameState extends BaseAppState  {
             .findElementById("energy")
             .getRenderer(TextRenderer.class)
             .setText("Energy: "+player.getEnergy().getValue());
+        nifty
+                .getScreen("hud_screen")
+                .findElementById("x:")
+                .getRenderer(TextRenderer.class)
+                .setText("x: "+player.getModel().getLocalTranslation().x);
+        nifty
+                .getScreen("hud_screen")
+                .findElementById("y:")
+                .getRenderer(TextRenderer.class)
+                .setText("y: "+player.getModel().getLocalTranslation().y);
     }
 
     @Override
