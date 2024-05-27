@@ -78,45 +78,16 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                                 panel(new InventoryCell(new InventoryCellId("inv_cell_weapon"), inventory));
                             }});
 
-                            panel(new PanelBuilder("inv_col_1"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_5"), inventory));
-                            }});
-
-                            panel(new PanelBuilder("inv_col_2"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_5"), inventory));
-                            }});
-
-                            panel(new PanelBuilder("inv_col_3"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_5"), inventory));
-                            }});
-
-                            panel(new PanelBuilder("inv_col_4"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_5"), inventory));
-                            }});
+                            for (int i = 1; i <= 4; i++) {
+                                final int ic = i;
+                                panel(new PanelBuilder("inv_col_"+i){{
+                                    childLayoutVertical();
+    
+                                    for (int j = 1; j <= 5; j++) {
+                                        panel(new InventoryCell(new InventoryCellId("inv_cell_"+ic+"_"+j), inventory));
+                                    }
+                                }});
+                            }
                         }});
                     } catch (InvalidCellIdException e) {
                         e.printStackTrace();
@@ -129,6 +100,8 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
 
         nifty.gotoScreen("inventory_screen");
     }
+
+    // UI callbacks
 
     public void selectCell(String cellId) {
         try {
@@ -160,7 +133,10 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             newItemIcon.setImage(createImage(selectedItem.getIconPath()));
 
                             selectedItemId = Optional.empty();
-                        } else {
+                        } else if (namedCell.isPresent() 
+                            || (namedCell.isEmpty() && itemToReplace.get().getItemKind().equals(selectedItem.getItemKind()))
+                            || (namedCell.isEmpty() && selectedItemId.get().getGridCell().isPresent())
+                        ){
                             inventory.setItem(selectedItem, id);
                             inventory.setItem(itemToReplace.get(), selectedItemId.get());
 
@@ -184,6 +160,8 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
             e.printStackTrace();
         }
     }
+
+    // Other methods
 
     @Override
     public void bind(@Nonnull final Nifty nifty, @Nonnull final Screen screen) {

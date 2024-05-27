@@ -43,10 +43,10 @@ public class Inventory {
                 "Item2", 
                 "Textures/ui/items/2.png"
             );
-            inventory.helmet = Optional.of(Item.helmet(
-                new ItemId("karel.item.helmet1"), 
-                "Helmet1", 
-                "Textures/ui/items/3.png"
+            inventory.chestplate = Optional.of(Item.chestplate(
+                new ItemId("karel.item.chestplate1"), 
+                "Chestplate1", 
+                "Textures/ui/items/23.png"
             ));
             return inventory;
         } catch (InvalidItemIdException e) {

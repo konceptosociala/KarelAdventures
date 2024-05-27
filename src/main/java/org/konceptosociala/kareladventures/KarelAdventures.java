@@ -25,7 +25,7 @@ public class KarelAdventures extends SimpleApplication {
 
     public KarelAdventures() {
         super();
-        // setFullscreen();
+        setFullscreen();
         setDisplayStatView(false);
         setDisplayFps(false);
         setShowSettings(false);

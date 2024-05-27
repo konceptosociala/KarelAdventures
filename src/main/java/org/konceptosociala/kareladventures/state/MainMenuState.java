@@ -13,7 +13,9 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.input.InputManager;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
+import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
@@ -42,12 +44,25 @@ public class MainMenuState extends BaseAppState implements ScreenController {
             layer(new LayerBuilder("main_menu_layer") {{
                 childLayoutVertical();
 
-                panel(Margin.vertical("10%"));
+                panel(Margin.vertical("7.5%"));
                 panel(new Logo("main_logo", "Textures/ui/logo.png", "80%"));
-                panel(Margin.vertical("15%"));
-                panel(new ImageButton("main_menu_play_button", "Play", "playGame()"));
-                panel(new ImageButton("main_menu_play_button", "Settings", "openSettings()"));
-                panel(new ImageButton("main_menu_quit_button", "Quit", "quitGame()"));
+                panel(Margin.vertical("7.5%"));
+                panel(new PanelBuilder("main_menu_panel"){{
+                    childLayoutCenter();
+
+                    image(new ImageBuilder("main_menu_panel_bg"){{
+                        height("95%");
+                        filename("Textures/ui/plane1.png");
+                    }});
+
+                    panel(new PanelBuilder("main_menu_panel_buttons"){{
+                        childLayoutVertical();
+
+                        panel(new ImageButton("main_menu_play_button", "Play", "playGame()"));
+                        panel(new ImageButton("main_menu_play_button", "Settings", "openSettings()"));
+                        panel(new ImageButton("main_menu_quit_button", "Quit", "quitGame()"));
+                    }});
+                }});
                 
             }});
             
