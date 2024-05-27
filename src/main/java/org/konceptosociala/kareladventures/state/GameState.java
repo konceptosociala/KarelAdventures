@@ -1,5 +1,14 @@
 package org.konceptosociala.kareladventures.state;
 
+import com.jme3.bullet.collision.shapes.CollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.FastMath;
+import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.tools.Color;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.player.Player;
 import com.jme3.app.Application;
@@ -23,7 +32,7 @@ import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.DefaultScreenController;
 
-public class GameState extends BaseAppState implements ActionListener {    
+public class GameState extends BaseAppState  {
     private KarelAdventures app;
     private AssetManager assetManager;
     private AppStateManager appStateManager;
@@ -38,26 +47,44 @@ public class GameState extends BaseAppState implements ActionListener {
     @Override
     protected void initialize(Application app) {
         this.app = (KarelAdventures) app;
+        this.app.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
         this.assetManager = this.app.getAssetManager();
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
         this.bulletAppState = this.app.getBulletAppState();
         this.nifty = this.app.getNifty();
-        this.player = new Player(assetManager, bulletAppState);
-        this.sun = new DirectionalLight(new Vector3f(-.5f,-.5f,-.5f).normalizeLocal(), ColorRGBA.White);
-        this.chaseCam = initChaseCam();
+        initPlayer();
+        initEnvironment();
 
-        this.app.getRootNode().attachChild(player);
-        this.app.getRootNode().addLight(sun);
 
         inventoryState = new InventoryState(player.getInventory());
         appStateManager.attach(inventoryState);
         inventoryState.setEnabled(false);
 
-        inputManager.addMapping("inventory", new KeyTrigger(KeyInput.KEY_E));
-        inputManager.addListener(this, new String[]{
-            "inventory",
-        });
+        initKeys();
+    }
+    private void initEnvironment(){
+        this.sun = new DirectionalLight(new Vector3f(-.5f,-.5f,-.5f).normalizeLocal(), ColorRGBA.White);
+        this.app.getRootNode().addLight(sun);
+        Spatial scene = assetManager.loadModel("Scenes/basic scene.glb");
+        scene.scale(5);
+        CollisionShape sceneShape =
+                CollisionShapeFactory.createMeshShape(scene);
+        RigidBodyControl landscape = new RigidBodyControl(sceneShape, 0);
+        landscape.setKinematic(true);
+        landscape.setGravity(new Vector3f(0,0,0));
+        scene.addControl(landscape);
+        this.app.getRootNode().attachChild(scene);
+        bulletAppState.getPhysicsSpace().addAll(scene);
+    }
+    private void initPlayer(){
+        this.player = new Player(assetManager,new Vector3f(10,100,10));
+        this.app.getRootNode().attachChild(player.getPlayerRoot());
+        chaseCam = initChaseCam();
+        bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
+        bulletAppState.getPhysicsSpace().addAll(player.getPlayerRoot());
+        player.getCharacterCollider().setGravity(new Vector3f(0,-9.8f,0));
+        player.getCharacterCollider().setAngularFactor(0f);
     }
 
     @Override
@@ -82,6 +109,12 @@ public class GameState extends BaseAppState implements ActionListener {
                         text("Energy: ???");
                         font("Interface/Fonts/Default.fnt");
                     }});
+                    text(new TextBuilder("data"){{
+                        text("Health: ???");
+                        color(Color.BLACK);
+                        font("Interface/Fonts/Default.fnt");
+                    }});
+
                 }});
                 
             }});
@@ -90,19 +123,58 @@ public class GameState extends BaseAppState implements ActionListener {
 
         nifty.gotoScreen("hud_screen");
     }
-
-    @Override
-    public void onAction(String action, boolean isPressed, float tpf) {
-        switch (action) {
-            case "inventory":
-                if (isPressed) 
-                    inventoryState.setEnabled(!inventoryState.isEnabled());
-                break;
-        
-            default:
-                break;
-        }
+    private void initKeys(){
+        inputManager.addMapping("EXIT", new KeyTrigger(KeyInput.KEY_F4));
+        inputManager.addMapping("INVENTORY", new KeyTrigger(KeyInput.KEY_E));
+        //player mappings
+        inputManager.addMapping("FORWARD", new KeyTrigger(KeyInput.KEY_W));
+        inputManager.addMapping("BACKWARD", new KeyTrigger(KeyInput.KEY_S));
+        inputManager.addMapping("LEFTWARD", new KeyTrigger(KeyInput.KEY_A));
+        inputManager.addMapping("RIGHTWARD", new KeyTrigger(KeyInput.KEY_D));
+        inputManager.addMapping("JUMP", new KeyTrigger(KeyInput.KEY_SPACE));
+        inputManager.addMapping("INTERACT", new KeyTrigger(KeyInput.KEY_F));
+        inputManager.addMapping("DASH", new KeyTrigger(KeyInput.KEY_LSHIFT));
+        inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(actionListener, new String[]{
+                "EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK"
+        });
+        inputManager.addListener(analogListener,new String[]{
+                "FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"
+        });
     }
+    final private ActionListener actionListener = new ActionListener() {
+        public void onAction(String action, boolean isPressed, float tpf) {
+            if (action.equals("EXIT") && !isPressed) {
+                System.exit(0);
+            }
+            if (action.equals("INVENTORY") && isPressed) {
+                inventoryState.setEnabled(!inventoryState.isEnabled());
+            }
+            if (action.equals("JUMP") && isPressed) {
+                player.jump();
+            }
+            if (action.equals("DASH") && isPressed) {
+                player.roll();
+            }
+        }
+    };
+    /** Use this listener for continuous events */
+    final private AnalogListener analogListener = new AnalogListener() {
+        @Override
+        public void onAnalog(String action, float value, float tpf) {
+            if (action.equals("FORWARD") && value>0) {
+                player.moveForward(-value,chaseCam.getHorizontalRotation());/*player.getCharacterCollider().getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)) - FastMath.HALF_PI - chaseCam.getHorizontalRotation()*/
+            }else if (action.equals("BACKWARD") && value>0) {
+                player.moveForward(value,chaseCam.getHorizontalRotation());
+            }
+            if (action.equals("RIGHTWARD") && value>0) {
+                player.moveSideward(-value,chaseCam.getHorizontalRotation());
+            }else if (action.equals("LEFTWARD") && value>0) {
+                player.moveSideward(value,chaseCam.getHorizontalRotation());
+            }
+        }
+    };
+
 
     @SuppressWarnings("null")
     @Override
@@ -118,10 +190,16 @@ public class GameState extends BaseAppState implements ActionListener {
             .findElementById("energy")
             .getRenderer(TextRenderer.class)
             .setText("Energy: "+player.getEnergy().getValue());
+        nifty
+                .getScreen("hud_screen")
+                .findElementById("data")
+                .getRenderer(TextRenderer.class)
+                .setText("ф: "+(int)Math.toDegrees(chaseCam.getHorizontalRotation()) + ";" + (int)Math.toDegrees(player.getCharacterCollider().getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))));
     }
 
     @Override
     protected void onDisable() {
+
     }
     
     @Override
@@ -129,9 +207,10 @@ public class GameState extends BaseAppState implements ActionListener {
     }
 
     private ChaseCamera initChaseCam() {
-        var chaseCam = new ChaseCamera(this.app.getCamera(), player, inputManager);
+        var chaseCam = new ChaseCamera(this.app.getCamera(), player.getModel(), inputManager);
         chaseCam.setSmoothMotion(true);
         chaseCam.setDragToRotate(false);
+        chaseCam.setDefaultDistance(3);
         return chaseCam;
     }
 }
