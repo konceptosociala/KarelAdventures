@@ -6,9 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
-import org.konceptosociala.kareladventures.ui.InventoryCell;
-import org.konceptosociala.kareladventures.ui.inventory_cell_id.InvalidCellIdException;
-import org.konceptosociala.kareladventures.ui.inventory_cell_id.InventoryCellId;
+import org.konceptosociala.kareladventures.ui.inventory.*;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
@@ -80,45 +78,16 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                                 panel(new InventoryCell(new InventoryCellId("inv_cell_weapon"), inventory));
                             }});
 
-                            panel(new PanelBuilder("inv_col_1"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_1_5"), inventory));
-                            }});
-
-                            panel(new PanelBuilder("inv_col_2"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_2_5"), inventory));
-                            }});
-
-                            panel(new PanelBuilder("inv_col_3"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_3_5"), inventory));
-                            }});
-
-                            panel(new PanelBuilder("inv_col_4"){{
-                                childLayoutVertical();
-
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_1"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_2"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_3"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_4"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_4_5"), inventory));
-                            }});
+                            for (int i = 1; i <= 4; i++) {
+                                final int ic = i;
+                                panel(new PanelBuilder("inv_col_"+i){{
+                                    childLayoutVertical();
+    
+                                    for (int j = 1; j <= 5; j++) {
+                                        panel(new InventoryCell(new InventoryCellId("inv_cell_"+ic+"_"+j), inventory));
+                                    }
+                                }});
+                            }
                         }});
                     } catch (InvalidCellIdException e) {
                         e.printStackTrace();
@@ -132,6 +101,8 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
         nifty.gotoScreen("inventory_screen");
     }
 
+    // UI callbacks
+
     public void selectCell(String cellId) {
         try {
             var id = new InventoryCellId(cellId);
@@ -144,24 +115,38 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                 } else {
                     var selectedItem = inventory.getItem(selectedItemId.get()).get();
                     var selectedItemCell = getCell(selectedItemId.get().toString());
-                    selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
-
                     var selectedItemIcon = getCellIcon(selectedItemId.get().toString());
                     var newItemIcon = getCellIcon(id.toString());
-
                     var itemToReplace = inventory.getItem(id);
-                    if (itemToReplace.isEmpty()) {
-                        inventory.setItem(selectedItem, id);
-                        inventory.removeItem(selectedItemId.get());
+                    var namedCell = id.getNamedCell();
+                    
+                    if (namedCell.isEmpty()
+                        || (namedCell.isPresent() && namedCell.get().toItemKind().equals(selectedItem.getItemKind()))
+                    ){
+                        // Accept replace
+                        if (itemToReplace.isEmpty()) {
+                            inventory.setItem(selectedItem, id);
+                            inventory.removeItem(selectedItemId.get());
 
-                        selectedItemId = Optional.empty();
-                    } else {
-                        inventory.setItem(selectedItem, id);
-                        inventory.setItem(itemToReplace.get(), selectedItemId.get());
+                            selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
+                            selectedItemIcon.setImage(createImage(InventoryCell.TRANSPARENT_ICON));
+                            newItemIcon.setImage(createImage(selectedItem.getIconPath()));
+
+                            selectedItemId = Optional.empty();
+                        } else if (namedCell.isPresent() 
+                            || (namedCell.isEmpty() && itemToReplace.get().getItemKind().equals(selectedItem.getItemKind()))
+                            || (namedCell.isEmpty() && selectedItemId.get().getGridCell().isPresent())
+                        ){
+                            inventory.setItem(selectedItem, id);
+                            inventory.setItem(itemToReplace.get(), selectedItemId.get());
+
+                            selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
+                            selectedItemIcon.setImage(createImage(itemToReplace.get().getIconPath()));
+                            newItemIcon.setImage(createImage(selectedItem.getIconPath()));
+
+                            selectedItemId = Optional.empty();
+                        }
                     }
-
-                    selectedItemIcon.setImage(createImage(InventoryCell.TRANSPARENT_ICON));
-                    newItemIcon.setImage(createImage(selectedItem.getIconPath()));
                 }
             } else {
                 var itemToReplace = inventory.getItem(id);
@@ -176,10 +161,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
         }
     }
 
-    @Override
-    public void onAction(String name, boolean isPressed, float tpf) {
-
-    }
+    // Other methods
 
     @Override
     public void bind(@Nonnull final Nifty nifty, @Nonnull final Screen screen) {
@@ -194,18 +176,6 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     protected void onDisable() {
         inputManager.setCursorVisible(false);
         nifty.gotoScreen("hud_screen");
-    }
-
-    @Override
-    protected void cleanup(Application app) {
-    }
-
-    @Override
-    public void onStartScreen() {
-    }
-
-    @Override
-    public void onEndScreen() {
     }
 
     @SuppressWarnings("null")
@@ -233,5 +203,17 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
             true
         );
     }
+
+    @Override
+    protected void cleanup(Application app) {}
+
+    @Override
+    public void onStartScreen() {}
+
+    @Override
+    public void onEndScreen() {}
+
+    @Override
+    public void onAction(String name, boolean isPressed, float tpf) {}
     
 }

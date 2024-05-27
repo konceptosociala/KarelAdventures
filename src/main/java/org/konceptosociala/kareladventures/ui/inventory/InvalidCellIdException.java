@@ -1,4 +1,4 @@
-package org.konceptosociala.kareladventures.ui.inventory_cell_id;
+package org.konceptosociala.kareladventures.ui.inventory;
 
 public class InvalidCellIdException extends Exception {
     public InvalidCellIdException(String id) {

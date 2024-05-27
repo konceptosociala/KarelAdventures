@@ -1,8 +1,10 @@
-package org.konceptosociala.kareladventures.ui.inventory_cell_id;
+package org.konceptosociala.kareladventures.ui.inventory;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import org.konceptosociala.kareladventures.game.inventory.ItemKind;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -83,6 +85,16 @@ public class InventoryCellId {
         leggings,
         boots,
         weapon;
+
+        public ItemKind toItemKind() {
+            return switch (this) {
+                case helmet -> ItemKind.Helmet;
+                case chestplate -> ItemKind.Chestplate;
+                case leggings -> ItemKind.Leggings;
+                case boots -> ItemKind.Boots;
+                case weapon -> ItemKind.Weapon;
+            };
+        }
 
         @Override
         public String toString() {
