@@ -6,7 +6,9 @@ import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.FastMath;
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.tools.Color;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.player.Player;
 
@@ -110,15 +112,12 @@ public class GameState extends BaseAppState  {
                         text("Energy: ???");
                         font("Interface/Fonts/Default.fnt");
                     }});
-                    text(new TextBuilder("x:"){{
+                    text(new TextBuilder("data"){{
                         text("Health: ???");
+                        color(Color.BLACK);
                         font("Interface/Fonts/Default.fnt");
                     }});
 
-                    text(new TextBuilder("y:"){{
-                        text("Energy: ???");
-                        font("Interface/Fonts/Default.fnt");
-                    }});
                 }});
                 
             }});
@@ -157,6 +156,9 @@ public class GameState extends BaseAppState  {
             if (action.equals("JUMP") && isPressed) {
                 player.jump();
             }
+            if (action.equals("DASH") && isPressed) {
+                player.roll();
+            }
         }
     };
     /** Use this listener for continuous events */
@@ -164,14 +166,14 @@ public class GameState extends BaseAppState  {
         @Override
         public void onAnalog(String action, float value, float tpf) {
             if (action.equals("FORWARD") && value>0) {
-                player.moveForward(value);
+                player.moveForward(-value,chaseCam.getHorizontalRotation());/*player.getCharacterCollider().getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)) - FastMath.HALF_PI - chaseCam.getHorizontalRotation()*/
             }else if (action.equals("BACKWARD") && value>0) {
-                player.moveForward(-value);
+                player.moveForward(value,chaseCam.getHorizontalRotation());
             }
             if (action.equals("RIGHTWARD") && value>0) {
-                player.moveSideward(-value);
+                player.moveSideward(-value,chaseCam.getHorizontalRotation());
             }else if (action.equals("LEFTWARD") && value>0) {
-                player.moveSideward(value);
+                player.moveSideward(value,chaseCam.getHorizontalRotation());
             }
         }
     };
@@ -193,14 +195,9 @@ public class GameState extends BaseAppState  {
             .setText("Energy: "+player.getEnergy().getValue());
         nifty
                 .getScreen("hud_screen")
-                .findElementById("x:")
+                .findElementById("data")
                 .getRenderer(TextRenderer.class)
-                .setText("x: "+player.getModel().getLocalTranslation().x);
-        nifty
-                .getScreen("hud_screen")
-                .findElementById("y:")
-                .getRenderer(TextRenderer.class)
-                .setText("y: "+player.getModel().getLocalTranslation().y);
+                .setText("ф: "+(int)Math.toDegrees(chaseCam.getHorizontalRotation()) + ";" + (int)Math.toDegrees(player.getCharacterCollider().getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))));
     }
 
     @Override
