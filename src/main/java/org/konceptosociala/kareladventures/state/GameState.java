@@ -4,6 +4,7 @@ import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.input.MouseInput;
+import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Spatial;
 import org.konceptosociala.kareladventures.KarelAdventures;
@@ -81,8 +82,10 @@ public class GameState extends BaseAppState  {
         this.player = new Player(assetManager,new Vector3f(10,100,10));
         this.app.getRootNode().attachChild(player.getPlayerRoot());
         chaseCam = initChaseCam();
-        bulletAppState.getPhysicsSpace().add(player.getCharacterControl());
+        bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
         bulletAppState.getPhysicsSpace().addAll(player.getPlayerRoot());
+        player.getCharacterCollider().setGravity(new Vector3f(0,-9.8f,0));
+        player.getCharacterCollider().setAngularFactor(0f);
     }
 
     @Override
@@ -137,7 +140,10 @@ public class GameState extends BaseAppState  {
         inputManager.addMapping("DASH", new KeyTrigger(KeyInput.KEY_LSHIFT));
         inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(actionListener, new String[]{
-                "EXIT","INVENTORY","FORWARD","BACKWARD","LEFTWARD","RIGHTWARD","JUMP","INTERACT","DASH","ATTACK"
+                "EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK"
+        });
+        inputManager.addListener(analogListener,new String[]{
+                "FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"
         });
     }
     final private ActionListener actionListener = new ActionListener() {
@@ -151,18 +157,25 @@ public class GameState extends BaseAppState  {
             if (action.equals("JUMP") && isPressed) {
                 player.jump();
             }
-            if (action.equals("FORWARD") && isPressed) {
-
-            }else if (action.equals("BACKWARD") && isPressed) {
-
+        }
+    };
+    /** Use this listener for continuous events */
+    final private AnalogListener analogListener = new AnalogListener() {
+        @Override
+        public void onAnalog(String action, float value, float tpf) {
+            if (action.equals("FORWARD") && value>0) {
+                player.moveForward(value);
+            }else if (action.equals("BACKWARD") && value>0) {
+                player.moveForward(-value);
             }
-            if (action.equals("RIGHTWARD") && isPressed) {
-
-            }else if (action.equals("LEFTWARD") && isPressed) {
-
+            if (action.equals("RIGHTWARD") && value>0) {
+                player.moveSideward(-value);
+            }else if (action.equals("LEFTWARD") && value>0) {
+                player.moveSideward(value);
             }
         }
     };
+
 
     @SuppressWarnings("null")
     @Override

@@ -1,5 +1,7 @@
 package org.konceptosociala.kareladventures.game.player;
 
+import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Transform;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -21,7 +23,7 @@ public class Player implements IUpdatable{
     private static final String PLAYER_MODEL_NAME = "Models/karel.glb";
 
     @Getter
-    private BetterCharacterControl characterControl;
+    private RigidBodyControl characterCollider;
     private final Spatial model;
 
     @Getter
@@ -31,14 +33,17 @@ public class Player implements IUpdatable{
     private Health health;
     private Energy energy;
     private Inventory inventory;
+    private float speed = 1000f;
     public Player(AssetManager assetManager,Vector3f position) {
         playerRoot =new Node();
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
         model.setLocalTranslation(10,10,10);
-        characterControl = new BetterCharacterControl(1f, 1f, 1000f);
-        characterControl.setJumpForce(new Vector3f(0, 10, 0));
-        characterControl.setPhysicsDamping(1f);
-        model.addControl(characterControl);
+        //characterCollider = new BetterCharacterControl(1f, 30f, 1f);
+        //characterControl.se
+        //characterCollider.setJumpForce(new Vector3f(0, 100, 0));
+        //characterCollider.setPhysicsDamping(1f);
+        characterCollider = new RigidBodyControl(new CapsuleCollisionShape(1,1),1);
+        model.addControl(characterCollider);
         playerRoot.attachChild(model);
 
         health = new Health(100);
@@ -55,7 +60,15 @@ public class Player implements IUpdatable{
 
     }
     public void jump(){
-        characterControl.jump();
+        characterCollider.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
+        //characterCollider.jump();
     }
-
+    public void moveForward(float value) {
+        characterCollider.applyForce(new Vector3f(0,0,value*speed),new Vector3f(0,0,0));
+        //model.move(characterCollider.getWalkDirection());
+    }
+    public void moveSideward(float value) {
+        characterCollider.applyForce(new Vector3f(value*speed,0,0),new Vector3f(0,0,0));
+        //model.move(characterCollider.getWalkDirection());
+    }
 }
