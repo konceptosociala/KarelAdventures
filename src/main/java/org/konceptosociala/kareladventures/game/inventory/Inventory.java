@@ -36,17 +36,17 @@ public class Inventory {
             inventory.items[0][0] = Item.regular(
                 new ItemId("karel.item.item1"), 
                 "Item1", 
-                "Textures/ui/items/1.png"
+                "Interface/items/1.png"
             );
             inventory.items[1][1] = Item.regular(
                 new ItemId("karel.item.item2"), 
                 "Item2", 
-                "Textures/ui/items/2.png"
+                "Interface/items/2.png"
             );
             inventory.chestplate = Optional.of(Item.chestplate(
                 new ItemId("karel.item.chestplate1"), 
                 "Chestplate1", 
-                "Textures/ui/items/23.png"
+                "Interface/items/23.png"
             ));
             return inventory;
         } catch (InvalidItemIdException e) {
