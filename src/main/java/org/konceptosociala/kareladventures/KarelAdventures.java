@@ -26,7 +26,7 @@ public class KarelAdventures extends SimpleApplication {
     public KarelAdventures() {
         super();
         setFullscreen();
-        setDisplayStatView(true);
+        setDisplayStatView(false);
         setDisplayFps(false);
         setShowSettings(false);
         setSettings(appSettings);
@@ -40,6 +40,7 @@ public class KarelAdventures extends SimpleApplication {
             bulletAppState = new BulletAppState();
             bulletAppState.setDebugEnabled(true);
             stateManager.attach(bulletAppState);
+            bulletAppState.setEnabled(false);
 
             introState = new IntroState(cam.getWidth(), cam.getHeight());
             mainMenuState = new MainMenuState();

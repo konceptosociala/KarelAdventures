@@ -20,7 +20,7 @@ public class ImageButton extends PanelBuilder {
         }}); 
 
         image(new ImageBuilder(id+"_image"){{
-            filename("Textures/ui/button_idle.png");
+            filename("Interface/button_idle.png");
             width("328px");
             height("54px");
         }});

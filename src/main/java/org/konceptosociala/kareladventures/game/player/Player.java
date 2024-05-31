@@ -13,6 +13,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
 import lombok.Setter;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
+import org.konceptosociala.kareladventures.utils.IUpdatable;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.ModelKey;
@@ -25,24 +26,18 @@ import com.jme3.scene.Node;
 import lombok.Getter;
 
 @Getter
-public class Player implements IUpdatable {
+public class Player extends Node implements IUpdatable {
     private static final String PLAYER_MODEL_NAME = "Models/karel.glb";
-
-    @Getter
-    private RigidBodyControl characterCollider;
+    
     private final Spatial model;
-
-    @Getter
-    @Setter
-    private Node playerRoot;
-
+    private RigidBodyControl characterCollider;
     private Health health;
     private Energy energy;
     private Inventory inventory;
     private float speed = 8f;
     AnimComposer animComposer;
     public Player(AssetManager assetManager,Vector3f position) {
-        playerRoot =new Node();
+        super();
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
         model.setLocalTranslation(10,10,10);
         model.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI,new Vector3f(0,1,0)));
@@ -53,7 +48,7 @@ public class Player implements IUpdatable {
         characterCollider = new RigidBodyControl(new CapsuleCollisionShape(1,1),1);
         characterCollider.setFriction(1);
         model.addControl(characterCollider);
-        playerRoot.attachChild(model);
+        attachChild(model);
 
         health = new Health(100);
         energy = new Energy(100);
