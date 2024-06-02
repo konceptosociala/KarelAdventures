@@ -38,7 +38,7 @@ public class KarelAdventures extends SimpleApplication {
             inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 
             bulletAppState = new BulletAppState();
-            bulletAppState.setDebugEnabled(true);
+            // bulletAppState.setDebugEnabled(true);
             stateManager.attach(bulletAppState);
             bulletAppState.setEnabled(false);
 
@@ -47,7 +47,6 @@ public class KarelAdventures extends SimpleApplication {
             nifty = initNifty();
 
             stateManager.attach(introState);
-            //stateManager.
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);

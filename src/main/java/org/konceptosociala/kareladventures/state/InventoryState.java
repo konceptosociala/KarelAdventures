@@ -47,7 +47,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     protected void onEnable() {
         inputManager.setCursorVisible(true);
 
-        nifty.addScreen("inventory_screen", new ScreenBuilder("HUD screen") {{
+        nifty.addScreen("inventory_screen", new ScreenBuilder("Inventory screen") {{
             controller(InventoryState.this);
 
             layer(new LayerBuilder("inventory_layer") {{
@@ -165,7 +165,6 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
 
     @Override
     public void bind(@Nonnull final Nifty nifty, @Nonnull final Screen screen) {
-        
     }
 
     public void gotoScreen(@Nonnull final String screenId) {

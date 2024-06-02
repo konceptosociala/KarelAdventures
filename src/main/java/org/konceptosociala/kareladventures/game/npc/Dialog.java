@@ -9,4 +9,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class Dialog {
     private List<DialogMessage> messages;
+    private Dialog nextDialog;
 }
