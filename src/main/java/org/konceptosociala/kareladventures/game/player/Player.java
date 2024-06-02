@@ -40,16 +40,17 @@ public class Player implements IUpdatable {
     private Energy energy;
     private Inventory inventory;
     private float speed = 8f;
+
     AnimComposer animComposer;
+    @Setter
+    private int movingForward = 0;
+    @Setter
+    private int movingSideward = 0;
     public Player(AssetManager assetManager,Vector3f position) {
         playerRoot =new Node();
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
         model.setLocalTranslation(10,10,10);
         model.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI,new Vector3f(0,1,0)));
-        //characterCollider = new BetterCharacterControl(1f, 30f, 1f);
-        //characterControl.se
-        //characterCollider.setJumpForce(new Vector3f(0, 100, 0));
-        //characterCollider.setPhysicsDamping(1f);
         characterCollider = new RigidBodyControl(new CapsuleCollisionShape(1,1),1);
         characterCollider.setFriction(1);
         model.addControl(characterCollider);
@@ -67,20 +68,29 @@ public class Player implements IUpdatable {
     }
 
     public void update() {
-
+        if(characterCollider.getLinearVelocity().mult(1,0,1).length()>1){
+            float XZVelocityVectorToYRotation = FastMath.atan2(characterCollider.getLinearVelocity().x,characterCollider.getLinearVelocity().z);/**FastMath.sign(characterCollider.getLinearVelocity().x*characterCollider.getLinearVelocity().z);*/
+            //System.out.println(XZVelocityVectorToYRotation+";"+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)));
+            float TORQUE = (XZVelocityVectorToYRotation+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))/2);
+            System.out.println(TORQUE);
+            //float a = (XZVelocityVectorToYRotation+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)))/2;
+            characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(TORQUE,new Vector3f(0,1,0)));
+            //characterCollider.setAngularVelocity(new Vector3f(0,TORQUE,0));
+        }else {
+            characterCollider.setAngularVelocity(new Vector3f(0,0,0));
+        }
     }
     public void jump(){
         characterCollider.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
-        //characterCollider.jump();
     }
     public void roll(){
-        RigidBodyControl rollRigidBody = new RigidBodyControl(new SphereCollisionShape(1),1);
+        /*RigidBodyControl rollRigidBody = new RigidBodyControl(new SphereCollisionShape(1),1);
         //copyRigidBodyStats(rollRigidBody,characterCollider);
         model.removeControl(characterCollider);
         characterCollider.setEnabled(false);
         copyRigidBodyStats(rollRigidBody,characterCollider);
-        model.addControl(rollRigidBody);
-        Tweens.sequence(Tweens.delay(1),Tweens.callMethod(this,"addRollImpulse",rollRigidBody),Tweens.delay(1),Tweens.callMethod(this,"returnToNormalCollider",rollRigidBody));
+        model.addControl(rollRigidBody);*/
+        Tweens.sequence(Tweens.delay(1),Tweens.callMethod(this,"jump"/*,rollRigidBody*/),Tweens.delay(1)/*,Tweens.callMethod(this,"returnToNormalCollider",rollRigidBody)*/);
 
     }
     private void addRollImpulse(RigidBodyControl rollRigidBody){
@@ -90,16 +100,24 @@ public class Player implements IUpdatable {
         rollRigidBody.setEnabled(false);
     }
     public void moveForward(float value,float rad) {
-        float zGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
-        characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(zGlobalMovementAngle,new Vector3f(0,1,0)));
-        characterCollider.applyForce(rotateByYAxis(new Vector3f(0,0,speed),zGlobalMovementAngle),new Vector3f(0,0,0));
+        movingForward = 1;
+        float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
+        float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
+        //characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(zGlobalMovementAngle,new Vector3f(0,1,0)));
+        characterCollider.applyForce(rotateByYAxis(new Vector3f(0,0,appliedForce),yGlobalMovementAngle),new Vector3f(0,0,0));
+//        float a = (yGlobalMovementAngle+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)))/2;
+//        characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)));
         //characterCollider.applyForce(new Vector3f(1*value*speed,0,0),new Vector3f(0,0,0));
         //model.move(characterCollider.getWalkDirection());
     }
     public void moveSideward(float value,float rad) {
-        float zGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI+FastMath.HALF_PI*Math.signum(value*2-1);
-        characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(zGlobalMovementAngle,new Vector3f(0,1,0)));
-        characterCollider.applyForce(rotateByYAxis(new Vector3f(speed,0,0),zGlobalMovementAngle-FastMath.HALF_PI),new Vector3f(0,0,0));
+        movingForward = 1;
+        float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI+FastMath.HALF_PI*Math.signum(value*2-1);
+        float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
+        //characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(zGlobalMovementAngle,new Vector3f(0,1,0)));
+        characterCollider.applyForce(rotateByYAxis(new Vector3f(appliedForce,0,0),yGlobalMovementAngle-FastMath.HALF_PI),new Vector3f(0,0,0));
+//        float a = (yGlobalMovementAngle+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)))/2;
+//        characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)));
         //characterCollider.applyForce(new Vector3f(0,0,1*value*speed),new Vector3f(0,0,0));
         //model.move(characterCollider.getWalkDirection());
     }

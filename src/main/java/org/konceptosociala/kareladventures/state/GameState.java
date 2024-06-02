@@ -7,9 +7,12 @@ import com.jme3.input.MouseInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.FastMath;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.tools.Color;
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.enemies.NavMesh;
 import org.konceptosociala.kareladventures.game.player.Player;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -43,6 +46,7 @@ public class GameState extends BaseAppState  {
     private ChaseCamera chaseCam;
     private DirectionalLight sun;
     private Player player;
+    private NavMesh navMesh;
 
     @Override
     protected void initialize(Application app) {
@@ -76,6 +80,11 @@ public class GameState extends BaseAppState  {
         scene.addControl(landscape);
         this.app.getRootNode().attachChild(scene);
         bulletAppState.getPhysicsSpace().addAll(scene);
+        Spatial navMeshSpatial = assetManager.loadModel("Scenes/navMesh.glb").scale(5);
+        this.app.getRootNode().attachChild(navMeshSpatial);
+        bulletAppState.getPhysicsSpace().addAll(navMeshSpatial);
+        Geometry navMeshGeometry = (Geometry)((Node) navMeshSpatial).getChild(0);
+        navMesh = new NavMesh(navMeshGeometry);
     }
     private void initPlayer(){
         this.player = new Player(assetManager,new Vector3f(10,100,10));
@@ -83,7 +92,7 @@ public class GameState extends BaseAppState  {
         chaseCam = initChaseCam();
         bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
         bulletAppState.getPhysicsSpace().addAll(player.getPlayerRoot());
-        player.getCharacterCollider().setGravity(new Vector3f(0,-9.8f,0));
+        player.getCharacterCollider().setGravity(new Vector3f(0,-10f,0));
         player.getCharacterCollider().setAngularFactor(0f);
     }
 
@@ -162,15 +171,19 @@ public class GameState extends BaseAppState  {
     final private AnalogListener analogListener = new AnalogListener() {
         @Override
         public void onAnalog(String action, float value, float tpf) {
-            if (action.equals("FORWARD") && value>0) {
+            if (action.equals("FORWARD")) {
                 player.moveForward(-value,chaseCam.getHorizontalRotation());/*player.getCharacterCollider().getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)) - FastMath.HALF_PI - chaseCam.getHorizontalRotation()*/
-            }else if (action.equals("BACKWARD") && value>0) {
+            }else if (action.equals("BACKWARD")) {
                 player.moveForward(value,chaseCam.getHorizontalRotation());
+            } else if (value == 0) {
+                player.setMovingForward(0);
             }
-            if (action.equals("RIGHTWARD") && value>0) {
+            if (action.equals("RIGHTWARD")) {
                 player.moveSideward(-value,chaseCam.getHorizontalRotation());
-            }else if (action.equals("LEFTWARD") && value>0) {
+            }else if (action.equals("LEFTWARD")) {
                 player.moveSideward(value,chaseCam.getHorizontalRotation());
+            } else if (value == 0) {
+                player.setMovingForward(0);
             }
         }
     };
@@ -179,6 +192,7 @@ public class GameState extends BaseAppState  {
     @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
+        player.update();
         nifty
             .getScreen("hud_screen")
             .findElementById("health")
