@@ -16,8 +16,6 @@ public class NPC extends InteractableNode {
 
     @Override
     public void interract() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'interract'");
+        
     }
-    
 }

@@ -64,10 +64,12 @@ public class Player extends Node implements IUpdatable {
     public void update() {
 
     }
+
     public void jump(){
         characterCollider.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
         //characterCollider.jump();
     }
+
     public void roll(){
         RigidBodyControl rollRigidBody = new RigidBodyControl(new SphereCollisionShape(1),1);
         //copyRigidBodyStats(rollRigidBody,characterCollider);
@@ -78,12 +80,15 @@ public class Player extends Node implements IUpdatable {
         Tweens.sequence(Tweens.delay(1),Tweens.callMethod(this,"addRollImpulse",rollRigidBody),Tweens.delay(1),Tweens.callMethod(this,"returnToNormalCollider",rollRigidBody));
 
     }
+
     private void addRollImpulse(RigidBodyControl rollRigidBody){
         rollRigidBody.applyImpulse(quaternionToDirection(rollRigidBody.getPhysicsRotation()).mult(10),new Vector3f(0,0,0));
     }
+
     private void returnToNormalCollider(RigidBodyControl rollRigidBody){
         rollRigidBody.setEnabled(false);
     }
+
     public void moveForward(float value,float rad) {
         float zGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
         characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(zGlobalMovementAngle,new Vector3f(0,1,0)));

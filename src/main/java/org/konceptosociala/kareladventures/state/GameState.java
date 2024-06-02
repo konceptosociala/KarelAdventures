@@ -7,10 +7,8 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
@@ -19,18 +17,16 @@ import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.DefaultScreenController;
 
+@SuppressWarnings("unused")
 public class GameState extends BaseAppState  {
     private KarelAdventures app;
     private AppStateManager appStateManager;
     private BulletAppState bulletAppState;
     private InputManager inputManager;
     private Nifty nifty;
-
-    private ChaseCamera chaseCam;
     private Player player;
 
-    public GameState(ChaseCamera chaseCam, Player player){
-        this.chaseCam = chaseCam;
+    public GameState(Player player){
         this.player = player;
     }
 
@@ -94,7 +90,7 @@ public class GameState extends BaseAppState  {
 
     @SuppressWarnings("null")
     @Override
-    public void update(float tpf) {
+    public void update(float tpf) { 
         nifty
             .getScreen("hud_screen")
             .findElementById("health")
@@ -106,11 +102,5 @@ public class GameState extends BaseAppState  {
             .findElementById("energy")
             .getRenderer(TextRenderer.class)
             .setText("Energy: " + player.getEnergy().getValue());
-
-        nifty
-            .getScreen("hud_screen")
-            .findElementById("data")
-            .getRenderer(TextRenderer.class)
-            .setText("ф: "+(int)Math.toDegrees(chaseCam.getHorizontalRotation()) + ";" + (int)Math.toDegrees(player.getCharacterCollider().getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))));
     }
 }

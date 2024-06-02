@@ -3,6 +3,8 @@ package org.konceptosociala.kareladventures.state;
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.Sun;
+import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.LoadingBarBuilder;
 
@@ -11,9 +13,6 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -22,10 +21,9 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Spatial;
+import com.jme3.scene.Node;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.LayerBuilder;
@@ -40,6 +38,7 @@ import de.lessvoid.nifty.tools.SizeValue;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("unused")
 @RequiredArgsConstructor
 public class LoadGameState extends BaseAppState implements ScreenController {
     public enum LoadType {
@@ -52,11 +51,13 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private AppStateManager stateManager;
     private InputManager inputManager;
     private BulletAppState bulletAppState;
+    private Node rootNode;
     private Nifty nifty;
 
     private InventoryState inventoryState;
     private ChaseCamera chaseCam;
-    private DirectionalLight sun;
+    private Sun sun;
+    private World world;
     private Player player;
 
     private final LoadType loadType;
@@ -72,6 +73,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         this.stateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
         this.bulletAppState = this.app.getBulletAppState();
+        this.rootNode = this.app.getRootNode();
         this.nifty = this.app.getNifty();
     }
 
@@ -141,7 +143,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
             setProgress(1.0f, "Finishing...");
         } else if (frameCount == 5) {
-            stateManager.attach(new GameState(chaseCam, player));
+            stateManager.attach(new GameState(player));
             this.setEnabled(false);
             stateManager.detach(this);
         }
@@ -150,26 +152,20 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void initPlayer(){
-        this.player = new Player(assetManager,new Vector3f(10,100,10));
-        this.app.getRootNode().attachChild(player);
-        chaseCam = initChaseCam();
+        player = new Player(assetManager,new Vector3f(10,100,10));
+        rootNode.attachChild(player);
         bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
         bulletAppState.getPhysicsSpace().addAll(player);
         player.getCharacterCollider().setGravity(new Vector3f(0,0,0));
         player.getCharacterCollider().setAngularFactor(0f);
+        chaseCam = initChaseCam();
     }
 
     private void initEnvironment(){
-        this.sun = new DirectionalLight(new Vector3f(-.5f,-.5f,-.5f).normalizeLocal(), ColorRGBA.White);
-        this.app.getRootNode().addLight(sun);
-        Spatial scene = assetManager.loadModel("Scenes/scene.glb");
-        CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(scene);
-        RigidBodyControl landscape = new RigidBodyControl(sceneShape, 0);
-        landscape.setKinematic(true);
-        landscape.setGravity(new Vector3f(0,0,0));
-        scene.addControl(landscape);
-        this.app.getRootNode().attachChild(scene);
-        bulletAppState.getPhysicsSpace().addAll(scene);
+        sun = new Sun(rootNode);
+        world = new World("Scenes/scene.glb", assetManager);
+        rootNode.attachChild(world);
+        bulletAppState.getPhysicsSpace().addAll(world);
     }
 
     private void loadEnvironment() {
