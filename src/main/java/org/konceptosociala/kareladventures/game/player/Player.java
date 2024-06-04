@@ -22,6 +22,7 @@ import com.jme3.scene.Geometry;
 import lombok.Setter;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
+import org.konceptosociala.kareladventures.utils.IUpdatable;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
@@ -38,20 +39,19 @@ import java.util.Queue;
 
 
 @Getter
-public class Player implements IUpdatable {
+public class Player extends Node implements IUpdatable {
     private static final String PLAYER_MODEL_NAME = "Models/karel.glb";
+
     private BulletAppState bulletAppState;
+    @Setter
     private GameState thisGameState;
     private Node worldRoot;
 
     @Getter
     private RigidBodyControl characterCollider;
+
     private final Spatial model;
-
-    @Getter
-    @Setter
-    private Node playerRoot;
-
+    //private RigidBodyControl characterCollider;
     private Health health;
     private Energy energy;
     private Inventory inventory;
@@ -64,26 +64,28 @@ public class Player implements IUpdatable {
     @Setter
     private int movingSideward = 0;
     private boolean onGround = false;
-    public Player(AssetManager assetManager, Vector3f position, Node worldRoot, BulletAppState state, GameState gs) {
-        thisGameState = gs;
+    private Node playerRoot;
+    public Player(AssetManager assetManager, Vector3f position, Node worldRoot, BulletAppState state/*, GameState gs*/) {
+        //thisGameState = gs;
         bulletAppState = state;
         this.worldRoot = worldRoot;
         playerRoot =new Node();
-        playerRoot.setLocalTranslation(0,10,0);
+        playerRoot.setLocalTranslation(position);
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
         model.setLocalTranslation(0,-1f,0);
         model.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI,new Vector3f(0,1,0)));
         playerRoot.attachChild(model);
         characterCollider = new RigidBodyControl(new CapsuleCollisionShape(0.5f,1f),1);
         characterCollider.setFriction(1);
+        //characterCollider.setGravity(new Vector3f(0,-10,0));
         playerRoot.addControl(characterCollider);
         legs = new Box(1,1,1);
-
-
         health = new Health(100);
         energy = new Energy(100);
         inventory = Inventory.test();
         animComposer = model.getControl(AnimComposer.class);
+        worldRoot.attachChild(playerRoot);
+        bulletAppState.getPhysicsSpace().addAll(this);
     }
 
     
@@ -92,29 +94,20 @@ public class Player implements IUpdatable {
     }
 
     public void update() {
-        onGround=checkIfOnGround(characterCollider.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f),characterCollider.getPhysicsRotation());
+        onGround=checkIfOnGround(characterCollider.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
         rotateInMovementDirection();
     }
-    private boolean checkIfOnGround(Vector3f center, Vector3f extents, Quaternion rotation){
-        // Get the character's current position
+    private boolean checkIfOnGround(Vector3f center, Vector3f extents){
         Vector3f characterPosition = characterCollider.getPhysicsLocation();
-
-        // Cast a ray downward from the character's position
         Vector3f rayFrom = characterPosition;
-        Vector3f rayTo = characterPosition.add(0, -1.5f, 0); // Adjust the distance as needed
-
-        // Perform the ray test
+        Vector3f rayTo = characterPosition.add(0, -1.5f, 0);
         List<PhysicsRayTestResult> results = bulletAppState.getPhysicsSpace().rayTest(rayFrom, rayTo);
-
-        // Check if there are any intersections
         for (PhysicsRayTestResult result : results) {
-            // Ensure the collision is not with itself
             if (result.getCollisionObject() != characterCollider) {
-                return true; // Ground detected
+                return true;
             }
         }
-
-        return false; // No ground detected
+        return false;
     }
     private void rotateInMovementDirection(){
         if(characterCollider.getLinearVelocity().mult(1,0,1).length()>0.1){
@@ -129,12 +122,14 @@ public class Player implements IUpdatable {
             //characterCollider.setAngularVelocity(new Vector3f(0,0,0));
         }
     }
+
     public void jump(){
         if(!onGround){
             return;
         }
         characterCollider.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
     }
+
     public void roll(){
         /*RigidBodyControl rollRigidBody = new RigidBodyControl(new SphereCollisionShape(1),1);
         //copyRigidBodyStats(rollRigidBody,characterCollider);
@@ -145,12 +140,15 @@ public class Player implements IUpdatable {
         Tweens.sequence(Tweens.delay(1),Tweens.callMethod(this,"jump"/*,rollRigidBody*/),Tweens.delay(1)/*,Tweens.callMethod(this,"returnToNormalCollider",rollRigidBody)*/);
 
     }
+
     private void addRollImpulse(RigidBodyControl rollRigidBody){
         rollRigidBody.applyImpulse(quaternionToDirection(rollRigidBody.getPhysicsRotation()).mult(10),new Vector3f(0,0,0));
     }
+
     private void returnToNormalCollider(RigidBodyControl rollRigidBody){
         rollRigidBody.setEnabled(false);
     }
+
     public void moveForward(float value,float rad) {
         /*if(!onGround){
             return;

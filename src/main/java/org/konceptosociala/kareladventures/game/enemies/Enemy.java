@@ -9,6 +9,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import lombok.Setter;
 import org.konceptosociala.kareladventures.game.player.Energy;
 import org.konceptosociala.kareladventures.game.player.Health;
 
@@ -25,14 +26,14 @@ public class Enemy extends Node implements IUpdatable {
     //private String name;
     private Health health;
     private Energy energy;
+    @Setter
     private GameState thisGameState;
     private float XZVelocityVectorToYRotation;
 
-    public Enemy(String name, int health, AssetManager assetManager, Node worldRoot, BulletAppState state, GameState gs) {
+    public Enemy(String name, Vector3f position, AssetManager assetManager, Node worldRoot, BulletAppState state,int health) {
         this.worldRoot = worldRoot;
         this.bulletAppState = state;
-        thisGameState = gs;
-        this.setLocalTranslation(10,10,10);
+        this.setLocalTranslation(position);
         this.rotate(FastMath.HALF_PI,0,0);
         model = assetManager.loadModel(ENEMY_MODEL_NAME);
         model.rotate(-FastMath.HALF_PI,0,0);
