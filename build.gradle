@@ -63,6 +63,7 @@ dependencies {
     implementation 'org.jmonkeyengine:jme3-jbullet:' + jmonkeyengineVersion
     runtimeOnly 'org.jmonkeyengine:jme3-lwjgl3:' + jmonkeyengineVersion
 
+    implementation 'pl.symentis.lua4j:lua4j:0.0.1'
     implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
     implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
     implementation 'org.luaj:luaj-jme:3.0.1'

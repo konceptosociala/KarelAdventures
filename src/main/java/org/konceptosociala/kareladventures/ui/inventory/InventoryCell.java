@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 public class InventoryCell extends PanelBuilder {
-    public static final String TRANSPARENT_ICON = "Textures/ui/transparent.png";
+    public static final String TRANSPARENT_ICON = "Interface/transparent.png";
 
     private InventoryCellId cellId;
     private Optional<Item> cellItem;
