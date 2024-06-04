@@ -2,31 +2,47 @@ package org.konceptosociala.kareladventures.game.player;
 
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.tween.Tweens;
+import com.jme3.bounding.BoundingBox;
+import com.jme3.bounding.BoundingVolume;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.PhysicsSpace;
+import com.jme3.bullet.collision.PhysicsRayTestResult;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
-import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
+import com.jme3.collision.Collidable;
+import com.jme3.collision.CollisionResults;
+import com.jme3.collision.UnsupportedCollisionException;
+import com.jme3.material.Material;
+import com.jme3.math.*;
+import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
+import com.jme3.scene.Geometry;
 import lombok.Setter;
+import org.konceptosociala.kareladventures.game.enemies.Enemy;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.ModelKey;
-import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.control.BetterCharacterControl;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
 
 import lombok.Getter;
+import org.konceptosociala.kareladventures.state.GameState;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Queue;
+////
+
 
 @Getter
 public class Player implements IUpdatable {
     private static final String PLAYER_MODEL_NAME = "Models/karel.glb";
+    private BulletAppState bulletAppState;
+    private GameState thisGameState;
+    private Node worldRoot;
 
     @Getter
     private RigidBodyControl characterCollider;
@@ -40,21 +56,29 @@ public class Player implements IUpdatable {
     private Energy energy;
     private Inventory inventory;
     private float speed = 8f;
+    private Box legs;
 
     AnimComposer animComposer;
     @Setter
     private int movingForward = 0;
     @Setter
     private int movingSideward = 0;
-    public Player(AssetManager assetManager,Vector3f position) {
+    private boolean onGround = false;
+    public Player(AssetManager assetManager, Vector3f position, Node worldRoot, BulletAppState state, GameState gs) {
+        thisGameState = gs;
+        bulletAppState = state;
+        this.worldRoot = worldRoot;
         playerRoot =new Node();
+        playerRoot.setLocalTranslation(0,10,0);
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
-        model.setLocalTranslation(10,10,10);
+        model.setLocalTranslation(0,-1f,0);
         model.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI,new Vector3f(0,1,0)));
-        characterCollider = new RigidBodyControl(new CapsuleCollisionShape(1,1),1);
-        characterCollider.setFriction(1);
-        model.addControl(characterCollider);
         playerRoot.attachChild(model);
+        characterCollider = new RigidBodyControl(new CapsuleCollisionShape(0.5f,1f),1);
+        characterCollider.setFriction(1);
+        playerRoot.addControl(characterCollider);
+        legs = new Box(1,1,1);
+
 
         health = new Health(100);
         energy = new Energy(100);
@@ -68,19 +92,47 @@ public class Player implements IUpdatable {
     }
 
     public void update() {
-        if(characterCollider.getLinearVelocity().mult(1,0,1).length()>1){
-            float XZVelocityVectorToYRotation = FastMath.atan2(characterCollider.getLinearVelocity().x,characterCollider.getLinearVelocity().z);/**FastMath.sign(characterCollider.getLinearVelocity().x*characterCollider.getLinearVelocity().z);*/
+        onGround=checkIfOnGround(characterCollider.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f),characterCollider.getPhysicsRotation());
+        rotateInMovementDirection();
+    }
+    private boolean checkIfOnGround(Vector3f center, Vector3f extents, Quaternion rotation){
+        // Get the character's current position
+        Vector3f characterPosition = characterCollider.getPhysicsLocation();
+
+        // Cast a ray downward from the character's position
+        Vector3f rayFrom = characterPosition;
+        Vector3f rayTo = characterPosition.add(0, -1.5f, 0); // Adjust the distance as needed
+
+        // Perform the ray test
+        List<PhysicsRayTestResult> results = bulletAppState.getPhysicsSpace().rayTest(rayFrom, rayTo);
+
+        // Check if there are any intersections
+        for (PhysicsRayTestResult result : results) {
+            // Ensure the collision is not with itself
+            if (result.getCollisionObject() != characterCollider) {
+                return true; // Ground detected
+            }
+        }
+
+        return false; // No ground detected
+    }
+    private void rotateInMovementDirection(){
+        if(characterCollider.getLinearVelocity().mult(1,0,1).length()>0.1){
+            float XZVelocityVectorToYRotation = FastMath.atan2(characterCollider.getLinearVelocity().x,characterCollider.getLinearVelocity().z)+FastMath.HALF_PI;/**FastMath.sign(characterCollider.getLinearVelocity().x*characterCollider.getLinearVelocity().z);*/
             //System.out.println(XZVelocityVectorToYRotation+";"+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)));
-            float TORQUE = (XZVelocityVectorToYRotation+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))/2);
-            System.out.println(TORQUE);
-            //float a = (XZVelocityVectorToYRotation+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)))/2;
-            characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(TORQUE,new Vector3f(0,1,0)));
+            //float TORQUE = (XZVelocityVectorToYRotation-characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))/2);
+            //System.out.println(TORQUE);
+            //float a = (XZVelocityVectorToYRotation+characterCollider.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))*2-);
+            characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,new Vector3f(0,1,0)));
             //characterCollider.setAngularVelocity(new Vector3f(0,TORQUE,0));
         }else {
-            characterCollider.setAngularVelocity(new Vector3f(0,0,0));
+            //characterCollider.setAngularVelocity(new Vector3f(0,0,0));
         }
     }
     public void jump(){
+        if(!onGround){
+            return;
+        }
         characterCollider.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
     }
     public void roll(){
@@ -100,6 +152,9 @@ public class Player implements IUpdatable {
         rollRigidBody.setEnabled(false);
     }
     public void moveForward(float value,float rad) {
+        /*if(!onGround){
+            return;
+        }*/
         movingForward = 1;
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
@@ -111,6 +166,9 @@ public class Player implements IUpdatable {
         //model.move(characterCollider.getWalkDirection());
     }
     public void moveSideward(float value,float rad) {
+        /*if(!onGround){
+            return;
+        }*/
         movingForward = 1;
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI+FastMath.HALF_PI*Math.signum(value*2-1);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
@@ -120,6 +178,59 @@ public class Player implements IUpdatable {
 //        characterCollider.setPhysicsRotation(new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)));
         //characterCollider.applyForce(new Vector3f(0,0,1*value*speed),new Vector3f(0,0,0));
         //model.move(characterCollider.getWalkDirection());
+    }
+
+    public void attack(String attackType){
+        switch (attackType){
+            case("melee"):
+                performMeleeAttack(2,3,1);
+                break;
+            case ("ranged"):
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void performMeleeAttack(float width, float length, float height){
+        List<Enemy> enemiesToAffect = getEnemiesInBox(characterCollider.getPhysicsLocation(),new Vector3f(width,height,length),characterCollider.getPhysicsRotation());
+        System.out.println(enemiesToAffect.size());
+        for (Enemy i: enemiesToAffect){
+            i.receiveDamage(10);
+            i.pushback();
+        }
+    }
+    public List<Enemy> getEnemiesInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
+        Node rootNode = worldRoot;
+        List<Enemy> enemies = new ArrayList<>();
+
+        // Create a box shape for the collider
+        Box boxShape = new Box(extents.x, extents.y, extents.z);
+
+        // Create a geometry for the collider
+        Geometry collider = new Geometry("Collider", boxShape);
+        collider.setLocalTranslation(center);
+        collider.setLocalRotation(rotation);
+
+        // Apply the collider's world transform to get the bounding volume in world space
+        Transform transform = new Transform(center, rotation);
+        BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
+        boundingBox.transform(transform);
+
+        // Iterate through all children of the rootNode
+        for (Spatial spatial : thisGameState.getEnemyRoot().getChildren()) {
+            // Check if the spatial intersects with the bounding box
+            if (boundingBox.intersects(spatial.getWorldBound())) {
+                // Check if the spatial is an instance of Enemy
+                if (spatial instanceof Enemy) {
+                    enemies.add((Enemy)spatial);
+                }
+            }
+        }
+
+        // The collider is not added to the scene graph, so no need to remove it
+
+        return enemies;
     }
 
     private static Vector3f rotateByYAxis(Vector3f vec, float rad){

@@ -18,7 +18,7 @@ public class NavMesh {
         vertices = (FloatBuffer)(graph.getMesh().getBuffer(VertexBuffer.Type.Position).getData());
         //graph.getMesh().getBuffer(VertexBuffer.Type.)
         Mesh m = graph.getMesh();
-        m.setMode(Mesh.Mode.Lines);
+        //m.setMode(Mesh.Mode.Lines);
         System.out.println(m.getIndicesAsList());
     }
 }

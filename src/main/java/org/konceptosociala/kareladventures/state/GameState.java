@@ -11,8 +11,11 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.tools.Color;
+import lombok.Getter;
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.enemies.Enemy;
 import org.konceptosociala.kareladventures.game.enemies.NavMesh;
+import org.konceptosociala.kareladventures.game.player.IUpdatable;
 import org.konceptosociala.kareladventures.game.player.Player;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -45,8 +48,11 @@ public class GameState extends BaseAppState  {
     private Nifty nifty;
     private ChaseCamera chaseCam;
     private DirectionalLight sun;
+    @Getter
     private Player player;
     private NavMesh navMesh;
+    @Getter
+    private Node enemyRoot;
 
     @Override
     protected void initialize(Application app) {
@@ -59,6 +65,7 @@ public class GameState extends BaseAppState  {
         this.nifty = this.app.getNifty();
         initPlayer();
         initEnvironment();
+        initEnemies();
 
 
         inventoryState = new InventoryState(player.getInventory());
@@ -67,10 +74,25 @@ public class GameState extends BaseAppState  {
 
         initKeys();
     }
+    private void initEnemies(){
+        enemyRoot = new Node();
+        enemyRoot.setUserData("name","enemy_root");
+        this.app.getRootNode().attachChild(enemyRoot);
+        // Create an enemy with name "Orc" and 100 health points
+        Enemy enemy = new Enemy("Bug", 100, assetManager,this.app.getRootNode(),bulletAppState,this);
+        enemyRoot.attachChild(enemy);
+
+        // Set the enemy's local translation
+        //enemy.setLocalTranslation(0, 10, 0);
+
+        // Add the enemy to the root node
+        //this.app.getRootNode().attachChild(enemy);
+    }
     private void initEnvironment(){
         this.sun = new DirectionalLight(new Vector3f(-.5f,-.5f,-.5f).normalizeLocal(), ColorRGBA.White);
         this.app.getRootNode().addLight(sun);
         Spatial scene = assetManager.loadModel("Scenes/basic scene.glb");
+        scene.setName("ground");
         scene.scale(5);
         CollisionShape sceneShape =
                 CollisionShapeFactory.createMeshShape(scene);
@@ -87,11 +109,11 @@ public class GameState extends BaseAppState  {
         navMesh = new NavMesh(navMeshGeometry);
     }
     private void initPlayer(){
-        this.player = new Player(assetManager,new Vector3f(10,100,10));
+        this.player = new Player(assetManager,new Vector3f(10,100,10),this.app.getRootNode(),bulletAppState,this);
         this.app.getRootNode().attachChild(player.getPlayerRoot());
         chaseCam = initChaseCam();
         bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
-        bulletAppState.getPhysicsSpace().addAll(player.getPlayerRoot());
+        //bulletAppState.getPhysicsSpace().addAll(player.getPlayerRoot());
         player.getCharacterCollider().setGravity(new Vector3f(0,-10f,0));
         player.getCharacterCollider().setAngularFactor(0f);
     }
@@ -165,6 +187,9 @@ public class GameState extends BaseAppState  {
             if (action.equals("DASH") && isPressed) {
                 player.roll();
             }
+            if (action.equals("ATTACK") && isPressed) {
+                player.attack("melee");
+            }
         }
     };
     /** Use this listener for continuous events */
@@ -193,6 +218,11 @@ public class GameState extends BaseAppState  {
     @Override
     public void update(float tpf) {
         player.update();
+        for(Spatial i: enemyRoot.getChildren()){
+            if(i instanceof IUpdatable){
+                ((IUpdatable) i).update();
+            }
+        }
         nifty
             .getScreen("hud_screen")
             .findElementById("health")
