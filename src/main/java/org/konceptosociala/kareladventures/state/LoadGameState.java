@@ -14,6 +14,10 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.environment.EnvironmentCamera;
+import com.jme3.environment.LightProbeFactory;
+import com.jme3.environment.generation.JobProgressAdapter;
+import com.jme3.environment.util.EnvMapUtils;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -22,11 +26,23 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.light.LightProbe;
+import com.jme3.material.Material;
+import com.jme3.renderer.ViewPort;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Sphere;
+import com.jme3.texture.Texture;
+import com.jme3.util.SkyFactory;
+import com.jme3.util.TangentBinormalGenerator;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
@@ -51,6 +67,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private AssetManager assetManager;
     private AppStateManager stateManager;
     private InputManager inputManager;
+    private ViewPort viewPort;
     private BulletAppState bulletAppState;
     private Node rootNode;
     private Node enemyRoot;
@@ -65,7 +82,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private final LoadType loadType;
     private Element progressBarElement;
     private TextRenderer textRenderer;
+    private LightProbe probe;
     private float frameCount = 0;
+    private boolean lightsPrepared = false;
 
     @Override
     protected void initialize(Application app) {
@@ -74,6 +93,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         this.assetManager = this.app.getAssetManager();
         this.stateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
+        this.viewPort = this.app.getViewPort();
         this.bulletAppState = this.app.getBulletAppState();
         this.rootNode = this.app.getRootNode();
         this.nifty = this.app.getNifty();
@@ -88,6 +108,12 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
             layer(new LayerBuilder("load_game_layer") {{
                 childLayoutCenter();
+
+                image(new ImageBuilder("load_game_bg") {{
+                    width("100%");
+                    height("100%");
+                    filename("Interface/load_bg.png");
+                }});
                 
                 panel(new PanelBuilder("load_game_panel"){{
                     childLayoutVertical();
@@ -130,23 +156,53 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             initEnemies();
 
             setProgress(0.2f, "Loading environment...");
-        } else if (frameCount == 3)  {
+        } else if (frameCount == 3) {
             switch (loadType) {
                 case NewGame -> initEnvironment();
-                case Saving -> loadEnvironment();
+                case Saving -> initEnvironmentFromFile();
             }
 
+            setProgress(0.6f, "Initializing sky...");
+        } else if (frameCount == 4) {
+            Spatial sky = SkyFactory.createSky(assetManager, "Textures/sky.jpg", SkyFactory.EnvMapType.EquirectMap);
+            sky.setShadowMode(ShadowMode.Off);
+            rootNode.attachChild(sky);
+            stateManager.attach(new EnvironmentCamera(256, Vector3f.ZERO));
+
             setProgress(0.6f, "Initializing controls...");
-        } else if (frameCount == 4){
+        } else if (frameCount == 5) {
             initKeys();
             
             inventoryState = new InventoryState(player.getInventory());
             stateManager.attach(inventoryState);
             inventoryState.setEnabled(false);
 
-            setProgress(1.0f, "Finishing...");
-        } else if (frameCount == 5) {
-            stateManager.attach(new GameState(player,enemyRoot));
+            setProgress(1.0f, "Setting up lighting...");
+        } else if (frameCount == 6) {
+            EnvironmentCamera environmentCamera = stateManager.getState(EnvironmentCamera.class);
+            probe = LightProbeFactory.makeProbe(
+                environmentCamera,
+                rootNode,
+                EnvMapUtils.GenerationType.Fast,
+                new JobProgressAdapter<LightProbe>() {
+                    @Override
+                    public void done(LightProbe result) {
+                        System.err.println("Done rendering env maps");
+                        lightsPrepared = true;
+                    }
+                }
+            );
+            probe.getArea().setRadius(200);
+            rootNode.addLight(probe);
+
+            rootNode.setShadowMode(ShadowMode.CastAndReceive);
+            sun = new Sun(assetManager, viewPort);
+            rootNode.addLight(sun);
+        }
+        
+        if (lightsPrepared == true) {
+            setProgress(1.0f, "Finished.");
+            stateManager.attach(new GameState(player, enemyRoot));
             this.setEnabled(false);
             stateManager.detach(this);
         }
@@ -155,31 +211,30 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void initPlayer(){
-        player = new Player(assetManager,new Vector3f(10,100,10),this.app.getRootNode(),bulletAppState);
+        player = new Player(assetManager,new Vector3f(0,10,0),this.app.getRootNode(),bulletAppState);
         rootNode.attachChild(player);
         bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
         bulletAppState.getPhysicsSpace().addAll(player);
-        player.getCharacterCollider().setGravity(new Vector3f(0,-10,0));
+        player.getCharacterCollider().setGravity(new Vector3f(0,-3,0));
         player.getCharacterCollider().setAngularFactor(0f);
         chaseCam = initChaseCam();
     }
     private void initEnemies(){
         enemyRoot = new Node();
         enemyRoot.setUserData("name","enemy_root");
-        this.app.getRootNode().attachChild(enemyRoot);
+        rootNode.attachChild(enemyRoot);
+
         Enemy enemy = new Enemy("Bug",new Vector3f(20,100,20), assetManager,this.app.getRootNode(),bulletAppState,100);
         enemyRoot.attachChild(enemy);
     }
 
     private void initEnvironment(){
-        sun = new Sun(rootNode);
         world = new World("Scenes/scene.glb", assetManager);
         rootNode.attachChild(world);
-        rootNode.attachChild(assetManager.loadModel("Scenes/non-collidable.glb"));
         bulletAppState.getPhysicsSpace().addAll(world);
     }
 
-    private void loadEnvironment() {
+    private void initEnvironmentFromFile() {
         throw new UnsupportedOperationException("not implemented `saving/loading`");
     }
 
@@ -218,7 +273,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         textRenderer.setText(loadingText);
     }
 
-        final private ActionListener actionListener = new ActionListener() {
+    final private ActionListener actionListener = new ActionListener() {
         public void onAction(String action, boolean isPressed, float tpf) {
             if (action.equals("EXIT") && !isPressed) {
                 System.exit(0);

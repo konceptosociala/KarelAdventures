@@ -115,6 +115,13 @@ run {
     enableAssertions = true
 }
 
+task refEnv(type: JavaExec) {
+    group = 'Application'
+    description = 'Run another class.'
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.konceptosociala.kareladventures.RefEnv'
+}
+
 task buildWindowsDistribution(dependsOn: [distZip, downloadAndUnzipWindowsJre], type: Copy) {
     group 'distribution'
     from files("${projectDir}/scripts/desktopDeployment/KarelAdventures.bat"), zipTree(distZip.archiveFile), "${buildDir}/jres/windowsJre"

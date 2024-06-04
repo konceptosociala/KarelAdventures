@@ -1,6 +1,5 @@
 package org.konceptosociala.kareladventures.state;
 
-
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.tools.Color;
