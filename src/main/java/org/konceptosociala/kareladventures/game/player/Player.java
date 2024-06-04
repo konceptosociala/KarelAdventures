@@ -3,19 +3,11 @@ package org.konceptosociala.kareladventures.game.player;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.tween.Tweens;
 import com.jme3.bounding.BoundingBox;
-import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.collision.Collidable;
-import com.jme3.collision.CollisionResults;
-import com.jme3.collision.UnsupportedCollisionException;
-import com.jme3.material.Material;
 import com.jme3.math.*;
-import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.Geometry;
@@ -33,10 +25,6 @@ import org.konceptosociala.kareladventures.state.GameState;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Queue;
-////
-
 
 @Getter
 public class Player extends Node implements IUpdatable {
@@ -199,7 +187,6 @@ public class Player extends Node implements IUpdatable {
         }
     }
     public List<Enemy> getEnemiesInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
-        Node rootNode = worldRoot;
         List<Enemy> enemies = new ArrayList<>();
 
         // Create a box shape for the collider
