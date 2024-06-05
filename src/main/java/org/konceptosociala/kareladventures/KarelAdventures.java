@@ -1,6 +1,10 @@
 package org.konceptosociala.kareladventures;
 
 import java.awt.*;
+import java.io.IOException;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
 import org.konceptosociala.kareladventures.state.IntroState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
 import com.jme3.app.SimpleApplication;
@@ -19,13 +23,19 @@ public class KarelAdventures extends SimpleApplication {
     private BulletAppState bulletAppState;
 
     public static void main(String[] args) {
+        try {
+            LogManager.getLogManager().readConfiguration(KarelAdventures.class.getResourceAsStream("/logging.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         KarelAdventures app = new KarelAdventures();
         app.start();
     }
 
     public KarelAdventures() {
         super();
-        setFullscreen();
+        // setFullscreen();
         setDisplayStatView(false);
         setDisplayFps(false);
         setShowSettings(false);
@@ -53,7 +63,7 @@ public class KarelAdventures extends SimpleApplication {
         }
     }
     
-    private void setFullscreen() {
+    public void setFullscreen() {   
         GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         DisplayMode[] modes = device.getDisplayModes();
         int i = 0;

@@ -1,13 +1,20 @@
 package org.konceptosociala.kareladventures.state;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
+import org.konceptosociala.kareladventures.game.npc.Dialog;
+import org.konceptosociala.kareladventures.game.npc.DialogMessage;
+import org.konceptosociala.kareladventures.game.npc.NPC;
+import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.LoadingBarBuilder;
+import org.konceptosociala.kareladventures.utils.InteractableNode;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -52,7 +59,7 @@ import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.tools.SizeValue;
-
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("unused")
@@ -70,20 +77,30 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private ViewPort viewPort;
     private BulletAppState bulletAppState;
     private Node rootNode;
-    private Node enemyRoot;
     private Nifty nifty;
 
+    @Getter
+    private Node interactableRoot;
+    @Getter
+    private Node enemyRoot;
+    @Getter
+    private DialogState dialogState;
+    @Getter
     private InventoryState inventoryState;
+    @Getter
     private ChaseCamera chaseCam;
+    @Getter
     private Sun sun;
+    @Getter
     private World world;
+    @Getter
     private Player player;
 
     private final LoadType loadType;
     private Element progressBarElement;
     private TextRenderer textRenderer;
     private LightProbe probe;
-    private float frameCount = 0;
+    private int frameCount = 0;
     private boolean lightsPrepared = false;
 
     @Override
@@ -141,68 +158,21 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         nifty.gotoScreen("load_game_screen");
     }
 
-    @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
-        if (frameCount == 1) {
-            textRenderer = nifty
-                .getScreen("load_game_screen")
-                .findElementById("loading_text")
-                .getRenderer(TextRenderer.class);
-
-            setProgress(0.0f, "Loading player...");
-        } else if (frameCount == 2) {
-            initPlayer();
-            initEnemies();
-
-            setProgress(0.2f, "Loading environment...");
-        } else if (frameCount == 3) {
-            switch (loadType) {
-                case NewGame -> initEnvironment();
-                case Saving -> initEnvironmentFromFile();
-            }
-
-            setProgress(0.6f, "Initializing sky...");
-        } else if (frameCount == 4) {
-            Spatial sky = SkyFactory.createSky(assetManager, "Textures/sky.jpg", SkyFactory.EnvMapType.EquirectMap);
-            sky.setShadowMode(ShadowMode.Off);
-            rootNode.attachChild(sky);
-            stateManager.attach(new EnvironmentCamera(256, Vector3f.ZERO));
-
-            setProgress(0.6f, "Initializing controls...");
-        } else if (frameCount == 5) {
-            initKeys();
-            
-            inventoryState = new InventoryState(player.getInventory());
-            stateManager.attach(inventoryState);
-            inventoryState.setEnabled(false);
-
-            setProgress(1.0f, "Setting up lighting...");
-        } else if (frameCount == 6) {
-            EnvironmentCamera environmentCamera = stateManager.getState(EnvironmentCamera.class);
-            probe = LightProbeFactory.makeProbe(
-                environmentCamera,
-                rootNode,
-                EnvMapUtils.GenerationType.Fast,
-                new JobProgressAdapter<LightProbe>() {
-                    @Override
-                    public void done(LightProbe result) {
-                        System.err.println("Done rendering env maps");
-                        lightsPrepared = true;
-                    }
-                }
-            );
-            probe.getArea().setRadius(200);
-            rootNode.addLight(probe);
-
-            rootNode.setShadowMode(ShadowMode.CastAndReceive);
-            sun = new Sun(assetManager, viewPort);
-            rootNode.addLight(sun);
+        switch (frameCount) {
+            case 1 -> setProgress(0.0f, "Loading player...",        this::loadTextRenderer);
+            case 2 -> setProgress(0.1f, "Loading NPC...",           this::loadPlayer);
+            case 3 -> setProgress(0.2f, "Loading enemies...",       this::loadNPC);
+            case 4 -> setProgress(0.3f, "Loading environment...",   this::loadEnemies);
+            case 5 -> setProgress(0.6f, "Initializing sky...",      this::loadEnvironment);
+            case 6 -> setProgress(0.9f, "Setting up lighting...",   this::loadSky); 
+            case 8 -> loadLighting();
         }
         
         if (lightsPrepared == true) {
-            setProgress(1.0f, "Finished.");
-            stateManager.attach(new GameState(player, enemyRoot));
+            setProgress(1.0f, "Finished.", null);
+            stateManager.attach(new GameState(this));
             this.setEnabled(false);
             stateManager.detach(this);
         }
@@ -210,25 +180,114 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         frameCount++;
     }
 
-    private void initPlayer(){
-        player = new Player(assetManager,new Vector3f(0,10,0),this.app.getRootNode(),bulletAppState);
-        rootNode.attachChild(player);
-        bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
-        bulletAppState.getPhysicsSpace().addAll(player);
-        player.getCharacterCollider().setGravity(new Vector3f(0,-3,0));
-        player.getCharacterCollider().setAngularFactor(0f);
-        chaseCam = initChaseCam();
+    private void setProgress(final float progress, String loadingText, Runnable loadMethod) {
+        if (loadMethod != null)
+            loadMethod.run();
+
+        final int MIN_WIDTH = 32;
+        int pixelWidth = (int) (MIN_WIDTH + (progressBarElement.getParent().getWidth() - MIN_WIDTH) * progress);
+        progressBarElement.setConstraintWidth(new SizeValue(pixelWidth + "px"));
+        progressBarElement.getParent().layoutElements();
+
+        textRenderer.setText(loadingText);
     }
-    private void initEnemies(){
+
+    private void loadLighting() {
+        EnvironmentCamera environmentCamera = stateManager.getState(EnvironmentCamera.class);
+        probe = LightProbeFactory.makeProbe(
+            environmentCamera,
+            rootNode,
+            EnvMapUtils.GenerationType.Fast,
+            new JobProgressAdapter<LightProbe>() {
+                @Override
+                public void done(LightProbe result) {
+                    System.err.println("Done rendering env maps");
+                    lightsPrepared = true;
+                }
+            }
+        );
+        probe.getArea().setRadius(200);
+        rootNode.addLight(probe);
+
+        rootNode.setShadowMode(ShadowMode.CastAndReceive);
+        sun = new Sun(assetManager, viewPort);
+        rootNode.addLight(sun);
+    }
+
+    private void loadSky() {
+        Spatial sky = SkyFactory.createSky(assetManager, "Textures/sky.jpg", SkyFactory.EnvMapType.EquirectMap);
+        sky.setShadowMode(ShadowMode.Off);
+        rootNode.attachChild(sky);
+        stateManager.attach(new EnvironmentCamera(256, Vector3f.ZERO));
+    }
+
+    private void loadEnvironment() {
+        switch (loadType) {
+            case NewGame -> initEnvironment();
+            case Saving -> initEnvironmentFromFile();
+        }
+    }
+
+    private void loadEnemies() {
         enemyRoot = new Node();
-        enemyRoot.setUserData("name","enemy_root");
+        enemyRoot.setUserData("name", "enemy_root");
         rootNode.attachChild(enemyRoot);
 
-        Enemy enemy = new Enemy("Bug",new Vector3f(20,100,20), assetManager,this.app.getRootNode(),bulletAppState,100);
+        Enemy enemy = new Enemy(new Vector3f(0, 5, 0), assetManager, bulletAppState, 100);
+        rootNode.attachChild(enemy);
         enemyRoot.attachChild(enemy);
     }
 
-    private void initEnvironment(){
+    private void loadPlayer() {
+        player = new Player(assetManager, new Vector3f(0,10,0), bulletAppState);
+        rootNode.attachChild(player);
+
+        inventoryState = new InventoryState(player.getInventory());
+        stateManager.attach(inventoryState);
+        inventoryState.setEnabled(false);
+
+        chaseCam = initChaseCam();
+    }
+
+    private void loadTextRenderer() {
+        var screen = nifty
+            .getScreen("load_game_screen");
+            
+        if (screen == null)
+            return;
+
+        var element = screen.findElementById("loading_text");
+
+        if (element == null)
+            return;
+
+        textRenderer = element.getRenderer(TextRenderer.class);
+    }
+
+    private void loadNPC() {
+        interactableRoot = new Node();
+        interactableRoot.setUserData("name", "enemy_root");
+        rootNode.attachChild(interactableRoot);
+
+        NPC pechkurova = new NPC(
+            "Sister Olena", 
+            "Models/pechkurova.glb",
+            "Pechkurova_idle",
+            new Dialog(
+                List.of(
+                    new DialogMessage("Sister Olena", "Hello, World!"),
+                    new DialogMessage("You", "Ok.")
+                ), 
+                null
+            ), 
+            assetManager,
+            bulletAppState
+        );
+        interactableRoot.attachChild(pechkurova);
+        rootNode.attachChild(pechkurova);
+    }
+
+    private void initEnvironment() {
         world = new World("Scenes/scene.glb", assetManager);
         rootNode.attachChild(world);
         bulletAppState.getPhysicsSpace().addAll(world);
@@ -245,78 +304,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         chaseCam.setDefaultDistance(3);
         return chaseCam;
     }
-
-    private void initKeys(){
-        inputManager.addMapping("EXIT", new KeyTrigger(KeyInput.KEY_F4));
-        inputManager.addMapping("INVENTORY", new KeyTrigger(KeyInput.KEY_I));
-        inputManager.addMapping("INTERACT", new KeyTrigger(KeyInput.KEY_E));
-        inputManager.addMapping("FORWARD", new KeyTrigger(KeyInput.KEY_W));
-        inputManager.addMapping("BACKWARD", new KeyTrigger(KeyInput.KEY_S));
-        inputManager.addMapping("LEFTWARD", new KeyTrigger(KeyInput.KEY_A));
-        inputManager.addMapping("RIGHTWARD", new KeyTrigger(KeyInput.KEY_D));
-        inputManager.addMapping("JUMP", new KeyTrigger(KeyInput.KEY_SPACE));
-        inputManager.addMapping("INTERACT", new KeyTrigger(KeyInput.KEY_F));
-        inputManager.addMapping("DASH", new KeyTrigger(KeyInput.KEY_LSHIFT));
-        inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-
-        // Enable listeners
-        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK"});
-        inputManager.addListener(analogListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"});
-    }
-
-    private void setProgress(final float progress, String loadingText) {
-        final int MIN_WIDTH = 32;
-        int pixelWidth = (int) (MIN_WIDTH + (progressBarElement.getParent().getWidth() - MIN_WIDTH) * progress);
-        progressBarElement.setConstraintWidth(new SizeValue(pixelWidth + "px"));
-        progressBarElement.getParent().layoutElements();
-
-        textRenderer.setText(loadingText);
-    }
-
-    final private ActionListener actionListener = new ActionListener() {
-        public void onAction(String action, boolean isPressed, float tpf) {
-            if (action.equals("EXIT") && !isPressed) {
-                System.exit(0);
-            }
-            
-            if (action.equals("INVENTORY") && isPressed) {
-                inventoryState.setEnabled(!inventoryState.isEnabled());
-            }
-            
-            if (action.equals("JUMP") && isPressed) {
-                player.jump();
-            }
-            
-            if (action.equals("DASH") && isPressed) {
-                player.roll();
-            }
-
-            if (action.equals("INTERACT") && isPressed) {
-
-            }
-
-            if (action.equals("ATTACK") && isPressed) {
-                player.attack("melee");
-            }
-        }
-    };
-
-    final private AnalogListener analogListener = new AnalogListener() {
-        @Override
-        public void onAnalog(String action, float value, float tpf) {
-            if (action.equals("FORWARD") && value>0) {
-                player.moveForward(-value,chaseCam.getHorizontalRotation());
-            } else if (action.equals("BACKWARD") && value>0) {
-                player.moveForward(value,chaseCam.getHorizontalRotation());
-            }
-
-            if (action.equals("RIGHTWARD") && value>0) {
-                player.moveSideward(-value,chaseCam.getHorizontalRotation());
-            } else if (action.equals("LEFTWARD") && value>0) {
-                player.moveSideward(value,chaseCam.getHorizontalRotation());
-            }
-        }
-    };
 
     @Override
     public void bind(@Nonnull Nifty nifty, @Nonnull Screen screen) {
