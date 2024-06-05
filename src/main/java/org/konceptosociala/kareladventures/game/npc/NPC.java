@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.state.DialogState;
 import org.konceptosociala.kareladventures.state.GameState;
-import org.konceptosociala.kareladventures.utils.DebugLine;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
 
 import com.jme3.asset.AssetManager;
@@ -15,7 +14,6 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
@@ -62,12 +60,6 @@ public class NPC extends InteractableNode {
         Vector3f rayFrom = characterPosition;
         Vector3f rayTo = characterPosition.add(player.getLocalRotation().getRotationColumn(0).mult(-2));
 
-        gameState.getRootNode().attachChild(new DebugLine(
-            rayFrom, rayTo, 
-            ColorRGBA.Green,
-            gameState.getAssetManager()
-        ));
-
         List<PhysicsRayTestResult> results = gameState.getBulletAppState().getPhysicsSpace().rayTest(rayFrom, rayTo);
         for (PhysicsRayTestResult result : results) {
             if (result.getCollisionObject() == this.rigidBodyControl) {
@@ -80,11 +72,7 @@ public class NPC extends InteractableNode {
         gameState.getChaseCam().setEnabled(false);
 
         DialogState dialogState = gameState.getDialogState();
-        dialogState.setDialog(Optional.of(dialog));
+        dialogState.setNpc(Optional.of(this));
         dialogState.setEnabled(true);
-
-        var nextDialog = dialog.getNextDialog();
-        if (nextDialog != null)
-            dialog = nextDialog;
     }
 }

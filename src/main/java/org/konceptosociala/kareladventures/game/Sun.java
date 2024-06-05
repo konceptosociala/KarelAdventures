@@ -7,7 +7,6 @@ import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
-import com.jme3.renderer.ViewPort;
 import com.jme3.shadow.CompareMode;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.EdgeFilteringMode;
@@ -18,7 +17,7 @@ import lombok.Getter;
 public class Sun extends DirectionalLight {
     public static final int SHADOWMAP_SIZE = 2048;
 
-    public Sun(AssetManager assetManager, ViewPort viewPort) {
+    public Sun(AssetManager assetManager, FilterPostProcessor fpp) {
         super();
         setColor(ColorRGBA.White);
         setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
@@ -35,10 +34,8 @@ public class Sun extends DirectionalLight {
         SSAOFilter ssao = new SSAOFilter(0.2f, 1f, 1f, 0.1f);
         FXAAFilter fxaa = new FXAAFilter();
 
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         fpp.addFilter(dlsf);
         fpp.addFilter(ssao);
         fpp.addFilter(fxaa);
-        viewPort.addProcessor(fpp);
     }
 }

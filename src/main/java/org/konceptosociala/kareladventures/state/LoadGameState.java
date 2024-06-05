@@ -16,6 +16,7 @@ import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.LoadingBarBuilder;
+import org.konceptosociala.kareladventures.ui.PauseBlur;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
 
 import com.jme3.app.Application;
@@ -41,6 +42,7 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -83,6 +85,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private BulletAppState bulletAppState;
     private Node rootNode;
     private Nifty nifty;
+    private FilterPostProcessor fpp;
 
     private Node interactableRoot;
     private Node enemyRoot;
@@ -108,6 +111,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         this.assetManager = this.app.getAssetManager();
         this.stateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
+        this.fpp = this.app.getFpp();
         this.viewPort = this.app.getViewPort();
         this.bulletAppState = this.app.getBulletAppState();
         this.rootNode = this.app.getRootNode();
@@ -208,7 +212,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.addLight(probe);
 
         rootNode.setShadowMode(ShadowMode.CastAndReceive);
-        sun = new Sun(assetManager, viewPort);
+        sun = new Sun(assetManager, fpp);
         rootNode.addLight(sun);
     }
 
@@ -283,7 +287,13 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                     new DialogMessage("Sister Olena", "Hello, World!"),
                     new DialogMessage("You", "Ok.")
                 ), 
-                null
+                new Dialog(
+                    List.of(
+                        new DialogMessage("Sister Olena", "Hello again!"),
+                        new DialogMessage("You", "Ok again...")
+                    ), 
+                    null
+                )
             ), 
             assetManager,
             bulletAppState

@@ -28,7 +28,6 @@ public class PauseState extends BaseAppState implements ScreenController {
     private InputManager inputManager;
     private BulletAppState bulletAppState;
     private Nifty nifty;
-
     private PauseBlur pauseBlur;
 
     @Override
@@ -38,13 +37,14 @@ public class PauseState extends BaseAppState implements ScreenController {
         this.inputManager = this.app.getInputManager();
         this.bulletAppState = this.app.getBulletAppState();
         this.nifty = this.app.getNifty();
+        this.pauseBlur = new PauseBlur(this.app.getFpp());
     }
 
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(true);
         bulletAppState.setEnabled(false);
-        // pauseBlur.setEnabled(true);
+        pauseBlur.setEnabled(true);
 
         nifty.addScreen("pause_screen", new ScreenBuilder("Pause screen") {{
             controller(new DefaultScreenController());

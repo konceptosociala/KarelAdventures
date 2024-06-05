@@ -177,9 +177,10 @@ public class GameState extends BaseAppState  {
         inputManager.addMapping("JUMP", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addMapping("DASH", new KeyTrigger(KeyInput.KEY_LSHIFT));
         inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addMapping("RETURN", new KeyTrigger(KeyInput.KEY_RETURN));
 
         // Enable listeners
-        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK", "ESCAPE"});
+        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN"});
         inputManager.addListener(analogListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"});
     }
 
@@ -201,6 +202,13 @@ public class GameState extends BaseAppState  {
                     pauseState.setEnabled(true);
                     GameState.this.setEnabled(false);
                 }
+            }
+
+            if (dialogState.isEnabled() && action.equals("RETURN") && isPressed) {
+                dialogState.nextMessage();
+
+                if (!dialogState.isEnabled())
+                    chaseCam.setEnabled(true);
             }
 
             if (inventoryState.isEnabled() 

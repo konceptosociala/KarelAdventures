@@ -11,9 +11,8 @@ public class PauseBlur {
         dof.setFocusDistance(0);
         dof.setFocusRange(50);
         dof.setBlurScale(3);
+        dof.setEnabled(false);
         fpp.addFilter(dof);
-
-        setEnabled(false);
     }
 
     public void setEnabled(boolean enabled) {

@@ -11,6 +11,7 @@ import org.konceptosociala.kareladventures.state.MainMenuState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.niftygui.NiftyJmeDisplay;
+import com.jme3.post.FilterPostProcessor;
 import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class KarelAdventures extends SimpleApplication {
     private IntroState introState;
     private MainMenuState mainMenuState;
     private BulletAppState bulletAppState;
+    private FilterPostProcessor fpp;
 
     public static void main(String[] args) {
         try {
@@ -59,6 +61,8 @@ public class KarelAdventures extends SimpleApplication {
             introState = new IntroState(cam.getWidth(), cam.getHeight());
             mainMenuState = new MainMenuState();
             nifty = initNifty();
+            fpp = new FilterPostProcessor(assetManager);
+            viewPort.addProcessor(fpp);
 
             stateManager.attach(introState);
         } catch (Exception e) {
