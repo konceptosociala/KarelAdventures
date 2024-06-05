@@ -2,6 +2,7 @@ package org.konceptosociala.kareladventures;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -16,6 +17,8 @@ import lombok.Getter;
 
 @Getter
 public class KarelAdventures extends SimpleApplication {
+    public static final Logger LOG = Logger.getLogger(KarelAdventures.class.getName());
+
     private Nifty nifty;
     private AppSettings appSettings = new AppSettings(true);
     private IntroState introState;
@@ -36,6 +39,7 @@ public class KarelAdventures extends SimpleApplication {
     public KarelAdventures() {
         super();
         // setFullscreen();
+        appSettings.setWindowSize(1024, 768);
         setDisplayStatView(false);
         setDisplayFps(false);
         setShowSettings(false);
@@ -87,6 +91,9 @@ public class KarelAdventures extends SimpleApplication {
 
         nifty.loadStyleFile("nifty-default-styles.xml");
         nifty.loadControlFile("nifty-default-controls.xml");
+
+        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
+        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
 
         return nifty;
     }

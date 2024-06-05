@@ -64,7 +64,6 @@ public class MainMenuState extends BaseAppState implements ScreenController {
                             childLayoutCenter();
     
                             image(new ImageBuilder("main_menu_panel_bg"){{
-                                height("95%");
                                 filename("Interface/plane1.png");
                             }});
     

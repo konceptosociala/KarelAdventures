@@ -1,5 +1,7 @@
 package org.konceptosociala.kareladventures.state;
 
+import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
+
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -59,10 +61,12 @@ import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.tools.SizeValue;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("unused")
+@Getter
 @RequiredArgsConstructor
 public class LoadGameState extends BaseAppState implements ScreenController {
     public enum LoadType {
@@ -72,6 +76,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
     private KarelAdventures app;
     private AssetManager assetManager;
+    @Getter(AccessLevel.NONE)
     private AppStateManager stateManager;
     private InputManager inputManager;
     private ViewPort viewPort;
@@ -79,21 +84,14 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private Node rootNode;
     private Nifty nifty;
 
-    @Getter
     private Node interactableRoot;
-    @Getter
     private Node enemyRoot;
-    @Getter
     private DialogState dialogState;
-    @Getter
     private InventoryState inventoryState;
-    @Getter
+    private PauseState pauseState;
     private ChaseCamera chaseCam;
-    @Getter
     private Sun sun;
-    @Getter
     private World world;
-    @Getter
     private Player player;
 
     private final LoadType loadType;
@@ -167,7 +165,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             case 4 -> setProgress(0.3f, "Loading environment...",   this::loadEnemies);
             case 5 -> setProgress(0.6f, "Initializing sky...",      this::loadEnvironment);
             case 6 -> setProgress(0.9f, "Setting up lighting...",   this::loadSky); 
-            case 8 -> loadLighting();
+            case 7 -> loadLighting();
         }
         
         if (lightsPrepared == true) {
@@ -201,7 +199,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             new JobProgressAdapter<LightProbe>() {
                 @Override
                 public void done(LightProbe result) {
-                    System.err.println("Done rendering env maps");
+                    LOG.info("Done rendering environment maps");
                     lightsPrepared = true;
                 }
             }
@@ -234,7 +232,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.attachChild(enemyRoot);
 
         Enemy enemy = new Enemy(new Vector3f(0, 5, 0), assetManager, bulletAppState, 100);
-        rootNode.attachChild(enemy);
         enemyRoot.attachChild(enemy);
     }
 
@@ -245,6 +242,14 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         inventoryState = new InventoryState(player.getInventory());
         stateManager.attach(inventoryState);
         inventoryState.setEnabled(false);
+
+        dialogState = new DialogState();
+        stateManager.attach(dialogState);
+        dialogState.setEnabled(false);
+
+        pauseState = new PauseState();
+        stateManager.attach(pauseState);
+        pauseState.setEnabled(false);
 
         chaseCam = initChaseCam();
     }
@@ -266,7 +271,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
     private void loadNPC() {
         interactableRoot = new Node();
-        interactableRoot.setUserData("name", "enemy_root");
+        interactableRoot.setUserData("name", "interactable_root");
         rootNode.attachChild(interactableRoot);
 
         NPC pechkurova = new NPC(
@@ -284,7 +289,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             bulletAppState
         );
         interactableRoot.attachChild(pechkurova);
-        rootNode.attachChild(pechkurova);
     }
 
     private void initEnvironment() {
