@@ -1,5 +1,7 @@
 package org.konceptosociala.kareladventures.state;
 
+import java.util.Optional;
+
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
@@ -15,16 +17,16 @@ import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class DialogState extends BaseAppState implements ScreenController {
     private KarelAdventures app;
     private InputManager inputManager;
     private Nifty nifty;
-    private Dialog dialog;
-
-    public DialogState(Dialog dialog) {
-       this.dialog = dialog;
-    }
+    private Optional<Dialog> dialog = Optional.empty();
 
     @Override
     protected void initialize(Application app) {

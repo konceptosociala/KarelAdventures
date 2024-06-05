@@ -5,6 +5,7 @@ import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.FXAAFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.renderer.ViewPort;
 import com.jme3.shadow.CompareMode;
@@ -32,10 +33,12 @@ public class Sun extends DirectionalLight {
         dlsf.setEnabled(true);
 
         SSAOFilter ssao = new SSAOFilter(0.2f, 1f, 1f, 0.1f);
+        FXAAFilter fxaa = new FXAAFilter();
 
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         fpp.addFilter(dlsf);
         fpp.addFilter(ssao);
+        fpp.addFilter(fxaa);
         viewPort.addProcessor(fpp);
     }
 }
