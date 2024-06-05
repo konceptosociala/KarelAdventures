@@ -16,6 +16,7 @@ import org.konceptosociala.kareladventures.utils.InteractableNode;
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
@@ -37,28 +38,34 @@ import de.lessvoid.nifty.screen.DefaultScreenController;
 @Getter
 public class GameState extends BaseAppState  {
     private KarelAdventures app;
+    private AssetManager assetManager;
     private AppStateManager appStateManager;
     private BulletAppState bulletAppState;
     private InputManager inputManager;
     private Nifty nifty;
     
+    private PauseState pauseState;
     private DialogState dialogState;
     private InventoryState inventoryState;
     private ChaseCamera chaseCam;
     private Sun sun;
     private World world;
     private Player player;
+    private Node rootNode;
     private Node enemyRoot;
     private Node interactableRoot;
     // private NavMesh navMesh;
 
     public GameState(LoadGameState loadGameState) {
+        assetManager = loadGameState.getAssetManager();
+        pauseState = loadGameState.getPauseState();
         dialogState = loadGameState.getDialogState();
         inventoryState = loadGameState.getInventoryState();
         chaseCam = loadGameState.getChaseCam();
         sun = loadGameState.getSun();
         world = loadGameState.getWorld();
         player = loadGameState.getPlayer();
+        rootNode = loadGameState.getRootNode();
         enemyRoot = loadGameState.getEnemyRoot();
         interactableRoot = loadGameState.getInteractableRoot();
     }
@@ -159,6 +166,7 @@ public class GameState extends BaseAppState  {
     }
 
     private void initControls() {
+        inputManager.addMapping("ESCAPE", new KeyTrigger(KeyInput.KEY_ESCAPE));
         inputManager.addMapping("EXIT", new KeyTrigger(KeyInput.KEY_F4));
         inputManager.addMapping("INVENTORY", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addMapping("INTERACT", new KeyTrigger(KeyInput.KEY_E));
@@ -171,18 +179,50 @@ public class GameState extends BaseAppState  {
         inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
 
         // Enable listeners
-        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK"});
+        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK", "ESCAPE"});
         inputManager.addListener(analogListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"});
     }
 
     final private ActionListener actionListener = new ActionListener() {
         public void onAction(String action, boolean isPressed, float tpf) {
+            if (action.equals("ESCAPE") && isPressed) {
+                if (inventoryState.isEnabled()) {
+                    chaseCam.setEnabled(true);
+                    inventoryState.setEnabled(false);
+                } else if (dialogState.isEnabled()) {
+                    chaseCam.setEnabled(true);
+                    dialogState.setEnabled(false);
+                } else if (pauseState.isEnabled()) {
+                    chaseCam.setEnabled(true);
+                    pauseState.setEnabled(false);
+                    GameState.this.setEnabled(true);
+                } else {
+                    chaseCam.setEnabled(false);
+                    pauseState.setEnabled(true);
+                    GameState.this.setEnabled(false);
+                }
+            }
+
+            if (inventoryState.isEnabled() 
+                || dialogState.isEnabled()
+                || pauseState.isEnabled())
+                return;
+
+            if (action.equals("INVENTORY") && isPressed) {
+                inventoryState.setEnabled(true);
+                chaseCam.setEnabled(false);
+            }
+
+            if (action.equals("INTERACT") && isPressed) {
+                for (Spatial i : interactableRoot.getChildren()) {
+                    if (i instanceof InteractableNode) {
+                        ((InteractableNode) i).interact(GameState.this, player);
+                    }
+                }
+            }
+
             if (action.equals("EXIT") && !isPressed) {
                 System.exit(0);
-            }
-            
-            if (action.equals("INVENTORY") && isPressed) {
-                inventoryState.setEnabled(!inventoryState.isEnabled());
             }
             
             if (action.equals("JUMP") && isPressed) {
@@ -191,15 +231,6 @@ public class GameState extends BaseAppState  {
             
             if (action.equals("DASH") && isPressed) {
                 player.roll();
-            }
-
-            if (action.equals("INTERACT") && isPressed) {
-                for (Spatial i : interactableRoot.getChildren()) {
-                    if (i instanceof InteractableNode) {
-                        System.exit(-1);
-                        ((InteractableNode) i).interact(GameState.this, player);
-                    }
-                }
             }
 
             if (action.equals("ATTACK") && isPressed) {
@@ -211,6 +242,9 @@ public class GameState extends BaseAppState  {
     final private AnalogListener analogListener = new AnalogListener() {
         @Override
         public void onAnalog(String action, float value, float tpf) {
+            if (inventoryState.isEnabled() || dialogState.isEnabled())
+                return;
+
             if (action.equals("FORWARD") && value>0) {
                 player.moveForward(-value,chaseCam.getHorizontalRotation());
             } else if (action.equals("BACKWARD") && value>0) {

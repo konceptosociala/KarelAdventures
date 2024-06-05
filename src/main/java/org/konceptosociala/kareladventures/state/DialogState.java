@@ -44,13 +44,16 @@ public class DialogState extends BaseAppState implements ScreenController {
 
             layer(new LayerBuilder("dialog_layer") {{
                 childLayoutCenter();
+                width("100%");
+                height("100%");
 
                 image(new ImageBuilder("dialog_image") {{
                     filename("Interface/dialog.png");
-                    width("90%");
                 }});
             }});
         }}.build(nifty));
+
+        nifty.gotoScreen("dialog_screen");
     }
 
     @Override
