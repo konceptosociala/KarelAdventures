@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.konceptosociala.kareladventures.game.inventory.ItemKind;
+import org.konceptosociala.kareladventures.ui.InvalidCellIdException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
