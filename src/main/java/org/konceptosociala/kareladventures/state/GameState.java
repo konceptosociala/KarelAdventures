@@ -44,6 +44,7 @@ public class GameState extends BaseAppState  {
     private InputManager inputManager;
     private Nifty nifty;
     
+    private KarelFarmState karelFarmState;
     private PauseState pauseState;
     private DialogState dialogState;
     private InventoryState inventoryState;
@@ -61,6 +62,7 @@ public class GameState extends BaseAppState  {
         pauseState = loadGameState.getPauseState();
         dialogState = loadGameState.getDialogState();
         inventoryState = loadGameState.getInventoryState();
+        karelFarmState = loadGameState.getKarelFarmState();
         chaseCam = loadGameState.getChaseCam();
         sun = loadGameState.getSun();
         world = loadGameState.getWorld();
@@ -193,6 +195,9 @@ public class GameState extends BaseAppState  {
                 } else if (dialogState.isEnabled()) {
                     chaseCam.setEnabled(true);
                     dialogState.setEnabled(false);
+                } else if (karelFarmState.isEnabled()) {
+                    chaseCam.setEnabled(true);
+                    karelFarmState.setEnabled(false);
                 } else if (pauseState.isEnabled()) {
                     chaseCam.setEnabled(true);
                     pauseState.setEnabled(false);
@@ -213,7 +218,8 @@ public class GameState extends BaseAppState  {
 
             if (inventoryState.isEnabled() 
                 || dialogState.isEnabled()
-                || pauseState.isEnabled())
+                || pauseState.isEnabled()
+                || karelFarmState.isEnabled())
                 return;
 
             if (action.equals("INVENTORY") && isPressed) {
@@ -250,7 +256,10 @@ public class GameState extends BaseAppState  {
     final private AnalogListener analogListener = new AnalogListener() {
         @Override
         public void onAnalog(String action, float value, float tpf) {
-            if (inventoryState.isEnabled() || dialogState.isEnabled())
+            if (inventoryState.isEnabled() 
+                || dialogState.isEnabled() 
+                || pauseState.isEnabled()
+                || karelFarmState.isEnabled())
                 return;
 
             if (action.equals("FORWARD") && value>0) {

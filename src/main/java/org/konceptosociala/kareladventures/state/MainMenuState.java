@@ -80,9 +80,9 @@ public class MainMenuState extends BaseAppState implements ScreenController {
                         panel(new PanelBuilder("main_menu_panel_buttons"){{
                             childLayoutVertical();
 
-                            panel(new ImageButton("main_menu_play_button", "Play", "playGame()"));
-                            panel(new ImageButton("main_menu_settings_button", "Settings", "openSettings()"));
-                            panel(new ImageButton("main_menu_quit_button", "Quit", "quitGame()"));
+                            panel(new ImageButton("main_menu_play_button", "Play", null, "playGame()"));
+                            panel(new ImageButton("main_menu_settings_button", "Settings", null, "openSettings()"));
+                            panel(new ImageButton("main_menu_quit_button", "Quit", null, "quitGame()"));
                         }});
                     }});
                 }});
@@ -119,20 +119,14 @@ public class MainMenuState extends BaseAppState implements ScreenController {
     // UI callbacks
 
     public void playGame() {
-        if (fadeOpacity > 0) return;
-
         this.setEnabled(false);
         stateManager.attach(new LoadGameState(LoadType.NewGame));
     }
 
     public void openSettings() {
-        if (fadeOpacity > 0) return;
-
     }
 
     public void quitGame() {
-        if (fadeOpacity > 0) return;
-
         app.stop();
     }
 

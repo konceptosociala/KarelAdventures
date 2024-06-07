@@ -10,6 +10,7 @@ import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
+import org.konceptosociala.kareladventures.game.farm.KarelFarm;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
 import org.konceptosociala.kareladventures.game.npc.DialogMessage;
 import org.konceptosociala.kareladventures.game.npc.NPC;
@@ -89,6 +90,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
     private Node interactableRoot;
     private Node enemyRoot;
+    private KarelFarmState karelFarmState;
     private DialogState dialogState;
     private InventoryState inventoryState;
     private PauseState pauseState;
@@ -255,6 +257,10 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         stateManager.attach(pauseState);
         pauseState.setEnabled(false);
 
+        karelFarmState = new KarelFarmState();
+        stateManager.attach(karelFarmState);
+        karelFarmState.setEnabled(false);
+
         chaseCam = initChaseCam();
     }
 
@@ -299,6 +305,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             bulletAppState
         );
         interactableRoot.attachChild(pechkurova);
+
+        KarelFarm karelFarm = new KarelFarm(assetManager, new Vector3f(10, 0, 0), bulletAppState);
+        interactableRoot.attachChild(karelFarm);
     }
 
     private void initEnvironment() {

@@ -2,6 +2,8 @@ package org.konceptosociala.kareladventures.ui.inventory;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.game.inventory.Item;
 import de.lessvoid.nifty.builder.*;
@@ -15,7 +17,7 @@ public class InventoryCell extends PanelBuilder {
     private InventoryCellId cellId;
     private Optional<Item> cellItem;
 
-    public InventoryCell(InventoryCellId id, Inventory inventory) {
+    public InventoryCell(InventoryCellId id, Inventory inventory, @Nullable String placeholderIcon) {
         super(id.toString());
         this.cellItem = Optional.empty();
 
@@ -27,13 +29,35 @@ public class InventoryCell extends PanelBuilder {
         marginLeft("2px");
         marginRight("2px");
         interactOnClick("selectCell("+id+")");
-        backgroundColor(new Color(0, 0, 0, 0));
+        
+        image(new ImageBuilder(id+"_placeholder") {{
+            width("75px");
+            height("75px");
+            filename("Interface/UI/Transparent center/panel-transparent-center-005.png");
+            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+        }});
+
+        var item = inventory.getItem(id);
+
+        if (placeholderIcon != null) {
+            image(new ImageBuilder(id+"_placeholder_icon") {{
+                filename(placeholderIcon);
+                width("48px");
+                height("48px");
+
+                if (item.isPresent())
+                    visible(false);
+            }});
+        }
+
+        panel(new PanelBuilder(id+"_select") {{
+            backgroundColor(new Color(0, 0, 0, 0));
+        }});
 
         image(new ImageBuilder(id+"_icon"){{
             width("64px");
             height("64px");
 
-            var item = inventory.getItem(id);
             if (item.isPresent())
                 filename(item.get().getIconPath());
             else

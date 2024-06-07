@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import static org.konceptosociala.kareladventures.KarelAdventures.createImage;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
+import org.konceptosociala.kareladventures.ui.InvalidCellIdException;
 import org.konceptosociala.kareladventures.ui.inventory.*;
 
 import com.jme3.app.Application;
@@ -18,6 +19,7 @@ import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
+import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.elements.render.PanelRenderer;
 import de.lessvoid.nifty.screen.Screen;
@@ -57,9 +59,10 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                     childLayoutCenter();
 
                     image(new ImageBuilder("inventory_image"){{
-                        filename("Interface/inventory.png");
+                        filename("Interface/UI/Transparent center/panel-transparent-center-003.png");
+                        imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
                         width("512px");
-                        height("800px");
+                        height("90%");
                     }});
 
                     try {
@@ -71,11 +74,11 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             panel(new PanelBuilder("inv_col_0"){{
                                 childLayoutVertical();
 
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_helmet"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_chestplate"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_leggings"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_boots"), inventory));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_weapon"), inventory));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_helmet"), inventory, "Interface/Inventory/helmet.png"));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_chestplate"), inventory, "Interface/Inventory/chestplate.png"));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_leggings"), inventory, "Interface/Inventory/leggings.png"));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_boots"), inventory, "Interface/Inventory/boots.png"));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_weapon"), inventory, "Interface/Inventory/sword.png"));
                             }});
 
                             for (int i = 1; i <= 4; i++) {
@@ -84,7 +87,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                                     childLayoutVertical();
     
                                     for (int j = 1; j <= 5; j++) {
-                                        panel(new InventoryCell(new InventoryCellId("inv_cell_"+ic+"_"+j), inventory));
+                                        panel(new InventoryCell(new InventoryCellId("inv_cell_"+ic+"_"+j), inventory, null));
                                     }
                                 }});
                             }
@@ -116,7 +119,9 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                     var selectedItem = inventory.getItem(selectedItemId.get()).get();
                     var selectedItemCell = getCell(selectedItemId.get().toString());
                     var selectedItemIcon = getCellIcon(selectedItemId.get().toString());
+                    var selectedItemPlaceholderIcon = getCellPlaceholderIcon(selectedItemId.get().toString());
                     var newItemIcon = getCellIcon(id.toString());
+                    var newItemPlaceholderIcon = getCellPlaceholderIcon(id.toString());
                     var itemToReplace = inventory.getItem(id);
                     var namedCell = id.getNamedCell();
                     
@@ -131,6 +136,12 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
                             selectedItemIcon.setImage(createImage(nifty, "inventory_screen", InventoryCell.TRANSPARENT_ICON, true));
                             newItemIcon.setImage(createImage(nifty, "inventory_screen", selectedItem.getIconPath(), true));
+                            
+                            if (newItemPlaceholderIcon != null)
+                                newItemPlaceholderIcon.setVisible(false);
+
+                            if (selectedItemPlaceholderIcon != null)
+                                selectedItemPlaceholderIcon.setVisible(true);
 
                             selectedItemId = Optional.empty();
                         } else if (namedCell.isPresent() 
@@ -153,7 +164,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                 if (itemToReplace.isEmpty())
                     return;
 
-                cell.setBackgroundColor(new Color(1, 1, 1, 0.1f));
+                cell.setBackgroundColor(new Color(1, 1, 1, 0.5f));
                 selectedItemId = Optional.of(id);
             }
         } catch (InvalidCellIdException e) {
@@ -181,8 +192,15 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     private PanelRenderer getCell(String cellId) {
         var screen = nifty.getScreen("inventory_screen");
         return screen
-            .findElementById(cellId)
+            .findElementById(cellId+"_select")
             .getRenderer(PanelRenderer.class);
+    }
+
+    @SuppressWarnings("null")
+    private Element getCellPlaceholderIcon(String cellId) {
+        var screen = nifty.getScreen("inventory_screen");
+        return screen
+            .findElementById(cellId+"_placeholder_icon");
     }
 
     @SuppressWarnings("null")

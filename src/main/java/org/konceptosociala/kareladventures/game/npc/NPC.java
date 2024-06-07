@@ -37,6 +37,7 @@ public class NPC extends InteractableNode {
         BulletAppState bulletAppState
     ){
         super();
+        setLocalTranslation(position);
         this.model = assetManager.loadModel(modelPath);
         this.collider = new CapsuleCollisionShape(0.5f, 3f);
         this.rigidBodyControl = new RigidBodyControl(collider, 1);

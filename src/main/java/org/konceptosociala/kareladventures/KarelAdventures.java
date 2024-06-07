@@ -7,6 +7,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.konceptosociala.kareladventures.state.IntroState;
+import org.konceptosociala.kareladventures.state.KarelFarmState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
@@ -65,7 +66,8 @@ public class KarelAdventures extends SimpleApplication {
             fpp = new FilterPostProcessor(assetManager);
             viewPort.addProcessor(fpp);
 
-            stateManager.attach(introState);
+            stateManager.attach(new KarelFarmState());
+            // stateManager.attach(introState);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
