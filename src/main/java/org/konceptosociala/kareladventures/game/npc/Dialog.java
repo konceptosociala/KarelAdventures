@@ -10,4 +10,12 @@ import lombok.Getter;
 public class Dialog {
     private List<DialogMessage> messages;
     private Dialog nextDialog;
+
+    /**
+     * @param dialogFile path to <code>.toml</code> file, where dialog
+     * @param nextDialog next dialog
+     */
+    public Dialog(String dialogFile, Dialog nextDialog) {
+        throw new UnsupportedOperationException("not implemented: Dialog from TOML");
+    }
 }

@@ -12,7 +12,6 @@ public class World extends Node {
     public World(String filename, AssetManager assetManager) {
         super();
         Spatial scene = assetManager.loadModel(filename);
-        // scene.getUserDataKeys().forEach(System.out::println);
         CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(scene);
         RigidBodyControl landscape = new RigidBodyControl(sceneShape, 0);
         landscape.setKinematic(true);
