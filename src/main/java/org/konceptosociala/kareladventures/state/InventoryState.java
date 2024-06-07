@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import static org.konceptosociala.kareladventures.KarelAdventures.createImage;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.ui.inventory.*;
@@ -19,7 +20,6 @@ import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.elements.render.PanelRenderer;
-import de.lessvoid.nifty.render.NiftyImage;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.tools.Color;
@@ -129,8 +129,8 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             inventory.removeItem(selectedItemId.get());
 
                             selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
-                            selectedItemIcon.setImage(createImage(InventoryCell.TRANSPARENT_ICON));
-                            newItemIcon.setImage(createImage(selectedItem.getIconPath()));
+                            selectedItemIcon.setImage(createImage(nifty, "inventory_screen", InventoryCell.TRANSPARENT_ICON, true));
+                            newItemIcon.setImage(createImage(nifty, "inventory_screen", selectedItem.getIconPath(), true));
 
                             selectedItemId = Optional.empty();
                         } else if (namedCell.isPresent() 
@@ -141,8 +141,8 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             inventory.setItem(itemToReplace.get(), selectedItemId.get());
 
                             selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
-                            selectedItemIcon.setImage(createImage(itemToReplace.get().getIconPath()));
-                            newItemIcon.setImage(createImage(selectedItem.getIconPath()));
+                            selectedItemIcon.setImage(createImage(nifty, "inventory_screen", itemToReplace.get().getIconPath(), true));
+                            newItemIcon.setImage(createImage(nifty, "inventory_screen", selectedItem.getIconPath(), true));
 
                             selectedItemId = Optional.empty();
                         }
@@ -191,16 +191,6 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
         return screen
             .findElementById(cellId+"_icon")
             .getRenderer(ImageRenderer.class);
-    }
-
-    @SuppressWarnings("null")
-    private NiftyImage createImage(String path) {
-        var screen = nifty.getScreen("inventory_screen");
-        return nifty.getRenderEngine().createImage(
-            screen, 
-            path, 
-            true
-        );
     }
 
     @Override

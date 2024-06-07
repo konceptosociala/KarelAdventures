@@ -87,6 +87,7 @@ public class DialogState extends BaseAppState implements ScreenController {
                         height("100px");
                         color(Color.WHITE);
                         font("Interface/Fonts/Default.fnt");
+                        wrap(true);
                     }});
                 }});
             }});

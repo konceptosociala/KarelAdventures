@@ -279,7 +279,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.attachChild(interactableRoot);
 
         NPC pechkurova = new NPC(
-            "Sister Olena", 
             "Models/pechkurova.glb",
             "Pechkurova_idle",
             new Dialog(
@@ -295,6 +294,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                     null
                 )
             ), 
+            new Vector3f(0, 0, 0),
             assetManager,
             bulletAppState
         );

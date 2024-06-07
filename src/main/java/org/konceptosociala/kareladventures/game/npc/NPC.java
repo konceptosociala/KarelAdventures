@@ -23,17 +23,16 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NPC extends InteractableNode {
-    private String name;
     private Spatial model; 
     private Dialog dialog;
     private CollisionShape collider;
     private RigidBodyControl rigidBodyControl;
 
     public NPC(
-        String name, 
         String modelPath, 
         String idleAnimationName, 
         Dialog dialog, 
+        Vector3f position,
         AssetManager assetManager,
         BulletAppState bulletAppState
     ){
@@ -48,7 +47,6 @@ public class NPC extends InteractableNode {
         bulletAppState.getPhysicsSpace().add(rigidBodyControl);
         bulletAppState.getPhysicsSpace().addAll(this);
 
-        this.name = name;
         this.dialog = dialog;
     }
 
