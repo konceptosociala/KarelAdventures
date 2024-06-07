@@ -14,6 +14,7 @@ import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.render.NiftyImage;
 import lombok.Getter;
 
 @Getter
@@ -40,8 +41,8 @@ public class KarelAdventures extends SimpleApplication {
 
     public KarelAdventures() {
         super();
-        // setFullscreen();
         appSettings.setWindowSize(1024, 768);
+        // setFullscreen();
         setDisplayStatView(false);
         setDisplayFps(false);
         setShowSettings(false);
@@ -54,7 +55,7 @@ public class KarelAdventures extends SimpleApplication {
             inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 
             bulletAppState = new BulletAppState();
-            // bulletAppState.setDebugEnabled(true);
+            bulletAppState.setDebugEnabled(true);
             stateManager.attach(bulletAppState);
             bulletAppState.setEnabled(false);
 
@@ -69,6 +70,16 @@ public class KarelAdventures extends SimpleApplication {
             e.printStackTrace();
             System.exit(-1);
         }
+    }
+
+    @SuppressWarnings("null")
+    public static NiftyImage createImage(Nifty nifty, String screenName, String path, boolean filterLinear) {
+        var screen = nifty.getScreen(screenName);
+        return nifty.getRenderEngine().createImage(
+            screen, 
+            path, 
+            filterLinear
+        );
     }
     
     public void setFullscreen() {   
