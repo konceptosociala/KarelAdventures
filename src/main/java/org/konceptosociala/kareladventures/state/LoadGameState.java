@@ -155,7 +155,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void initPlayer(){
-        player = new Player(assetManager,new Vector3f(10,100,10),this.app.getRootNode(),bulletAppState);
+        player = new Player(assetManager,new Vector3f(10,10,10),this.app.getRootNode(),bulletAppState);
         rootNode.attachChild(player);
         bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
         bulletAppState.getPhysicsSpace().addAll(player);
@@ -167,8 +167,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         enemyRoot = new Node();
         enemyRoot.setUserData("name","enemy_root");
         this.app.getRootNode().attachChild(enemyRoot);
-        Enemy enemy = new Enemy("Bug",new Vector3f(20,100,20), assetManager,this.app.getRootNode(),bulletAppState,100);
-        enemyRoot.attachChild(enemy);
+        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(0,10,0), assetManager,this.app.getRootNode(),bulletAppState,100));
+        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(10,10,10), assetManager,this.app.getRootNode(),bulletAppState,100));
+        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(-20,10,-20), assetManager,this.app.getRootNode(),bulletAppState,100));
     }
 
     private void initEnvironment(){
