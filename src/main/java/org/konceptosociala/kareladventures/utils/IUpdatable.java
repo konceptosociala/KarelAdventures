@@ -1,5 +1,5 @@
 package org.konceptosociala.kareladventures.utils;
 
 public interface IUpdatable {
-    public void update();
+    public void update(float tpf);
 }
