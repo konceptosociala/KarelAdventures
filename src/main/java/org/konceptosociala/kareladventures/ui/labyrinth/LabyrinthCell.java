@@ -1,14 +1,11 @@
 package org.konceptosociala.kareladventures.ui.labyrinth;
 
-import java.util.Optional;
-
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.tools.Color;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.Accessors;
 
 @Getter
 @Setter
