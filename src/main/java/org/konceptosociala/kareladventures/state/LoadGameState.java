@@ -184,6 +184,26 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         frameCount++;
     }
 
+/*<<<<<<< HEAD
+    private void initPlayer(){
+        player = new Player(assetManager,new Vector3f(10,10,10),this.app.getRootNode(),bulletAppState);
+        rootNode.attachChild(player);
+        bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
+        bulletAppState.getPhysicsSpace().addAll(player);
+        player.getCharacterCollider().setGravity(new Vector3f(0,-10,0));
+        player.getCharacterCollider().setAngularFactor(0f);
+        chaseCam = initChaseCam();
+    }*/
+    /*private void initEnemies(){
+        enemyRoot = new Node();
+        enemyRoot.setUserData("name","enemy_root");
+        this.app.getRootNode().attachChild(enemyRoot);
+        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(0,10,0), assetManager,this.app.getRootNode(),bulletAppState,100));
+        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(10,10,10), assetManager,this.app.getRootNode(),bulletAppState,100));
+        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(-20,10,-20), assetManager,this.app.getRootNode(),bulletAppState,100));
+*/
+//=======
+
     private void setProgress(final float progress, String loadingText, Runnable loadMethod) {
         if (loadMethod != null)
             loadMethod.run();
@@ -194,6 +214,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         progressBarElement.getParent().layoutElements();
 
         textRenderer.setText(loadingText);
+//>>>>>>> ee0f99a7d91c8033ed06035936f98463a7f4ef5f
     }
 
     private void loadLighting() {

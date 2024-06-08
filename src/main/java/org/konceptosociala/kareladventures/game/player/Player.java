@@ -70,15 +70,21 @@ public class Player extends Node implements IUpdatable {
         bulletAppState.getPhysicsSpace().add(characterControl);
         bulletAppState.getPhysicsSpace().addAll(this);
     }
-
-    @Override
-    public void update() {
-        onGround = checkIfOnGround(characterControl.getPhysicsLocation(), new Vector3f(0.01f,0.01f,0.01f));
-        rotateInMovementDirection();
-    }
     
     public boolean isAlive() {
         return health.getValue() > 0;
+    }
+
+    public void update() {
+        onGround=checkIfOnGround(characterControl.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
+        //rotateInMovementDirection();
+        movingSideward=0;
+        movingForward=0;
+    }
+    private void rotateInMovementDirection(float a){
+            //float XZVelocityVectorToYRotation = FastMath.atan2(characterCollider.getLinearVelocity().x,characterCollider.getLinearVelocity().z)+FastMath.HALF_PI;/**FastMath.sign(characterCollider.getLinearVelocity().x*characterCollider.getLinearVelocity().z);*/
+            //float XZVelocityVectorToYRotation = a;
+            characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().slerp(characterControl.getPhysicsRotation(),new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)),0.1f));
     }
 
     public void jump(){
@@ -101,33 +107,19 @@ public class Player extends Node implements IUpdatable {
     }
 
     public void moveForward(float value,float rad) {
-        /*if(!onGround){
-            return;
-        }*/
         movingForward = 1;
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
+        rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
-        //characterControl.setPhysicsRotation(new Quaternion().fromAngleAxis(zGlobalMovementAngle,new Vector3f(0,1,0)));
         characterControl.applyForce(rotateByYAxis(new Vector3f(0,0,appliedForce),yGlobalMovementAngle),new Vector3f(0,0,0));
-//        float a = (yGlobalMovementAngle+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)))/2;
-//        characterControl.setPhysicsRotation(new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)));
-        //characterControl.applyForce(new Vector3f(1*value*speed,0,0),new Vector3f(0,0,0));
-        //model.move(characterControl.getWalkDirection());
     }
 
     public void moveSideward(float value,float rad) {
-        /*if(!onGround){
-            return;
-        }*/
-        movingForward = 1;
+        movingSideward = 1;
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI+FastMath.HALF_PI*Math.signum(value*2-1);
+        rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
-        //characterControl.setPhysicsRotation(new Quaternion().fromAngleAxis(zGlobalMovementAngle,new Vector3f(0,1,0)));
         characterControl.applyForce(rotateByYAxis(new Vector3f(appliedForce,0,0),yGlobalMovementAngle-FastMath.HALF_PI),new Vector3f(0,0,0));
-//        float a = (yGlobalMovementAngle+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)))/2;
-//        characterControl.setPhysicsRotation(new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)));
-        //characterControl.applyForce(new Vector3f(0,0,1*value*speed),new Vector3f(0,0,0));
-        //model.move(characterControl.getWalkDirection());
     }
 
     public List<Enemy> getEnemiesInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
