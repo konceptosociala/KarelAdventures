@@ -14,11 +14,12 @@ import lombok.Getter;
 public class InventoryCell extends PanelBuilder {
     public static final String TRANSPARENT_ICON = "Interface/transparent.png";
 
-    private InventoryCellId cellId;
+    private final InventoryCellId cellId;
     private Optional<Item> cellItem;
 
     public InventoryCell(InventoryCellId id, Inventory inventory, @Nullable String placeholderIcon) {
         super(id.toString());
+        this.cellId = id;
         this.cellItem = Optional.empty();
 
         childLayoutCenter();

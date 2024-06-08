@@ -1,50 +1,26 @@
 package org.konceptosociala.kareladventures.ui.labyrinth;
 
-import java.util.random.RandomGenerator;
-
-import org.konceptosociala.kareladventures.ui.InvalidCellIdException;
-
-import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.tools.Color;
 
 public class Labyrinth extends PanelBuilder {
-    RandomGenerator rgen = RandomGenerator.getDefault();
 
-    public Labyrinth(String id) {
+    public Labyrinth(String id, LabyrinthCell[][] cells) {
         super(id);
-        childLayoutCenter();
-        width("100%h");
-        height("85%h");
-        align(Align.Center);
+        childLayoutHorizontal();
+        backgroundColor(Color.WHITE);
+        width("90%");
+        height("90%");
 
-        image(new ImageBuilder(id+"_bg") {{
-            filename("Interface/UI/Panel/panel-027.png");
-            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
-            width("100%");
-            height("100%");
-        }});
+        for (int i = 0; i < 4; i++) {
+            final int ic = i;
+            panel(new PanelBuilder("inv_col_"+i){{
+                childLayoutVertical();
 
-        panel(new PanelBuilder(id+"_inner") {{
-            childLayoutHorizontal();
-            backgroundColor(Color.WHITE);
-            width("90%");
-            height("90%");
-
-            try {
-                for (int i = 1; i <= 4; i++) {
-                    final int ic = i;
-                    panel(new PanelBuilder("inv_col_"+i){{
-                        childLayoutVertical();
-        
-                        for (int j = 1; j <= 4; j++) {
-                            panel(new LabyrinthCell(new LabyrinthCellId("lab_cell_"+ic+"_"+j), rgen.nextBoolean()));
-                        }
-                    }});
+                for (int j = 0; j < 4; j++) {
+                    panel(cells[ic][j].toPanelBuilder());
                 }
-            } catch (InvalidCellIdException e) {
-                e.printStackTrace();
-            }
-        }});
-    }
+            }});
+        }
+    }  
 }

@@ -209,11 +209,17 @@ public class GameState extends BaseAppState  {
                 }
             }
 
-            if (dialogState.isEnabled() && action.equals("RETURN") && isPressed) {
-                dialogState.nextMessage();
+            if (action.equals("RETURN") && isPressed) {
+                if (dialogState.isEnabled()) {
+                    dialogState.nextMessage();
+    
+                    if (!dialogState.isEnabled())
+                        chaseCam.setEnabled(true);
+                }
 
-                if (!dialogState.isEnabled())
-                    chaseCam.setEnabled(true);
+                if (karelFarmState.isEnabled()) {
+                    karelFarmState.enterCommand();
+                }
             }
 
             if (inventoryState.isEnabled() 
