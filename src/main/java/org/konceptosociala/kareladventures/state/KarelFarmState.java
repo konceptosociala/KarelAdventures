@@ -1,7 +1,5 @@
 package org.konceptosociala.kareladventures.state;
 
-import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
-
 import java.util.random.RandomGenerator;
 
 import javax.annotation.Nonnull;
@@ -30,6 +28,7 @@ import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.controls.textfield.builder.TextFieldBuilder;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.tools.Color;
@@ -179,9 +178,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                                         panel(new PanelBuilder("labyrinth_controls") {{
                                             childLayoutHorizontal();
 
-                                            panel(new ImageButton("labyrinth_controls_enter_command", "enter command", new Size(100, 50), "enterCommand()"));
-                                            panel(new ImageButton("labyrinth_controls_reset", "Reset", new Size(100, 50), "resetLabyrinth()"));
-                                            panel(new ImageButton("labyrinth_controls_rebuild", "Rebuild", new Size(100, 50), "rebuildLabyrinth()"));
+                                            panel(new ImageButton("labyrinth_controls_reset", "Reset", new Size(150, 50), "resetLabyrinth()"));
+                                            panel(new ImageButton("labyrinth_controls_rebuild", "Rebuild", new Size(150, 50), "rebuildLabyrinth()"));
                                         }});
                                     }});
                                 }});
@@ -199,22 +197,17 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
     // UI callbacks
 
+    @SuppressWarnings("null")
     public void resetLabyrinth() {
         if (msgBoxVisible || won) return;
 
+        nifty
+            .getScreen("karel_farm_screen")
+            .findElementById("code_field_history")
+            .getRenderer(TextRenderer.class)
+            .setText("");
+
         copyCells(initialCells, cells);
-
-        for (final var a : cells) {
-            for (final var c : a) {
-                LOG.info(c.toString());
-            }
-        }
-
-        for (final var a : initialCells) {
-            for (final var c : a) {
-                LOG.warning(c.toString());
-            }
-        }
  
         gameOver = false;
         direction = KarelDirection.Right;
@@ -223,14 +216,19 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         karelX = pos.getKey();
         karelY = pos.getValue();
 
-        LOG.severe("X:"+karelX+", Y:"+karelY);
-
         redrawLabyrinth();
     }
 
     
+    @SuppressWarnings("null")
     public void rebuildLabyrinth() {
         if (msgBoxVisible) return;
+
+        nifty
+            .getScreen("karel_farm_screen")
+            .findElementById("code_field_history")
+            .getRenderer(TextRenderer.class)
+            .setText("");
 
         rebuildCells();
         redrawLabyrinth();
@@ -277,6 +275,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
     // Commands
 
+    @SuppressWarnings("null")
     private void executeCommand(String command) {
         switch (command) {
             case "move()" -> move();
@@ -285,16 +284,36 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
             case "turnAround()" -> turnAround();
             case "pickBeeper()" -> pickBeeper();
 
-            default -> showMsgBox(
-                "Wrong command", 
-                "Command `"+command+"` is wrong. List of available commands: \n"
-                + "move() - move 1 step forward\n" 
-                + "turnLeft() - rotate Karel counter clockwise\n" 
-                + "turnRight() - rotate Karel clockwise\n" 
-                + "turnAround() - turn Karel 180 degrees\n" 
-                + "pickBeeper() - pick beeper to bag" 
-            );
+            default -> {
+                showMsgBox(
+                    "Wrong command", 
+                    "Command `"+command+"` is wrong. List of available commands: \n"
+                    + "move() - move 1 step forward\n" 
+                    + "turnLeft() - rotate Karel counter clockwise\n" 
+                    + "turnRight() - rotate Karel clockwise\n" 
+                    + "turnAround() - turn Karel 180 degrees\n" 
+                    + "pickBeeper() - pick beeper to bag" 
+                );
+
+                return;
+            }
         };
+
+        var history = nifty
+            .getScreen("karel_farm_screen")
+            .findElementById("code_field_history")
+            .getRenderer(TextRenderer.class);
+
+        var historyText = history.getOriginalText();
+        var newLineCount = historyText
+            .split("\n")
+            .length - 1;
+
+        if (newLineCount >= 12) {
+            historyText = historyText.replaceFirst("^.*\\n", "");
+        }
+
+        history.setText(historyText+"\n"+command);
     }
 
     private void move() {
@@ -310,6 +329,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         if (karelX <= 0 || karelY <= 0 || karelX > 4 || karelY > 4) {
             gameOver = true;
             showMsgBox("Game Over", "Karel has fallen beyond the map");
+            return;
         }
 
         var newCell = cells[karelX-1][karelY-1];
@@ -321,6 +341,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         if (newCell.isBlocked()) {
             gameOver = true;
             showMsgBox("Game Over", "Karel has stacked in a wall");
+            return;
         }
     }
 
@@ -366,11 +387,14 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
             cell.setBeeper(false);
             if (checkBeepers()) {
                 victory();
+                won = true;
                 showMsgBox("Victory!", "Karel has collected all the beepers!");
+                return;
             }
         } else {
             gameOver = true;
             showMsgBox("Game Over", "No beeper to pick up");
+            return;
         }
     }
 
@@ -401,7 +425,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     }
 
     private void victory() {
-        LOG.info("VICTORY!");
+        // TODO: make victory
     }
 
     @SuppressWarnings("null")
