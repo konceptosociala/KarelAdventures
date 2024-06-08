@@ -79,8 +79,11 @@ public class Player extends Node implements IUpdatable {
     public boolean isAlive() {
         return health.getValue() > 0;
     }
+    public void takeDamage(int amount){
+        health.subtract(amount);
+    }
 
-    public void update() {
+    public void update(float tpf) {
         onGround=checkIfOnGround(characterControl.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
         //rotateInMovementDirection();
         characterControl.setLinearVelocity((forwardMovement.add(sidewardMovement)).setY(characterControl.getLinearVelocity().y));

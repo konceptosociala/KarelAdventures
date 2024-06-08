@@ -125,10 +125,10 @@ public class GameState extends BaseAppState  {
     @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
-        player.update();
+        player.update(tpf);
         for (Spatial i : enemyRoot.getChildren()) {
             if (i instanceof IUpdatable) {
-                ((IUpdatable) i).update();
+                ((IUpdatable) i).update(tpf);
             }
         }
 
