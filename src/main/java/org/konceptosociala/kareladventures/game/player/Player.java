@@ -8,6 +8,7 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.material.Material;
 import com.jme3.math.*;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
@@ -46,10 +47,14 @@ public class Player extends Node implements IUpdatable {
     private int movingForward = 0;
     private int movingSideward = 0;
     private boolean onGround = false;
+    private Vector3f sidewardMovement = new Vector3f().zero();
+    private Vector3f forwardMovement = new Vector3f().zero();
+    private AssetManager thisAssetManager;
+
 
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state) {
         super();
-
+        thisAssetManager = assetManager;
         bulletAppState = state;
         setLocalTranslation(position);
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
@@ -78,6 +83,9 @@ public class Player extends Node implements IUpdatable {
     public void update() {
         onGround=checkIfOnGround(characterControl.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
         //rotateInMovementDirection();
+        characterControl.setLinearVelocity((forwardMovement.add(sidewardMovement)).setY(characterControl.getLinearVelocity().y));
+        sidewardMovement = new Vector3f().zero();
+        forwardMovement = new Vector3f().zero();
         movingSideward=0;
         movingForward=0;
     }
@@ -111,7 +119,9 @@ public class Player extends Node implements IUpdatable {
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
         rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
-        characterControl.applyForce(rotateByYAxis(new Vector3f(0,0,appliedForce),yGlobalMovementAngle),new Vector3f(0,0,0));
+        //characterControl.applyForce(rotateByYAxis(new Vector3f(0,0,appliedForce),yGlobalMovementAngle),new Vector3f(0,0,0));
+        //characterControl.setLinearVelocity(rotateByYAxis(new Vector3f(0,characterControl.getLinearVelocity().y,appliedForce),yGlobalMovementAngle));
+        forwardMovement = rotateByYAxis(new Vector3f(0,characterControl.getLinearVelocity().y,appliedForce),yGlobalMovementAngle);
     }
 
     public void moveSideward(float value,float rad) {
@@ -119,45 +129,34 @@ public class Player extends Node implements IUpdatable {
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI+FastMath.HALF_PI*Math.signum(value*2-1);
         rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
-        characterControl.applyForce(rotateByYAxis(new Vector3f(appliedForce,0,0),yGlobalMovementAngle-FastMath.HALF_PI),new Vector3f(0,0,0));
+        //characterControl.applyForce(rotateByYAxis(new Vector3f(appliedForce,0,0),yGlobalMovementAngle-FastMath.HALF_PI),new Vector3f(0,0,0));
+        //characterControl.setLinearVelocity(rotateByYAxis(new Vector3f(appliedForce,characterControl.getLinearVelocity().y,0),yGlobalMovementAngle-FastMath.HALF_PI));
+        sidewardMovement = rotateByYAxis(new Vector3f(appliedForce,characterControl.getLinearVelocity().y,0),yGlobalMovementAngle-FastMath.HALF_PI);
     }
 
     public List<Enemy> getEnemiesInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
         List<Enemy> enemies = new ArrayList<>();
-
-        // Create a box shape for the collider
         Box boxShape = new Box(extents.x, extents.y, extents.z);
-
-        // Create a geometry for the collider
         Geometry collider = new Geometry("Collider", boxShape);
         collider.setLocalTranslation(center);
         collider.setLocalRotation(rotation);
-
-        // Apply the collider's world transform to get the bounding volume in world space
         Transform transform = new Transform(center, rotation);
         BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
         boundingBox.transform(transform);
-
-        // Iterate through all children of the rootNode
         for (Spatial spatial : thisGameState.getEnemyRoot().getChildren()) {
-            // Check if the spatial intersects with the bounding box
             if (boundingBox.intersects(spatial.getWorldBound())) {
-                // Check if the spatial is an instance of Enemy
                 if (spatial instanceof Enemy) {
                     enemies.add((Enemy)spatial);
                 }
             }
         }
-
-        // The collider is not added to the scene graph, so no need to remove it
-
         return enemies;
     }
 
     public void attack(AttackType attackType){
         switch (attackType){
             case Melee:
-                performMeleeAttack(2,3,1);
+                performMeleeAttack(2,1f,0.5f);
                 break;
 
             case Ranged:
@@ -200,8 +199,10 @@ public class Player extends Node implements IUpdatable {
         rollRigidBody.setEnabled(false);
     }
 
-    private void performMeleeAttack(float width, float length, float height){
-        List<Enemy> enemiesToAffect = getEnemiesInBox(characterControl.getPhysicsLocation(),new Vector3f(width,height,length),characterControl.getPhysicsRotation());
+    private void performMeleeAttack(float length, float width, float height){
+        Vector3f attackColliderOffset = new Vector3f();
+        model.localToWorld(new Vector3f(0,1,length),attackColliderOffset);
+        List<Enemy> enemiesToAffect = getEnemiesInBox(attackColliderOffset,new Vector3f(length,height,width),characterControl.getPhysicsRotation());
         for (Enemy i: enemiesToAffect) {
             i.receiveDamage(10);
             i.pushback();
