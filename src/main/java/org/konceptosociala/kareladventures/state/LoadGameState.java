@@ -11,6 +11,7 @@ import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
 import org.konceptosociala.kareladventures.game.enemies.EnemyTower;
+import org.konceptosociala.kareladventures.game.enemies.RangedEnemy;
 import org.konceptosociala.kareladventures.game.farm.KarelFarm;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
 import org.konceptosociala.kareladventures.game.npc.DialogMessage;
@@ -260,8 +261,10 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.attachChild(enemyRoot);
 
         Enemy e1 = new Enemy(new Vector3f(-45, 5, 5), assetManager, bulletAppState, 100);
+        RangedEnemy re1 = new RangedEnemy(new Vector3f(-80, 5, -8), assetManager, bulletAppState, 100);
         EnemyTower et1 = new EnemyTower(new Vector3f(-90, 5, 10), assetManager, bulletAppState, 500);
         enemyRoot.attachChild(e1);
+        getEnemyRoot().attachChild(re1);
         enemyRoot.attachChild(et1);
     }
 
