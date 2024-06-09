@@ -6,34 +6,29 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.material.Material;
 import com.jme3.math.*;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import com.jme3.scene.shape.Box;
-import lombok.extern.java.Log;
 import org.konceptosociala.kareladventures.game.player.Energy;
 import org.konceptosociala.kareladventures.game.player.Health;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.state.GameState;
+import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Console;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 
 @Getter
 @Setter
-public class Enemy extends Node implements IUpdatable {
+public class Enemy extends Node implements IUpdatable, IAmEnemy {
     private static final String ENEMY_MODEL_NAME = "Models/simple_bug.glb";//boppin_ariados.glb
 
     private BulletAppState bulletAppState;
@@ -51,7 +46,7 @@ public class Enemy extends Node implements IUpdatable {
     private float attackCooldownTime = 1f;
     private float attackCooldownTimer = 0.0f;
     private boolean attackAvailable = true;
-    private float agroRange = 30f;
+    private float agroRange = 15f;
     private Vector3f originPosition;
     private Vector3f target;
 
@@ -107,8 +102,8 @@ public class Enemy extends Node implements IUpdatable {
         }
         setTarget();
         calculateYRotation(target);
-        rotateTowardsPlayer();
-        moveTowardsPlayer();
+        rotateTowardsTarget();
+        moveTowardsTarget();
         if (!attackAvailable) {
             attackCooldownTimer += tpf;
             if (attackCooldownTimer >= attackCooldownTime) {
@@ -167,12 +162,18 @@ public class Enemy extends Node implements IUpdatable {
         return pl;
     }
 
-    private void rotateTowardsPlayer(){
+    private void rotateTowardsTarget(){
         //characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().add(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,Vector3f.UNIT_Y)));
         characterControl.setPhysicsRotation(new Quaternion().fromAngles(FastMath.HALF_PI,XZVelocityVectorToYRotation+FastMath.PI,0));
     }
-    private void moveTowardsPlayer(){
-        characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+    private void moveTowardsTarget(){
+        var location = characterControl.getPhysicsLocation();
+        var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
+        if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>0.2f){
+            characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+        }else{
+            characterControl.setLinearVelocity(new Vector3f().zero().setY(characterControl.getLinearVelocity().y));
+        }
     }
     private static Vector3f rotateByYAxis(Vector3f vec, float rad){
         return new Vector3f((float)(vec.x*Math.cos(rad)+vec.z*Math.sin(rad)), vec.y, (float)(-vec.x*Math.sin(rad)+vec.z*Math.cos(rad)));
@@ -180,5 +181,10 @@ public class Enemy extends Node implements IUpdatable {
 
     public void pushback(){
         characterControl.applyImpulse(rotateByYAxis(new Vector3f(-2f,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+    }
+
+    @Override
+    public void setThisGameState(GameState gameState) {
+        thisGameState = gameState;
     }
 }

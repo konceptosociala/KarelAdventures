@@ -16,9 +16,11 @@ import com.jme3.scene.Geometry;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 
+import org.konceptosociala.kareladventures.game.enemies.EnemyTower;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
+import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 
 import lombok.Setter;
@@ -137,8 +139,8 @@ public class Player extends Node implements IUpdatable {
         sidewardMovement = rotateByYAxis(new Vector3f(appliedForce,characterControl.getLinearVelocity().y,0),yGlobalMovementAngle-FastMath.HALF_PI);
     }
 
-    public List<Enemy> getEnemiesInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
-        List<Enemy> enemies = new ArrayList<>();
+    public List<Spatial> getEnemiesInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
+        List<Spatial> enemies = new ArrayList<>();
         Box boxShape = new Box(extents.x, extents.y, extents.z);
         Geometry collider = new Geometry("Collider", boxShape);
         collider.setLocalTranslation(center);
@@ -146,13 +148,18 @@ public class Player extends Node implements IUpdatable {
         Transform transform = new Transform(center, rotation);
         BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
         boundingBox.transform(transform);
+        // Create a material with an unshaded definition
+        //Material mat = new Material(thisAssetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+
+        // Set the material color to blue
+        //mat.setColor("Color", ColorRGBA.Blue);
+        //collider.setMaterial(mat);
         for (Spatial spatial : thisGameState.getEnemyRoot().getChildren()) {
             if (boundingBox.intersects(spatial.getWorldBound())) {
-                if (spatial instanceof Enemy) {
-                    enemies.add((Enemy)spatial);
-                }
+                enemies.add(spatial);
             }
         }
+        //thisGameState.getRootNode().attachChild(collider);
         return enemies;
     }
 
@@ -205,10 +212,12 @@ public class Player extends Node implements IUpdatable {
     private void performMeleeAttack(float length, float width, float height){
         Vector3f attackColliderOffset = new Vector3f();
         model.localToWorld(new Vector3f(0,1,length),attackColliderOffset);
-        List<Enemy> enemiesToAffect = getEnemiesInBox(attackColliderOffset,new Vector3f(length,height,width),characterControl.getPhysicsRotation());
-        for (Enemy i: enemiesToAffect) {
-            i.receiveDamage(10);
-            i.pushback();
+        List<Spatial> enemiesToAffect = getEnemiesInBox(attackColliderOffset,new Vector3f(length,height,width),characterControl.getPhysicsRotation());
+        for (Spatial i: enemiesToAffect) {
+            if(i instanceof IAmEnemy){
+                ((IAmEnemy) i).receiveDamage(10);
+                ((IAmEnemy) i).pushback();
+            }
         }
     }
 

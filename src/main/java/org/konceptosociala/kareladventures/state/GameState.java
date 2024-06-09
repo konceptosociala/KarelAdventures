@@ -7,9 +7,12 @@ import lombok.Getter;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
+import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
+import org.konceptosociala.kareladventures.game.enemies.EnemyTower;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
+import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
 
@@ -79,6 +82,9 @@ public class GameState extends BaseAppState  {
         this.inputManager = this.app.getInputManager();
         this.bulletAppState = this.app.getBulletAppState();
         this.nifty = this.app.getNifty();
+        BulletCollisionListener bulletCollisionListener = new BulletCollisionListener();
+        bulletCollisionListener.setBulletAppState(bulletAppState);
+        bulletAppState.getPhysicsSpace().addCollisionListener(bulletCollisionListener);
         initPlayer();
         initEnemies();
         initControls();
@@ -161,9 +167,12 @@ public class GameState extends BaseAppState  {
 
     private void initEnemies(){
         for (Spatial i : enemyRoot.getChildren()){
-            if(i instanceof Enemy){
-                ((Enemy) i).setThisGameState(this);
+            if(i instanceof IAmEnemy){
+                ((IAmEnemy) i).setThisGameState(this);
             }
+            /*if(i instanceof EnemyTower){
+                ((EnemyTower) i).setThisGameState(this);
+            }*/
         }
     }
 
