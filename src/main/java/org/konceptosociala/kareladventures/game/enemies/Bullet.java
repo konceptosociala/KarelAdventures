@@ -35,7 +35,7 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 @Getter
 @Setter
 public class Bullet extends Node implements IUpdatable {
-    private static final String ENEMY_MODEL_NAME = "Models/enemy_bullet.glb";
+    private String ENEMY_MODEL_NAME = "Models/enemy_bullet.glb";
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
@@ -51,9 +51,11 @@ public class Bullet extends Node implements IUpdatable {
             Vector3f position,
             Vector3f target,
             AssetManager assetManager,
-            BulletAppState bulletAppState
+            BulletAppState bulletAppState,
+            String MODEL_NAME
     ){
         super();
+        ENEMY_MODEL_NAME = MODEL_NAME;
         this.assetManager = assetManager;
         this.bulletAppState = bulletAppState;
         this.setLocalTranslation(position);

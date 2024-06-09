@@ -1,11 +1,8 @@
 package org.konceptosociala.kareladventures.game.enemies;
 
-//package org.konceptosociala.kareladventures.game.enemies;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -31,8 +28,8 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 
 @Getter
 @Setter
-public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
-    private static final String ENEMY_MODEL_NAME = "Models/tower.glb";//boppin_ariados.glb
+public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
+    private static final String ENEMY_MODEL_NAME = "Models/simple_bug.glb";//boppin_ariados.glb
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
@@ -45,15 +42,16 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
     private float movementSpeed = 2f;
     private float XZVelocityVectorToYRotation;
     private AssetManager assetManager;
-    private int damage = 3;
-    private float attackCooldownTime = 0.4f;
+    private int damage = 6;
+    private float attackCooldownTime = 1f;
     private float attackCooldownTimer = 0.0f;
     private boolean attackAvailable = true;
     private float agroRange = 50f;
+    private float attackRange = 30f;
     private Vector3f originPosition;
     private Vector3f target;
 
-    public EnemyTower(
+    public RangedEnemy(
             Vector3f position,
             AssetManager assetManager,
             BulletAppState bulletAppState,
@@ -64,17 +62,17 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
         this.assetManager = assetManager;
         this.bulletAppState = bulletAppState;
         this.setLocalTranslation(position);
-        //this.rotate(FastMath.HALF_PI,0,0);
+        this.rotate(FastMath.HALF_PI,0,0);
         this.model = assetManager.loadModel(ENEMY_MODEL_NAME);
-        //this.model.rotate(-FastMath.HALF_PI,0,0);
-        this.model.setLocalTranslation(0,-0.5f,0);
+        this.model.rotate(-FastMath.HALF_PI,0,0);
+        this.model.setLocalTranslation(0,0,0.2f);
 
         this.model.setName(name);
         this.attachChild(model);
         this.health = new Health(health);
         this.energy = new Energy(10);
-        this.characterCollider = new BoxCollisionShape(new Vector3f(2,1,2));
-        this.characterControl = new RigidBodyControl(this.characterCollider,10000f);
+        this.characterCollider = new CapsuleCollisionShape(0.6f,1f);
+        this.characterControl = new RigidBodyControl(this.characterCollider,0.3f);
         this.characterControl.setFriction(1);
         this.characterControl.setAngularFactor(0);
         this.addControl(characterControl);
@@ -105,8 +103,8 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
         }
         setTarget();
         calculateYRotation(target);
-        //rotateTowardsPlayer();
-        //moveTowardsPlayer();
+        rotateTowardsTarget();
+        moveTowardsTarget();
         if (!attackAvailable) {
             attackCooldownTimer += tpf;
             if (attackCooldownTimer >= attackCooldownTime) {
@@ -119,7 +117,7 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
     private void setTarget(){
         var location = characterControl.getPhysicsLocation();
         var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
-        if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>agroRange){
+        if(FastMath.sqrt(FastMath.pow(originPosition.x - playerLocation.x,2)+FastMath.pow(originPosition.z - playerLocation.z,2))>agroRange){
             target=originPosition;
         }else{
             target=playerLocation;
@@ -129,11 +127,23 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
         var location = characterControl.getPhysicsLocation();
         XZVelocityVectorToYRotation = FastMath.atan2(location.x - target.x, location.z - target.z);
     }
+    /*private void performMeleeAttack(){
+        Vector3f attackColliderOffset = new Vector3f();
+        model.localToWorld(new Vector3f(0,0.5f,2),attackColliderOffset);
+        var player = getPlayerInBox(attackColliderOffset,new Vector3f(0.5f,0.5f,0.2f),characterControl.getPhysicsRotation());
+        //LOG.info("a");
+        if(player.isPresent()&&attackAvailable){
+            attackAvailable = false;
+            player.get().takeDamage(damage);
+            LOG.info(String.valueOf(player.get().getHealth().getValue()));
+        }
+    }*/
+
     private void performAttack(){
         if(attackAvailable){
             var location = characterControl.getPhysicsLocation();
             var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
-            if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))<agroRange){
+            if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))<attackRange){
                 LOG.info("a");
                 shoot();
                 attackAvailable = false;
@@ -144,7 +154,7 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
     }
 
     private void shoot() {
-        Bullet bullet =  new Bullet(this.getOriginPosition().add(0,5,0),thisGameState.getPlayer().getCharacterControl().getPhysicsLocation().add(0,-1,0),assetManager,bulletAppState,"Models/enemy_bullet.glb");
+        Bullet bullet =  new Bullet(characterControl.getPhysicsLocation().add(0,1,0),thisGameState.getPlayer().getCharacterControl().getPhysicsLocation().add(0,0,0),assetManager,bulletAppState,"Models/enemy_bullet.glb");
         thisGameState.getRootNode().attachChild(bullet);
     }
 
@@ -172,12 +182,18 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
         return pl;
     }
 
-    private void rotateTowardsPlayer(){
+    private void rotateTowardsTarget(){
         //characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().add(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,Vector3f.UNIT_Y)));
         characterControl.setPhysicsRotation(new Quaternion().fromAngles(FastMath.HALF_PI,XZVelocityVectorToYRotation+FastMath.PI,0));
     }
-    private void moveTowardsPlayer(){
-        characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+    private void moveTowardsTarget(){
+        var location = characterControl.getPhysicsLocation();
+        var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
+        if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>attackRange){
+            characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+        }else{
+            characterControl.setLinearVelocity(new Vector3f().zero().setY(characterControl.getLinearVelocity().y));
+        }
     }
     private static Vector3f rotateByYAxis(Vector3f vec, float rad){
         return new Vector3f((float)(vec.x*Math.cos(rad)+vec.z*Math.sin(rad)), vec.y, (float)(-vec.x*Math.sin(rad)+vec.z*Math.cos(rad)));
