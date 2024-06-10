@@ -18,6 +18,9 @@ public class Sun extends DirectionalLight {
     public static final int SHADOWMAP_SIZE = 2048;
 
     private FilterPostProcessor fpp;
+    private DirectionalLightShadowFilter dlsf;
+    private SSAOFilter ssao;
+    private FXAAFilter fxaa;
 
     public Sun(AssetManager assetManager, FilterPostProcessor fpp) {
         super();
@@ -26,7 +29,7 @@ public class Sun extends DirectionalLight {
 
         this.fpp = fpp;
 
-        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);
+        dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);
         dlsf.setLight(this);
         dlsf.setEnabledStabilization(true);
         dlsf.setShadowIntensity(0.7f);
@@ -35,8 +38,8 @@ public class Sun extends DirectionalLight {
         dlsf.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
         dlsf.setEnabled(true);
 
-        SSAOFilter ssao = new SSAOFilter(0.2f, 1f, 1f, 0.1f);
-        FXAAFilter fxaa = new FXAAFilter();
+        ssao = new SSAOFilter(0.2f, 1f, 1f, 0.1f);
+        fxaa = new FXAAFilter();
 
         fpp.addFilter(dlsf);
         fpp.addFilter(ssao);
@@ -44,6 +47,9 @@ public class Sun extends DirectionalLight {
     }
 
     public void cleanup() {
+        dlsf.setEnabled(false);
+        ssao.setEnabled(false);
+        fxaa.setEnabled(false);
         fpp.cleanup();
     }
 }

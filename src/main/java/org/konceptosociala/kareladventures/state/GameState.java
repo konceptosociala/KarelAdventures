@@ -12,11 +12,12 @@ import java.util.HashMap;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
-import org.konceptosociala.kareladventures.game.enemies.Enemy;
+import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
 import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
+import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
 import org.konceptosociala.kareladventures.utils.Level;
@@ -28,6 +29,7 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.environment.EnvironmentCamera;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -36,6 +38,7 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.light.LightProbe;
 import com.jme3.math.Quaternion;
 
 import de.lessvoid.nifty.Nifty;
@@ -62,6 +65,7 @@ public class GameState extends BaseAppState  {
     private InventoryState inventoryState;
     private ChaseCamera chaseCam;
     private Sun sun;
+    private LightProbe probe;
     private World world;
     private Player player;
     private Node enemyRoot;
@@ -82,6 +86,7 @@ public class GameState extends BaseAppState  {
         enemyRoot = loadGameState.getEnemyRoot();
         interactableRoot = loadGameState.getInteractableRoot();
         currentLevel = loadGameState.getCurrentLevel();
+        probe = loadGameState.getProbe();
     }
 
     @Override
@@ -90,6 +95,9 @@ public class GameState extends BaseAppState  {
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
         this.nifty = this.app.getNifty();
+        BulletCollisionListener bulletCollisionListener = new BulletCollisionListener();
+        bulletCollisionListener.setBulletAppState(bulletAppState);
+        bulletAppState.getPhysicsSpace().addCollisionListener(bulletCollisionListener);
         initPlayer();
         initEnemies();
         initControls();
@@ -160,10 +168,10 @@ public class GameState extends BaseAppState  {
     @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
-        player.update();
+        player.update(tpf);
         for (Spatial i : enemyRoot.getChildren()) {
             if (i instanceof IUpdatable) {
-                ((IUpdatable) i).update();
+                ((IUpdatable) i).update(tpf);
             }
         }
 
@@ -190,8 +198,12 @@ public class GameState extends BaseAppState  {
         appStateManager.detach(pauseState);
         appStateManager.detach(dialogState);
         appStateManager.detach(inventoryState);
+        appStateManager.detach(appStateManager.getState(EnvironmentCamera.class));
         chaseCam.cleanupWithInput(inputManager);
+        rootNode.removeLight(probe);
+        rootNode.removeLight(sun);
         sun.cleanup();
+        
         rootNode.detachAllChildren();
         app.getCamera().setRotation(new Quaternion());
     }
@@ -207,9 +219,12 @@ public class GameState extends BaseAppState  {
 
     private void initEnemies(){
         for (Spatial i : enemyRoot.getChildren()){
-            if(i instanceof Enemy){
-                ((Enemy) i).setThisGameState(this);
+            if(i instanceof IAmEnemy){
+                ((IAmEnemy) i).setThisGameState(this);
             }
+            /*if(i instanceof EnemyTower){
+                ((EnemyTower) i).setThisGameState(this);
+            }*/
         }
     }
 
