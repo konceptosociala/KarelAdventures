@@ -17,10 +17,14 @@ import lombok.Getter;
 public class Sun extends DirectionalLight {
     public static final int SHADOWMAP_SIZE = 2048;
 
+    private FilterPostProcessor fpp;
+
     public Sun(AssetManager assetManager, FilterPostProcessor fpp) {
         super();
         setColor(ColorRGBA.White);
         setDirection(new Vector3f(2.8f, -2.8f, -2.8f).normalizeLocal());
+
+        this.fpp = fpp;
 
         DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);
         dlsf.setLight(this);
@@ -37,5 +41,9 @@ public class Sun extends DirectionalLight {
         fpp.addFilter(dlsf);
         fpp.addFilter(ssao);
         fpp.addFilter(fxaa);
+    }
+
+    public void cleanup() {
+        fpp.cleanup();
     }
 }

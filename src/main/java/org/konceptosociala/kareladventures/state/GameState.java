@@ -4,14 +4,24 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.tools.Color;
 import lombok.Getter;
+
+import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
+
+import java.util.HashMap;
+
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
+import org.konceptosociala.kareladventures.game.npc.Dialog;
+import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
+import org.konceptosociala.kareladventures.utils.Level;
+import org.konceptosociala.kareladventures.utils.SaveLoadException;
+import org.konceptosociala.kareladventures.utils.SaveLoader;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -26,6 +36,7 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.Quaternion;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.LayerBuilder;
@@ -43,6 +54,7 @@ public class GameState extends BaseAppState  {
     private BulletAppState bulletAppState;
     private InputManager inputManager;
     private Nifty nifty;
+    private Node rootNode;
     
     private KarelFarmState karelFarmState;
     private PauseState pauseState;
@@ -52,14 +64,13 @@ public class GameState extends BaseAppState  {
     private Sun sun;
     private World world;
     private Player player;
-    private Node rootNode;
     private Node enemyRoot;
     private Node interactableRoot;
-    // private NavMesh navMesh;
+    private Level currentLevel;
 
     public GameState(LoadGameState loadGameState) {
+        bulletAppState = loadGameState.getBulletAppState();
         assetManager = loadGameState.getAssetManager();
-        pauseState = loadGameState.getPauseState();
         dialogState = loadGameState.getDialogState();
         inventoryState = loadGameState.getInventoryState();
         karelFarmState = loadGameState.getKarelFarmState();
@@ -70,6 +81,7 @@ public class GameState extends BaseAppState  {
         rootNode = loadGameState.getRootNode();
         enemyRoot = loadGameState.getEnemyRoot();
         interactableRoot = loadGameState.getInteractableRoot();
+        currentLevel = loadGameState.getCurrentLevel();
     }
 
     @Override
@@ -77,17 +89,21 @@ public class GameState extends BaseAppState  {
         this.app = (KarelAdventures) app;
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
-        this.bulletAppState = this.app.getBulletAppState();
         this.nifty = this.app.getNifty();
         initPlayer();
         initEnemies();
         initControls();
+
+        pauseState = new PauseState(this);
+        appStateManager.attach(pauseState);
+        pauseState.setEnabled(false);
     }
 
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(false);
         bulletAppState.setEnabled(true);
+        chaseCam.setEnabled(true);
 
         nifty.addScreen("hud_screen", new ScreenBuilder("HUD screen") {{
             controller(new DefaultScreenController());
@@ -122,6 +138,25 @@ public class GameState extends BaseAppState  {
         nifty.gotoScreen("hud_screen");
     }
 
+    public void save() {
+        var saveLoader = new SaveLoader(
+            player.getHealth(), 
+            player.getEnergy(), 
+            player.getInventory(), 
+            dialogsToMap(), 
+            player.getLocalTranslation(), 
+            currentLevel
+        );
+
+        try {
+            saveLoader.save("karel.sav");
+        } catch (SaveLoadException e) {
+            LOG.severe("Cannot save game: "+e.getMessage());
+        }
+
+        LOG.info("Game saved.");
+    }
+
     @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
@@ -147,7 +182,18 @@ public class GameState extends BaseAppState  {
 
     @Override
     protected void cleanup(Application app) {
-        this.app.getRootNode().detachAllChildren();
+        save();
+
+        bulletAppState.cleanup();
+        inputManager.clearMappings();
+        appStateManager.detach(karelFarmState);
+        appStateManager.detach(pauseState);
+        appStateManager.detach(dialogState);
+        appStateManager.detach(inventoryState);
+        chaseCam.cleanupWithInput(inputManager);
+        sun.cleanup();
+        rootNode.detachAllChildren();
+        app.getCamera().setRotation(new Quaternion());
     }
 
     @Override
@@ -199,7 +245,6 @@ public class GameState extends BaseAppState  {
                     chaseCam.setEnabled(true);
                     karelFarmState.setEnabled(false);
                 } else if (pauseState.isEnabled()) {
-                    chaseCam.setEnabled(true);
                     pauseState.setEnabled(false);
                     GameState.this.setEnabled(true);
                 } else {
@@ -281,4 +326,17 @@ public class GameState extends BaseAppState  {
             }
         }
     };
+
+    private HashMap<String, Dialog> dialogsToMap() {
+        var dialogsMap = new HashMap<String, Dialog>();
+
+        for (var spatial : interactableRoot.getChildren()) {
+            if (spatial instanceof NPC) {
+                var npc = (NPC) spatial;
+                dialogsMap.put(npc.getName(), npc.getDialog());
+            }
+        }
+
+        return dialogsMap;
+    }
 }

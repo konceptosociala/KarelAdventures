@@ -2,31 +2,35 @@ package org.konceptosociala.kareladventures.game.inventory;
 
 import org.konceptosociala.kareladventures.ui.inventory.InventoryCellId;
 
+import java.io.Serializable;
 import java.util.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-
+import lombok.ToString;
 
 @Getter
 @Setter
-public class Inventory {
-    private Optional<Item> helmet;
-    private Optional<Item> chestplate;
-    private Optional<Item> leggings;
-    private Optional<Item> boots;
-    private Optional<Item> weapon;
+@ToString
+public class Inventory implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
+    private Item helmet;
+    private Item chestplate;
+    private Item leggings;
+    private Item boots;
+    private Item weapon;
     
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private Item[][] items;
 
     public Inventory() {
-        helmet = Optional.empty();
-        chestplate = Optional.empty();
-        leggings = Optional.empty();
-        boots = Optional.empty();
-        weapon = Optional.empty();
+        helmet = null;
+        chestplate = null;
+        leggings = null;
+        boots = null;
+        weapon = null;
         items = new Item[4][5];
     }
 
@@ -43,15 +47,14 @@ public class Inventory {
                 "Item2", 
                 "Interface/items/2.png"
             );
-            inventory.chestplate = Optional.of(Item.chestplate(
+            inventory.chestplate = Item.chestplate(
                 new ItemId("karel.item.chestplate1"), 
                 "Chestplate1", 
                 "Interface/items/23.png"
-            ));
+            );
             return inventory;
         } catch (InvalidItemIdException e) {
             e.printStackTrace();
-            System.exit(-1);
             return null;
         }
     }
@@ -62,11 +65,11 @@ public class Inventory {
 
         if (namedCell.isPresent()) {
             return switch (namedCell.get()) {
-                case helmet -> helmet;
-                case chestplate -> chestplate;
-                case leggings -> leggings;
-                case boots -> boots;
-                case weapon -> weapon;
+                case helmet -> optional(helmet);
+                case chestplate -> optional(chestplate);
+                case leggings -> optional(leggings);
+                case boots -> optional(boots);
+                case weapon -> optional(weapon);
             };
         } else {
             int col = gridCell.get().getColumn();
@@ -95,8 +98,8 @@ public class Inventory {
                 case helmet: {
                     var oldItem = helmet;
                     if (item.getItemKind().equals(ItemKind.Helmet)) {
-                        helmet = Optional.of(item);
-                        return oldItem;
+                        helmet = item;
+                        return optional(oldItem);
                     } else {
                         return Optional.empty();
                     }
@@ -104,8 +107,8 @@ public class Inventory {
                 case chestplate: {
                     var oldItem = chestplate;
                     if (item.getItemKind().equals(ItemKind.Chestplate)) {
-                        chestplate = Optional.of(item);
-                        return oldItem;
+                        chestplate = item;
+                        return optional(oldItem);
                     } else {
                         return Optional.empty();
                     }
@@ -113,8 +116,8 @@ public class Inventory {
                 case leggings: {
                     var oldItem = leggings;
                     if (item.getItemKind().equals(ItemKind.Leggings)) {
-                        leggings = Optional.of(item);
-                        return oldItem;
+                        leggings = item;
+                        return optional(oldItem);
                     } else {
                         return Optional.empty();
                     }
@@ -122,8 +125,8 @@ public class Inventory {
                 case boots: {
                     var oldItem = boots;
                     if (item.getItemKind().equals(ItemKind.Boots)) {
-                        boots = Optional.of(item);
-                        return oldItem;
+                        boots = item;
+                        return optional(oldItem);
                     } else {
                         return Optional.empty();
                     }
@@ -131,8 +134,8 @@ public class Inventory {
                 case weapon: {
                     var oldItem = weapon;
                     if (item.getItemKind().equals(ItemKind.Weapon)) {
-                        weapon = Optional.of(item);
-                        return oldItem;
+                        weapon = item;
+                        return optional(oldItem);
                     } else {
                         return Optional.empty();
                     }
@@ -162,28 +165,28 @@ public class Inventory {
             switch (namedCell.get()) {
                 case helmet: {
                     var oldItem = helmet;
-                    helmet = Optional.empty();
-                    return oldItem;
+                    helmet = null;
+                    return optional(oldItem);
                 }
                 case chestplate: {
                     var oldItem = chestplate;
-                    chestplate = Optional.empty();
-                    return oldItem;
+                    chestplate = null;
+                    return optional(oldItem);
                 }
                 case leggings: {
                     var oldItem = leggings;
-                    leggings = Optional.empty();
-                    return oldItem;
+                    leggings = null;
+                    return optional(oldItem);
                 }
                 case boots: {
                     var oldItem = boots;
-                    boots = Optional.empty();
-                    return oldItem;
+                    boots = null;
+                    return optional(oldItem);
                 }
                 case weapon: {
                     var oldItem = weapon;
-                    weapon = Optional.empty();
-                    return oldItem;
+                    weapon = null;
+                    return optional(oldItem);
                 }
             }
         } else {
@@ -200,5 +203,12 @@ public class Inventory {
         }
 
         return null;
+    }
+
+    private <T> Optional<T> optional(T nullable) {
+        if (nullable != null) 
+            return Optional.of(nullable);
+        else 
+            return Optional.empty();
     }
 }

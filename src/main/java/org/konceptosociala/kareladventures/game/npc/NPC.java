@@ -29,6 +29,7 @@ public class NPC extends InteractableNode {
     private RigidBodyControl rigidBodyControl;
 
     public NPC(
+        String npcName,
         String modelPath, 
         String idleAnimationName, 
         Dialog dialog, 
@@ -36,7 +37,7 @@ public class NPC extends InteractableNode {
         AssetManager assetManager,
         BulletAppState bulletAppState
     ){
-        super();
+        super(npcName);
         setLocalTranslation(position);
         this.model = assetManager.loadModel(modelPath);
         this.collider = new CapsuleCollisionShape(0.5f, 3f);

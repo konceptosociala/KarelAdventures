@@ -7,4 +7,8 @@ import com.jme3.scene.Node;
 
 public abstract class InteractableNode extends Node {
     public abstract void interact(GameState gameState, Player player);
+
+    public InteractableNode(String name) {
+        super(name);
+    }
 }

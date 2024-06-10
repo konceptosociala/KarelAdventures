@@ -40,7 +40,7 @@ public class ImageButton extends PanelBuilder {
         text(new TextBuilder(id+"_label"){{
             text(label);
             font("Interface/Fonts/Ubuntu-C.ttf");
-            height("100px");
+            height("80px");
             width("100%");
             color(Color.BLACK);
         }});

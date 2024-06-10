@@ -1,11 +1,17 @@
 package org.konceptosociala.kareladventures.game.inventory;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @AllArgsConstructor
-public class Item {
+@ToString
+public class Item implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private final ItemId id;
     private final String name;
     private final String iconPath;

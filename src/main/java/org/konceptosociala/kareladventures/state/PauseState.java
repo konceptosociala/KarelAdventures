@@ -3,6 +3,7 @@ package org.konceptosociala.kareladventures.state;
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.ui.ImageButton;
 import org.konceptosociala.kareladventures.ui.PauseBlur;
 
 import com.jme3.app.Application;
@@ -16,7 +17,6 @@ import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
-import de.lessvoid.nifty.screen.DefaultScreenController;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 import lombok.Getter;
@@ -29,13 +29,18 @@ public class PauseState extends BaseAppState implements ScreenController {
     private BulletAppState bulletAppState;
     private Nifty nifty;
     private PauseBlur pauseBlur;
+    private GameState gameState;
+
+    public PauseState(GameState gameState) {
+        this.gameState = gameState;
+    }
 
     @Override
     protected void initialize(Application app) {
         this.app = (KarelAdventures) app;
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
-        this.bulletAppState = this.app.getBulletAppState();
+        this.bulletAppState = gameState.getBulletAppState();
         this.nifty = this.app.getNifty();
         this.pauseBlur = new PauseBlur(this.app.getFpp());
     }
@@ -47,24 +52,32 @@ public class PauseState extends BaseAppState implements ScreenController {
         pauseBlur.setEnabled(true);
 
         nifty.addScreen("pause_screen", new ScreenBuilder("Pause screen") {{
-            controller(new DefaultScreenController());
+            controller(PauseState.this);
 
             layer(new LayerBuilder("pause_layer") {{
                 childLayoutHorizontal();
 
                 panel(new PanelBuilder("pause_panel") {{
                     childLayoutCenter();
-
                     width("100%");
                     height("100%");
 
-                    image(new ImageBuilder("pause_bg") {{
-                        filename("Interface/plane1.png");
-                        height("50%");
-                    }});
-
                     panel(new PanelBuilder("pause_controls") {{
+                        childLayoutCenter();
 
+                        image(new ImageBuilder("main_menu_panel_bg") {{
+                            filename("Interface/UI/Transparent center/panel-transparent-center-010.png");
+                            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                            width("450px");
+                            height("60%h");
+                        }});
+
+                        panel(new PanelBuilder("main_menu_panel_buttons"){{
+                            childLayoutVertical();
+
+                            panel(new ImageButton("main_menu_resume_button", "Resume", null, "resume()"));
+                            panel(new ImageButton("main_menu_quit_button", "Exit to menu", null, "exitToMenu()"));
+                        }});
                     }});
                 }});
                 
@@ -74,6 +87,21 @@ public class PauseState extends BaseAppState implements ScreenController {
 
         nifty.gotoScreen("pause_screen");
     }
+
+    // UI callbacks
+
+    public void resume() {
+        gameState.setEnabled(true);
+        setEnabled(false);
+    }
+
+    public void exitToMenu() {
+        appStateManager.detach(gameState);
+        app.getMainMenuState().setEnabled(true);
+        setEnabled(false);
+    }
+
+    // Other methods
 
     public void gotoScreen(@Nonnull final String screenId) {
         nifty.gotoScreen(screenId);

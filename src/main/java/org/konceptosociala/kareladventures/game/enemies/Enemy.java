@@ -35,6 +35,7 @@ public class Enemy extends Node implements IUpdatable {
     private float XZVelocityVectorToYRotation;
 
     public Enemy(
+        String name,
         Vector3f position, 
         AssetManager assetManager, 
         BulletAppState bulletAppState,

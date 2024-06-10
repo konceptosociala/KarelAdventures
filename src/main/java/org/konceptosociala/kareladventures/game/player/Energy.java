@@ -1,10 +1,14 @@
 package org.konceptosociala.kareladventures.game.player;
 
+import java.io.Serializable;
+
 import lombok.Getter;
 import lombok.ToString;
 
 @ToString
-public class Energy {
+public class Energy implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private static final int ENERGY_MIN = 0;
     private static final int ENERGY_MAX = 100;
 

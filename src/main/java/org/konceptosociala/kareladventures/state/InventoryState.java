@@ -62,15 +62,13 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                         filename("Interface/UI/Transparent center/panel-transparent-center-003.png");
                         imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
                         width("512px");
-                        height("90%");
+                        height("512px");
                     }});
 
                     try {
                         panel(new PanelBuilder("inventory_columns_panel"){{
                             childLayoutHorizontal();
-
-                            marginTop("84px");
-
+                            
                             panel(new PanelBuilder("inv_col_0"){{
                                 childLayoutVertical();
 

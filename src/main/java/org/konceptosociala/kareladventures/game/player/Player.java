@@ -65,7 +65,7 @@ public class Player extends Node implements IUpdatable {
         legs = new Box(1,1,1);
         health = new Health(100);
         energy = new Energy(100);
-        inventory = Inventory.test();
+        inventory = new Inventory();
         animComposer = model.getControl(AnimComposer.class);
         bulletAppState.getPhysicsSpace().add(characterControl);
         bulletAppState.getPhysicsSpace().addAll(this);

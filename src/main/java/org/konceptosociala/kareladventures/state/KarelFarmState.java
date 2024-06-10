@@ -115,17 +115,31 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                                         color(Color.BLACK);
                                         font("Interface/Fonts/Ubuntu-C.ttf");
                                     }});
-    
-                                    text(new TextBuilder("code_field_history") {{
+
+                                    panel(new PanelBuilder("code_field_history_panel") {{
+                                        childLayoutCenter();
                                         height("100%");
                                         width("100%");
-                                        color(Color.BLACK);
-                                        backgroundColor(Color.WHITE);
-                                        font("Interface/Fonts/FiraCode-Bold.ttf");
-                                        textHAlign(Align.Left);
-                                        textVAlign(VAlign.Top);
-                                        align(Align.Left);
-                                        valign(VAlign.Top);
+
+                                        image(new ImageBuilder("code_editor_bg") {{
+                                            width("100%");
+                                            height("100%");
+                                            filename("Interface/UI/Panel/panel-009.png");
+                                            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                                        }});
+
+                                        text(new TextBuilder("code_field_history") {{
+                                            height("90%");
+                                            width("90%");
+                                            color(Color.BLACK);
+                                            backgroundColor(Color.WHITE);
+                                            font("Interface/Fonts/FiraCode-Bold.ttf");
+                                            textHAlign(Align.Left);
+                                            textVAlign(VAlign.Top);
+                                            align(Align.Center);
+                                            valign(VAlign.Center);
+                                            margin("5%");
+                                        }});
                                     }});
     
                                     panel(Margin.vertical("10px"));
@@ -309,7 +323,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
             .split("\n")
             .length - 1;
 
-        if (newLineCount >= 12) {
+        if (newLineCount >= 10) {
             historyText = historyText.replaceFirst("^.*\\n", "");
         }
 
