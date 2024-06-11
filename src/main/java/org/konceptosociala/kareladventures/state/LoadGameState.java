@@ -24,6 +24,7 @@ import org.konceptosociala.kareladventures.utils.InteractableNode;
 import org.konceptosociala.kareladventures.utils.Level;
 import org.konceptosociala.kareladventures.utils.SaveLoadException;
 import org.konceptosociala.kareladventures.utils.SaveLoader;
+import org.konceptosociala.kareladventures.utils.TomlException;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -139,7 +140,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                 image(new ImageBuilder("load_game_bg") {{
                     width("100%");
                     height("100%");
-                    filename("Interface/load_bg.png");
+                    filename("Interface/UI/load_bg.png");
                 }});
 
                 panel(new PanelBuilder("load_game_panel"){{
@@ -205,7 +206,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
     private void loadPhysics() {
         bulletAppState = new BulletAppState();
-        bulletAppState.setDebugEnabled(true);
+        // bulletAppState.setDebugEnabled(true);
         stateManager.attach(bulletAppState);
         bulletAppState.setEnabled(false);
     }
@@ -240,9 +241,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void loadEnvironment() {
-        world = new World("Scenes/scene.glb", assetManager);
-        rootNode.attachChild(world);
-        bulletAppState.getPhysicsSpace().addAll(world);
+        // world = new World("Scenes/scene.glb", assetManager);
+        // rootNode.attachChild(world);
+        // bulletAppState.getPhysicsSpace().addAll(world);
     }
 
     private void loadEnemies() {
@@ -261,7 +262,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private void loadPlayer() {
         if (loadType == LoadType.Saving) {
             try {
-                saveLoader = SaveLoader.load("karel.sav");
+                saveLoader = SaveLoader.load("data/Saves/karel.sav");
             } catch (SaveLoadException e) {
                 e.printStackTrace();
                 System.exit(-1);
@@ -316,28 +317,27 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         interactableRoot.setUserData("name", "interactable_root");
         rootNode.attachChild(interactableRoot);
 
-        NPC pechkurova = new NPC(
-            "Pechkurova",
-            "Models/pechkurova.glb",
-            "Pechkurova_idle",
-            new Dialog(
-                List.of(
-                    new DialogMessage("Sister Olena", "Hello, World!"),
-                    new DialogMessage("You", "Ok.")
-                ), 
-                new Dialog(
-                    List.of(
-                        new DialogMessage("Sister Olena", "Hello again!"),
-                        new DialogMessage("You", "Ok again...")
-                    ), 
-                    null
-                )
-            ), 
-            new Vector3f(0, 0, 0),
-            assetManager,
-            bulletAppState
-        );
-        interactableRoot.attachChild(pechkurova);
+        try {
+            NPC sisterOlena = new NPC(
+                "Sister Olena",
+                "Models/pechkurova.glb",
+                "Pechkurova_idle",
+
+                    new Dialog("data/Dialogs/sister_olena_1.toml", 
+                    new Dialog("data/Dialogs/sister_olena_2.toml", 
+                    new Dialog("data/Dialogs/sister_olena_3.toml", null))),
+
+                new Vector3f(0, 0, 0),
+                assetManager,
+                bulletAppState
+            );
+            interactableRoot.attachChild(sisterOlena);
+
+            sisterOlena.getLastDialog().setNextDialog(sisterOlena.getDialog());
+        } catch (TomlException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
         if (loadType == LoadType.Saving) {
             for (var entry : saveLoader.getDialogs().entrySet()) {

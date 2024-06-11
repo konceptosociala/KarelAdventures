@@ -157,7 +157,7 @@ public class GameState extends BaseAppState  {
         );
 
         try {
-            saveLoader.save("karel.sav");
+            saveLoader.save("data/Saves/karel.sav");
         } catch (SaveLoadException e) {
             LOG.severe("Cannot save game: "+e.getMessage());
         }

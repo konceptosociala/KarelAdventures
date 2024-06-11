@@ -19,6 +19,8 @@ import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
+import de.lessvoid.nifty.builder.TextBuilder;
+import de.lessvoid.nifty.effects.EffectEventId;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.ImageRenderer;
 import de.lessvoid.nifty.elements.render.PanelRenderer;
@@ -74,7 +76,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
 
                                 panel(new InventoryCell(new InventoryCellId("inv_cell_helmet"), inventory, "Interface/Inventory/helmet.png"));
                                 panel(new InventoryCell(new InventoryCellId("inv_cell_chestplate"), inventory, "Interface/Inventory/chestplate.png"));
-                                panel(new InventoryCell(new InventoryCellId("inv_cell_leggings"), inventory, "Interface/Inventory/leggings.png"));
+                                panel(new InventoryCell(new InventoryCellId("inv_cell_leggings") , inventory, "Interface/Inventory/leggings.png"));
                                 panel(new InventoryCell(new InventoryCellId("inv_cell_boots"), inventory, "Interface/Inventory/boots.png"));
                                 panel(new InventoryCell(new InventoryCellId("inv_cell_weapon"), inventory, "Interface/Inventory/sword.png"));
                             }});
@@ -95,6 +97,24 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                     }
                 }});
                 
+            }});
+
+            layer(new LayerBuilder("hint_layer") {{
+                childLayoutAbsolute();
+
+                panel(new PanelBuilder("hint_panel") {{
+                    childLayoutVertical();
+                    visible(false);
+                    padding("30px,90px,30px,90px");
+                    backgroundColor(new Color("#000c"));
+
+                    text(new TextBuilder("content") {{
+                        font("Interface/Fonts/Ubuntu-C.ttf");
+                        text("                            ");
+                        align(Align.Center);
+                        valign(VAlign.Center);
+                    }});
+                }});
             }});
             
         }}.build(nifty));
@@ -122,7 +142,26 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                     var newItemPlaceholderIcon = getCellPlaceholderIcon(id.toString());
                     var itemToReplace = inventory.getItem(id);
                     var namedCell = id.getNamedCell();
-                    
+
+                    var newItemElementParams = getCellElement(id.toString())
+                        .getEffects(EffectEventId.onHover, InventoryHint.class)
+                        .get(0)
+                        .getParameters();
+
+                    var selectedItemParams = getCellElement(selectedItemId.get().toString())
+                        .getEffects(EffectEventId.onHover, InventoryHint.class)
+                        .get(0)
+                        .getParameters();
+
+                    newItemElementParams.setProperty("hasItem", "true");
+                    newItemElementParams.setProperty("itemName", selectedItem.getName());
+                    newItemElementParams.setProperty("itemDescription", selectedItem.getDescription());  
+                    newItemElementParams.setProperty("itemRareness", selectedItem.getItemRareness().toString());   
+                    newItemElementParams.setProperty("itemBenefit", 
+                        selectedItem.getBenefit().isPresent()
+                            ? String.valueOf(selectedItem.getBenefit().get())
+                            : ""
+                    );               
                     if (namedCell.isEmpty()
                         || (namedCell.isPresent() && namedCell.get().toItemKind().equals(selectedItem.getItemKind()))
                     ){
@@ -142,6 +181,12 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                                 selectedItemPlaceholderIcon.setVisible(true);
 
                             selectedItemId = Optional.empty();
+
+                            selectedItemParams.setProperty("hasItem", "false");
+                            selectedItemParams.setProperty("itemName", "");
+                            selectedItemParams.setProperty("itemDescription", "");
+                            selectedItemParams.setProperty("itemRareness", "");
+                            selectedItemParams.setProperty("itemBenefit", ""); 
                         } else if (namedCell.isPresent() 
                             || (namedCell.isEmpty() && itemToReplace.get().getItemKind().equals(selectedItem.getItemKind()))
                             || (namedCell.isEmpty() && selectedItemId.get().getGridCell().isPresent())
@@ -150,10 +195,21 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             inventory.setItem(itemToReplace.get(), selectedItemId.get());
 
                             selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
+                            
                             selectedItemIcon.setImage(createImage(nifty, "inventory_screen", itemToReplace.get().getIconPath(), true));
                             newItemIcon.setImage(createImage(nifty, "inventory_screen", selectedItem.getIconPath(), true));
 
                             selectedItemId = Optional.empty();
+
+                            selectedItemParams.setProperty("hasItem", "true");
+                            selectedItemParams.setProperty("itemName", itemToReplace.get().getName());
+                            selectedItemParams.setProperty("itemDescription", itemToReplace.get().getDescription());
+                            selectedItemParams.setProperty("itemRareness", itemToReplace.get().getItemRareness().toString());
+                            selectedItemParams.setProperty("itemBenefit", 
+                                itemToReplace.get().getBenefit().isPresent()
+                                    ? String.valueOf(itemToReplace.get().getBenefit().get())
+                                    : ""
+                            ); 
                         }
                     }
                 }
@@ -192,6 +248,13 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
         return screen
             .findElementById(cellId+"_select")
             .getRenderer(PanelRenderer.class);
+    }
+
+    @SuppressWarnings("null")
+    private Element getCellElement(String cellId) {
+        return nifty
+            .getScreen("inventory_screen")
+            .findElementById(cellId);
     }
 
     @SuppressWarnings("null")

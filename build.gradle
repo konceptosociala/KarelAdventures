@@ -18,6 +18,7 @@ javafx {
         'javafx.swing',
         'javafx.media'
     ]
+    sdk = System.getenv("PATH_TO_FX")
 }
 
 description = 'KarelAdventures application'

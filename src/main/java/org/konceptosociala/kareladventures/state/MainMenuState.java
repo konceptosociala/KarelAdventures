@@ -64,13 +64,13 @@ public class MainMenuState extends BaseAppState implements ScreenController {
 
             layer(new LayerBuilder("main_menu_layer") {{
                 childLayoutCenter();
-                backgroundImage("Interface/menu_bg.png");
+                backgroundImage("Interface/UI/menu_bg.png");
 
                 panel(new PanelBuilder("main_menu_panel") {{
                     childLayoutVertical();
 
                     panel(Margin.vertical("10%"));
-                    panel(new Logo("main_logo", "Interface/logo2.png"));
+                    panel(new Logo("main_logo", "Interface/UI/logo2.png"));
 
                     panel(new PanelBuilder("main_menu_controls_panel"){{
                         childLayoutCenter();
@@ -136,11 +136,11 @@ public class MainMenuState extends BaseAppState implements ScreenController {
     public void loadGame() {
         if (msgBoxVisible) return;
 
-        if (new File("karel.sav").exists()) {
+        if (new File("data/Saves/karel.sav").exists()) {
             setEnabled(false);
             stateManager.attach(new LoadGameState(LoadType.Saving));
         } else {
-            showMsgBox("Error", "File 'karel.sav' not found.");
+            showMsgBox("Error", "File 'data/Saves/karel.sav' not found.");
         }
     }
 

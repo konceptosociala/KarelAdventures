@@ -35,28 +35,30 @@ public class Inventory implements Serializable {
     }
 
     public static Inventory test() {
-        try {
             var inventory = new Inventory();
-            inventory.items[0][0] = Item.regular(
-                new ItemId("karel.item.item1"), 
-                "Item1", 
-                "Interface/items/1.png"
-            );
-            inventory.items[1][1] = Item.regular(
-                new ItemId("karel.item.item2"), 
-                "Item2", 
-                "Interface/items/2.png"
-            );
-            inventory.chestplate = Item.chestplate(
-                new ItemId("karel.item.chestplate1"), 
-                "Chestplate1", 
-                "Interface/items/23.png"
-            );
+            inventory.items[0][0] = Item.DARK_TINY_SWORD;
+            inventory.items[0][1] = Item.DEBUGGER;
+            inventory.items[0][2] = Item.DISASSEMBLER;
+            inventory.items[0][3] = Item.DUSTCLEANER;
+            inventory.items[0][4] = Item.FIRE_DIRK;
+            inventory.items[1][0] = Item.GLUONER;
+            inventory.items[1][1] = Item.LAMBDA_SAW;
+            inventory.items[1][2] = Item.LAVA_BLADE;
+            inventory.items[1][3] = Item.METAL_SWORD;
+            inventory.items[1][4] = Item.PYTHON_SABER;
+            inventory.weapon = Item.SLITHER;
             return inventory;
-        } catch (InvalidItemIdException e) {
-            e.printStackTrace();
-            return null;
+    }
+
+    public boolean isFull() {
+        for (var col : items) {
+            for (var item : col) {
+                if (item == null)
+                    return false;
+            }
         }
+
+        return true;
     }
 
     public Optional<Item> getItem(InventoryCellId id) {

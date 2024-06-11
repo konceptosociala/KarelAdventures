@@ -29,14 +29,14 @@ public class LabyrinthCell implements Cloneable {
                 backgroundColor(Color.BLACK);                
 
             if (beeper)
-                backgroundImage("Interface/beeper.png");
+                backgroundImage("Interface/UI/beeper.png");
 
             if (karel) {
                 switch (karelDirection) {
-                    case Up -> backgroundImage("Interface/karel/up.png");
-                    case Down -> backgroundImage("Interface/karel/down.png");
-                    case Left -> backgroundImage("Interface/karel/left.png");
-                    case Right -> backgroundImage("Interface/karel/right.png");
+                    case Up -> backgroundImage("Interface/Karel/up.png");
+                    case Down -> backgroundImage("Interface/Karel/down.png");
+                    case Left -> backgroundImage("Interface/Karel/left.png");
+                    case Right -> backgroundImage("Interface/Karel/right.png");
                 }
             }
         }};

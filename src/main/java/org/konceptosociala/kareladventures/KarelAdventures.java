@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import org.konceptosociala.kareladventures.game.inventory.Item;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.state.IntroState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
@@ -41,8 +42,8 @@ public class KarelAdventures extends SimpleApplication {
 
     public KarelAdventures() {
         super();
-        appSettings.setWindowSize(1024, 768);
-        // setFullscreen();
+        // appSettings.setWindowSize(1024, 768);
+        setFullscreen();
         setDisplayStatView(false);
         setDisplayFps(false);
         setShowSettings(false);
@@ -59,6 +60,8 @@ public class KarelAdventures extends SimpleApplication {
             nifty = initNifty();
             fpp = new FilterPostProcessor(assetManager);
             viewPort.addProcessor(fpp);
+
+            LOG.info(Item.DARK_TINY_SWORD.toString());
 
             stateManager.attach(introState);
         } catch (Exception e) {
@@ -101,6 +104,8 @@ public class KarelAdventures extends SimpleApplication {
 
         nifty.loadStyleFile("nifty-default-styles.xml");
         nifty.loadControlFile("nifty-default-controls.xml");
+
+        nifty.registerEffect("inventory-hint", "org.konceptosociala.kareladventures.ui.inventory.InventoryHint");
 
         Logger.getLogger("de.lessvoid.nifty").setLevel(Level.WARNING);
         Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.WARNING);

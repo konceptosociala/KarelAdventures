@@ -32,7 +32,7 @@ public class NPC extends InteractableNode {
         String npcName,
         String modelPath, 
         String idleAnimationName, 
-        Dialog dialog, 
+        Dialog dialog2, 
         Vector3f position,
         AssetManager assetManager,
         BulletAppState bulletAppState
@@ -49,7 +49,7 @@ public class NPC extends InteractableNode {
         bulletAppState.getPhysicsSpace().add(rigidBodyControl);
         bulletAppState.getPhysicsSpace().addAll(this);
 
-        this.dialog = dialog;
+        this.dialog = dialog2;
     }
 
     @Override
@@ -74,5 +74,18 @@ public class NPC extends InteractableNode {
         DialogState dialogState = gameState.getDialogState();
         dialogState.setNpc(Optional.of(this));
         dialogState.setEnabled(true);
+    }
+
+    public Dialog getLastDialog() {
+        return getLastDialogInner(getDialog());
+    }
+
+    private Dialog getLastDialogInner(Dialog dialog) {
+        var nextDialog = dialog.getNextDialog();
+        if (nextDialog == null) {
+            return dialog;
+        } else {
+            return getLastDialogInner(nextDialog);
+        }
     }
 }

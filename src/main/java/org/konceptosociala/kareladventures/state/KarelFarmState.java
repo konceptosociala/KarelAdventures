@@ -78,7 +78,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                     childLayoutVertical();
 
                     panel(Margin.vertical("10%"));
-                    panel(new Logo("karel_farm_logo", "Interface/karel_farm_logo.png"));
+                    panel(new Logo("karel_farm_logo", "Interface/UI/karel_farm_logo.png"));
 
                     panel(new PanelBuilder("karel_farm_controls_main_panel") {{
                         childLayoutCenter();     
