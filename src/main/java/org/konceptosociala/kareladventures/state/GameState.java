@@ -2,7 +2,6 @@ package org.konceptosociala.kareladventures.state;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import de.lessvoid.nifty.tools.Color;
 import lombok.Getter;
 
 import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
@@ -17,6 +16,7 @@ import org.konceptosociala.kareladventures.game.npc.Dialog;
 import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
@@ -58,6 +58,7 @@ public class GameState extends BaseAppState  {
     private InputManager inputManager;
     private Nifty nifty;
     private Node rootNode;
+    private InterfaceBlur interfaceBlur;
     
     private KarelFarmState karelFarmState;
     private PauseState pauseState;
@@ -71,6 +72,8 @@ public class GameState extends BaseAppState  {
     private Node enemyRoot;
     private Node interactableRoot;
     private Level currentLevel;
+
+    private boolean gameOver = false;
 
     public GameState(LoadGameState loadGameState) {
         bulletAppState = loadGameState.getBulletAppState();
@@ -95,6 +98,7 @@ public class GameState extends BaseAppState  {
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
         this.nifty = this.app.getNifty();
+        this.interfaceBlur = new InterfaceBlur(this.app.getFpp());
         BulletCollisionListener bulletCollisionListener = new BulletCollisionListener();
         bulletCollisionListener.setBulletAppState(bulletAppState);
         bulletAppState.getPhysicsSpace().addCollisionListener(bulletCollisionListener);
@@ -123,18 +127,13 @@ public class GameState extends BaseAppState  {
                     childLayoutVertical();
 
                     text(new TextBuilder("health"){{
-                        text("Health: ???");
-                        font("Interface/Fonts/Default.fnt");
+                        text("Життя: ???");
+                        font("Interface/Fonts/Ubuntu-C.ttf");
                     }});
 
                     text(new TextBuilder("energy"){{
-                        text("Energy: ???");
-                        font("Interface/Fonts/Default.fnt");
-                    }});
-                    text(new TextBuilder("data"){{
-                        text("Health: ???");
-                        color(Color.BLACK);
-                        font("Interface/Fonts/Default.fnt");
+                        text("Енергія: ???");
+                        font("Interface/Fonts/Ubuntu-C.ttf");
                     }});
 
                 }});
@@ -150,6 +149,7 @@ public class GameState extends BaseAppState  {
         var saveLoader = new SaveLoader(
             player.getHealth(), 
             player.getEnergy(), 
+            player.getBalance(),
             player.getInventory(), 
             dialogsToMap(), 
             player.getLocalTranslation(), 
@@ -168,6 +168,8 @@ public class GameState extends BaseAppState  {
     @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
+        if (gameOver) return;
+
         player.update(tpf);
         for (Spatial i : enemyRoot.getChildren()) {
             if (i instanceof IUpdatable) {
@@ -186,11 +188,17 @@ public class GameState extends BaseAppState  {
             .findElementById("energy")
             .getRenderer(TextRenderer.class)
             .setText("Energy: " + player.getEnergy().getValue());
+
+        if (player.getHealth().getValue() == 0) {
+            gameOver = true;
+            appStateManager.attach(new GameOverState(this));
+        }
     }
 
     @Override
     protected void cleanup(Application app) {
-        save();
+        if (!gameOver)
+            save();
 
         bulletAppState.cleanup();
         inputManager.clearMappings();
@@ -249,6 +257,8 @@ public class GameState extends BaseAppState  {
 
     final private ActionListener actionListener = new ActionListener() {
         public void onAction(String action, boolean isPressed, float tpf) {
+            if (gameOver) return;
+
             if (action.equals("ESCAPE") && isPressed) {
                 if (inventoryState.isEnabled()) {
                     chaseCam.setEnabled(true);
@@ -322,6 +332,8 @@ public class GameState extends BaseAppState  {
     final private AnalogListener analogListener = new AnalogListener() {
         @Override
         public void onAnalog(String action, float value, float tpf) {
+            if (gameOver) return;
+
             if (inventoryState.isEnabled() 
                 || dialogState.isEnabled() 
                 || pauseState.isEnabled()

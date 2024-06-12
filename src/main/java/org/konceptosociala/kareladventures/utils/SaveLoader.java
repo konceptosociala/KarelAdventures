@@ -22,6 +22,7 @@ public class SaveLoader implements Serializable {
     
     private final Health playerHealth;
     private final Energy playerEnergy;
+    private final int balance;
     private final Inventory playerInventory;  
     private final HashMap<String, Dialog> dialogs;
     private final Vector3f playerPosition;

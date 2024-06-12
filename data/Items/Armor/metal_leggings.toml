@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.metal_leggings"
+name = "Металеві поножі"
+description = ""
+icon_path = "Interface/Items/Metal_Leggings.png"
+item_kind = "Leggings"
+item_rareness = "Common"
+benefit = 2

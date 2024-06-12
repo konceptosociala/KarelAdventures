@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.java_leggings"
+name = "Шаровари Джавіста"
+description = ""
+icon_path = "Interface/Items/Java_Leggings.png"
+item_kind = "Leggings"
+item_rareness = "Legendary"
+benefit = 10

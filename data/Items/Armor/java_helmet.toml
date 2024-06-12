@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.java_helmet"
+name = "Капелюх Джавіста"
+description = ""
+icon_path = "Interface/Items/Java_Helmet.png"
+item_kind = "Helmet"
+item_rareness = "Legendary"
+benefit = 10

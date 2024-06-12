@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.java_chestplate"
+name = "Одіяння Джавіста"
+description = ""
+icon_path = "Interface/Items/Java_Chestplate.png"
+item_kind = "Chestplate"
+item_rareness = "Legendary"
+benefit = 11

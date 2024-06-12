@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.metal_helmet"
+name = "Металевий шолом"
+description = ""
+icon_path = "Interface/Items/Metal_Helmet.png"
+item_kind = "Helmet"
+item_rareness = "Common"
+benefit = 2

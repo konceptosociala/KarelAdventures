@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.ui.ImageButton;
-import org.konceptosociala.kareladventures.ui.PauseBlur;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -28,7 +28,7 @@ public class PauseState extends BaseAppState implements ScreenController {
     private InputManager inputManager;
     private BulletAppState bulletAppState;
     private Nifty nifty;
-    private PauseBlur pauseBlur;
+    private InterfaceBlur interfaceBlur;
     private GameState gameState;
 
     public PauseState(GameState gameState) {
@@ -42,14 +42,14 @@ public class PauseState extends BaseAppState implements ScreenController {
         this.inputManager = this.app.getInputManager();
         this.bulletAppState = gameState.getBulletAppState();
         this.nifty = this.app.getNifty();
-        this.pauseBlur = new PauseBlur(this.app.getFpp());
+        this.interfaceBlur = gameState.getInterfaceBlur();
     }
 
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(true);
         bulletAppState.setEnabled(false);
-        pauseBlur.setEnabled(true);
+        interfaceBlur.setEnabled(true);
 
         nifty.addScreen("pause_screen", new ScreenBuilder("Pause screen") {{
             controller(PauseState.this);
@@ -75,8 +75,8 @@ public class PauseState extends BaseAppState implements ScreenController {
                         panel(new PanelBuilder("main_menu_panel_buttons"){{
                             childLayoutVertical();
 
-                            panel(new ImageButton("main_menu_resume_button", "Resume", null, "resume()"));
-                            panel(new ImageButton("main_menu_quit_button", "Exit to menu", null, "exitToMenu()"));
+                            panel(new ImageButton("main_menu_resume_button", "Відновити", null, "resume()"));
+                            panel(new ImageButton("main_menu_quit_button", "Вийти в меню", null, "exitToMenu()"));
                         }});
                     }});
                 }});
@@ -109,7 +109,7 @@ public class PauseState extends BaseAppState implements ScreenController {
 
     @Override
     protected void onDisable() {
-        pauseBlur.setEnabled(false);
+        interfaceBlur.setEnabled(false);
     }
 
     @Override

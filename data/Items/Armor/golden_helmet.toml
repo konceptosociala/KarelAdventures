@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.golden_helmet"
+name = "Золотий капелюх"
+description = ""
+icon_path = "Interface/Items/Golden_Helmet.png"
+item_kind = "Helmet"
+item_rareness = "Golden"
+benefit = 5

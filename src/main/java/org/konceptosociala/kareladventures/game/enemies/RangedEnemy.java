@@ -1,28 +1,22 @@
 package org.konceptosociala.kareladventures.game.enemies;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.*;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import com.jme3.scene.shape.Box;
 import org.konceptosociala.kareladventures.game.player.Energy;
 import org.konceptosociala.kareladventures.game.player.Health;
-import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Optional;
 
 import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 
@@ -115,7 +109,6 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
         performAttack();
     }
     private void setTarget(){
-        var location = characterControl.getPhysicsLocation();
         var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
         if(FastMath.sqrt(FastMath.pow(originPosition.x - playerLocation.x,2)+FastMath.pow(originPosition.z - playerLocation.z,2))>agroRange){
             target=originPosition;
@@ -158,29 +151,29 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
         thisGameState.getRootNode().attachChild(bullet);
     }
 
-    private Optional<Player> getPlayerInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
-        //List<Enemy> enemies = new ArrayList<>();
-        //Player player = null;
-        Optional<Player> pl = Optional.empty();
-        Box boxShape = new Box(extents.x, extents.y, extents.z);
-        Geometry collider = new Geometry("Collider", boxShape);
-        collider.setLocalTranslation(center);
-        collider.setLocalRotation(rotation);
-        Transform transform = new Transform(center, rotation);
-        BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
-        boundingBox.transform(transform);
-        // Create a material with an unshaded definition
-        //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    // private Optional<Player> getPlayerInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
+    //     //List<Enemy> enemies = new ArrayList<>();
+    //     //Player player = null;
+    //     Optional<Player> pl = Optional.empty();
+    //     Box boxShape = new Box(extents.x, extents.y, extents.z);
+    //     Geometry collider = new Geometry("Collider", boxShape);
+    //     collider.setLocalTranslation(center);
+    //     collider.setLocalRotation(rotation);
+    //     Transform transform = new Transform(center, rotation);
+    //     BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
+    //     boundingBox.transform(transform);
+    //     // Create a material with an unshaded definition
+    //     //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 
-        // Set the material color to blue
-        //mat.setColor("Color", ColorRGBA.Blue);
-        //collider.setMaterial(mat);
-        if (boundingBox.intersects(thisGameState.getPlayer().getWorldBound())) {
-            pl = Optional.of(thisGameState.getPlayer());
-        }
-        //thisGameState.getRootNode().attachChild(collider);
-        return pl;
-    }
+    //     // Set the material color to blue
+    //     //mat.setColor("Color", ColorRGBA.Blue);
+    //     //collider.setMaterial(mat);
+    //     if (boundingBox.intersects(thisGameState.getPlayer().getWorldBound())) {
+    //         pl = Optional.of(thisGameState.getPlayer());
+    //     }
+    //     //thisGameState.getRootNode().attachChild(collider);
+    //     return pl;
+    // }
 
     private void rotateTowardsTarget(){
         //characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().add(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,Vector3f.UNIT_Y)));

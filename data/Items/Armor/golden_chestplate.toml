@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.golden_chestplate"
+name = "Золоте одіяння"
+description = ""
+icon_path = "Interface/Items/Golden_Chestplate.png"
+item_kind = "Chestplate"
+item_rareness = "Golden"
+benefit = 6

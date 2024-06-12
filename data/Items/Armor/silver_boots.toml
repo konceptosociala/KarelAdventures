@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.silver_boots"
+name = "Срібні чоботи"
+description = ""
+icon_path = "Interface/Items/Silver_Boots.png"
+item_kind = "Boots"
+item_rareness = "Silver"
+benefit = 3

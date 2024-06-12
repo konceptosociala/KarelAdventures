@@ -19,7 +19,7 @@ import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.LoadingBarBuilder;
-import org.konceptosociala.kareladventures.ui.PauseBlur;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
 import org.konceptosociala.kareladventures.utils.Level;
 import org.konceptosociala.kareladventures.utils.SaveLoadException;
@@ -159,6 +159,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
                     control(new LabelBuilder("loading_text"){{
                         align(Align.Center);
+                        font("Interface/Fonts/Ubuntu-C.ttf");
                         text("                                                  ");
                     }});
                 }});
@@ -172,13 +173,13 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     @Override
     public void update(float tpf) {
         switch (frameCount) {
-            case 1 -> setProgress(0.0f, "Loading physics...",       this::loadTextRenderer);
-            case 2 -> setProgress(0.1f, "Loading player...",        this::loadPhysics);
-            case 3 -> setProgress(0.2f, "Loading NPC...",           this::loadPlayer);
-            case 4 -> setProgress(0.3f, "Loading enemies...",       this::loadNPC);
-            case 5 -> setProgress(0.4f, "Loading environment...",   this::loadEnemies);
-            case 6 -> setProgress(0.6f, "Initializing sky...",      this::loadEnvironment);
-            case 7 -> setProgress(0.9f, "Setting up lighting...",   this::loadSky); 
+            case 1 -> setProgress(0.0f, "Завантаження фізики...",       this::loadTextRenderer);
+            case 2 -> setProgress(0.1f, "Завантаження гравця...",       this::loadPhysics);
+            case 3 -> setProgress(0.2f, "Завантаження НІПів...",        this::loadPlayer);
+            case 4 -> setProgress(0.3f, "Завантаження ворогів...",      this::loadNPC);
+            case 5 -> setProgress(0.4f, "Завантаження середовища...",   this::loadEnemies);
+            case 6 -> setProgress(0.6f, "Ініціалізація неба...",        this::loadEnvironment);
+            case 7 -> setProgress(0.9f, "Налаштування світла...",       this::loadSky); 
             case 8 -> loadLighting();
         }
       
@@ -241,9 +242,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void loadEnvironment() {
-        // world = new World("Scenes/scene.glb", assetManager);
-        // rootNode.attachChild(world);
-        // bulletAppState.getPhysicsSpace().addAll(world);
+        world = new World("Scenes/scene.glb", assetManager);
+        rootNode.attachChild(world);
+        bulletAppState.getPhysicsSpace().addAll(world);
     }
 
     private void loadEnemies() {
@@ -273,6 +274,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             player.setEnergy(saveLoader.getPlayerEnergy());
             player.setHealth(saveLoader.getPlayerHealth());
             player.setInventory(saveLoader.getPlayerInventory());
+            player.setBalance(saveLoader.getBalance());
 
             currentLevel = saveLoader.getCurrentLevel();
         } else {
@@ -290,7 +292,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         stateManager.attach(dialogState);
         dialogState.setEnabled(false);
 
-        karelFarmState = new KarelFarmState();
+        karelFarmState = new KarelFarmState(player);
         stateManager.attach(karelFarmState);
         karelFarmState.setEnabled(false);
 

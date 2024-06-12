@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.golden_leggings"
+name = "Золоті шаровари"
+description = ""
+icon_path = "Interface/Items/Golden_Leggings.png"
+item_kind = "Leggings"
+item_rareness = "Golden"
+benefit = 5

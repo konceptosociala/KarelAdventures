@@ -3,28 +3,22 @@ package org.konceptosociala.kareladventures.game.enemies;
 //package org.konceptosociala.kareladventures.game.enemies;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.*;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import com.jme3.scene.shape.Box;
 import org.konceptosociala.kareladventures.game.player.Energy;
 import org.konceptosociala.kareladventures.game.player.Health;
-import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Optional;
 
 import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 
@@ -147,37 +141,38 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
         thisGameState.getRootNode().attachChild(bullet);
     }
 
-    private Optional<Player> getPlayerInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
-        //List<Enemy> enemies = new ArrayList<>();
-        //Player player = null;
-        Optional<Player> pl = Optional.empty();
-        Box boxShape = new Box(extents.x, extents.y, extents.z);
-        Geometry collider = new Geometry("Collider", boxShape);
-        collider.setLocalTranslation(center);
-        collider.setLocalRotation(rotation);
-        Transform transform = new Transform(center, rotation);
-        BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
-        boundingBox.transform(transform);
-        // Create a material with an unshaded definition
-        //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    // private Optional<Player> getPlayerInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
+    //     //List<Enemy> enemies = new ArrayList<>();
+    //     //Player player = null;
+    //     Optional<Player> pl = Optional.empty();
+    //     Box boxShape = new Box(extents.x, extents.y, extents.z);
+    //     Geometry collider = new Geometry("Collider", boxShape);
+    //     collider.setLocalTranslation(center);
+    //     collider.setLocalRotation(rotation);
+    //     Transform transform = new Transform(center, rotation);
+    //     BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
+    //     boundingBox.transform(transform);
+    //     // Create a material with an unshaded definition
+    //     //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 
-        // Set the material color to blue
-        //mat.setColor("Color", ColorRGBA.Blue);
-        //collider.setMaterial(mat);
-        if (boundingBox.intersects(thisGameState.getPlayer().getWorldBound())) {
-            pl = Optional.of(thisGameState.getPlayer());
-        }
-        //thisGameState.getRootNode().attachChild(collider);
-        return pl;
-    }
+    //     // Set the material color to blue
+    //     //mat.setColor("Color", ColorRGBA.Blue);
+    //     //collider.setMaterial(mat);
+    //     if (boundingBox.intersects(thisGameState.getPlayer().getWorldBound())) {
+    //         pl = Optional.of(thisGameState.getPlayer());
+    //     }
+    //     //thisGameState.getRootNode().attachChild(collider);
+    //     return pl;
+    // }
 
-    private void rotateTowardsPlayer(){
-        //characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().add(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,Vector3f.UNIT_Y)));
-        characterControl.setPhysicsRotation(new Quaternion().fromAngles(FastMath.HALF_PI,XZVelocityVectorToYRotation+FastMath.PI,0));
-    }
-    private void moveTowardsPlayer(){
-        characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
-    }
+    // private void rotateTowardsPlayer(){
+    //     //characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().add(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,Vector3f.UNIT_Y)));
+    //     characterControl.setPhysicsRotation(new Quaternion().fromAngles(FastMath.HALF_PI,XZVelocityVectorToYRotation+FastMath.PI,0));
+    // }
+    // private void moveTowardsPlayer(){
+    //     characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+    // }
+
     private static Vector3f rotateByYAxis(Vector3f vec, float rad){
         return new Vector3f((float)(vec.x*Math.cos(rad)+vec.z*Math.sin(rad)), vec.y, (float)(-vec.x*Math.sin(rad)+vec.z*Math.cos(rad)));
     }

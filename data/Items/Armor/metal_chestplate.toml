@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.metal_chestplate"
+name = "Металевий нагрудник"
+description = ""
+icon_path = "Interface/Items/Metal_Chestplate.png"
+item_kind = "Chestplate"
+item_rareness = "Common"
+benefit = 3

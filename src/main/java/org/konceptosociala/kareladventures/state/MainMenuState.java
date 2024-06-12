@@ -85,10 +85,10 @@ public class MainMenuState extends BaseAppState implements ScreenController {
                         panel(new PanelBuilder("main_menu_panel_buttons"){{
                             childLayoutVertical();
 
-                            panel(new ImageButton("main_menu_new_button", "New game", null, "newGame()"));
-                            panel(new ImageButton("main_menu_load_button", "Load game", null, "loadGame()"));
-                            panel(new ImageButton("main_menu_settings_button", "Settings", null, "openSettings()"));
-                            panel(new ImageButton("main_menu_quit_button", "Quit", null, "quitGame()"));
+                            panel(new ImageButton("main_menu_new_button", "Нова гра", null, "newGame()"));
+                            panel(new ImageButton("main_menu_load_button", "Завантажити гру", null, "loadGame()"));
+                            panel(new ImageButton("main_menu_settings_button", "Налаштування", null, "openSettings()"));
+                            panel(new ImageButton("main_menu_quit_button", "Вийти", null, "quitGame()"));
                         }});
                     }});
                 }});
@@ -140,7 +140,7 @@ public class MainMenuState extends BaseAppState implements ScreenController {
             setEnabled(false);
             stateManager.attach(new LoadGameState(LoadType.Saving));
         } else {
-            showMsgBox("Error", "File 'data/Saves/karel.sav' not found.");
+            showMsgBox("Помилка", "Файл 'data/Saves/karel.sav' не знайдено.");
         }
     }
 

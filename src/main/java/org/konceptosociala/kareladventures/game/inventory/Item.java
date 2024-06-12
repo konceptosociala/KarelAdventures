@@ -3,6 +3,7 @@ package org.konceptosociala.kareladventures.game.inventory;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.konceptosociala.kareladventures.utils.TomlException;
@@ -19,6 +20,24 @@ import lombok.ToString;
 public class Item implements Serializable {
     private static final long serialVersionUID = 1L;
     
+    // Armor
+    public static final Item METAL_HELMET = Item.load("data/Items/Armor/metal_helmet.toml");
+    public static final Item METAL_CHESTPLATE = Item.load("data/Items/Armor/metal_chestplate.toml");
+    public static final Item METAL_LEGGINGS = Item.load("data/Items/Armor/metal_leggings.toml");
+    public static final Item METAL_BOOTS = Item.load("data/Items/Armor/metal_boots.toml");
+    public static final Item SILVER_HELMET = Item.load("data/Items/Armor/silver_helmet.toml");
+    public static final Item SILVER_CHESTPLATE = Item.load("data/Items/Armor/silver_chestplate.toml");
+    public static final Item SILVER_LEGGINGS = Item.load("data/Items/Armor/silver_leggings.toml");
+    public static final Item SILVER_BOOTS = Item.load("data/Items/Armor/silver_boots.toml");
+    public static final Item GOLDEN_HELMET = Item.load("data/Items/Armor/golden_helmet.toml");
+    public static final Item GOLDEN_CHESTPLATE = Item.load("data/Items/Armor/golden_chestplate.toml");
+    public static final Item GOLDEN_LEGGINGS = Item.load("data/Items/Armor/golden_leggings.toml");
+    public static final Item GOLDEN_BOOTS = Item.load("data/Items/Armor/golden_boots.toml");
+    public static final Item JAVA_HELMET = Item.load("data/Items/Armor/java_helmet.toml");
+    public static final Item JAVA_CHESTPLATE = Item.load("data/Items/Armor/java_chestplate.toml");
+    public static final Item JAVA_LEGGINGS = Item.load("data/Items/Armor/java_leggings.toml");
+    public static final Item JAVA_BOOTS = Item.load("data/Items/Armor/java_boots.toml");
+
     // Weapon
     public static final Item DARK_TINY_SWORD = Item.load("data/Items/Weapon/dark_tiny_sword.toml");
     public static final Item DISASSEMBLER = Item.load("data/Items/Weapon/disassembler.toml");
@@ -38,7 +57,7 @@ public class Item implements Serializable {
     private final String iconPath;
     private final ItemKind itemKind;
     private final ItemRareness itemRareness;
-    private final Optional<Long> benefit;
+    private final Long benefit;
 
     public Item(String itemFile) throws TomlException {
         try {
@@ -51,7 +70,7 @@ public class Item implements Serializable {
             iconPath = item.getString("icon_path");
             itemKind = ItemKind.valueOf(item.getString("item_kind"));
             itemRareness = ItemRareness.valueOf(item.getString("item_rareness"));
-            benefit = Optional.ofNullable(item.getLong("benefit"));
+            benefit = item.getLong("benefit");
         } catch (Exception e) {
             throw new TomlException(e.getMessage());
         }
@@ -67,6 +86,31 @@ public class Item implements Serializable {
         }
     }
 
+    public static List<Item> getAllItems(ItemRareness rareness) {
+        return switch (rareness) {
+            case Common -> List.of(
+                METAL_BOOTS, METAL_CHESTPLATE, METAL_HELMET, METAL_LEGGINGS,
+                METAL_SWORD,DARK_TINY_SWORD
+            );
+            case Rare -> List.of(
+                DUSTCLEANER,
+                FIRE_DIRK
+            );
+            case Silver -> List.of(
+                SILVER_BOOTS, SILVER_CHESTPLATE, SILVER_HELMET, SILVER_LEGGINGS,
+                DEBUGGER, LAMBDA_SAW
+            );
+            case Golden -> List.of(
+                GOLDEN_BOOTS, GOLDEN_CHESTPLATE, GOLDEN_HELMET, GOLDEN_LEGGINGS,
+                DISASSEMBLER, GLUONER, SLITHER
+            );
+            case Legendary -> List.of(
+                JAVA_BOOTS, JAVA_CHESTPLATE, JAVA_HELMET, JAVA_LEGGINGS,
+                LAVA_BLADE, PYTHON_SABER
+            );
+        };
+    }
+
     public static Item regular(
         ItemId id, 
         String name, 
@@ -74,7 +118,7 @@ public class Item implements Serializable {
         String iconPath, 
         ItemRareness rareness
     ){
-        return new Item(id, name, description, iconPath, ItemKind.Regular, rareness, Optional.empty());
+        return new Item(id, name, description, iconPath, ItemKind.Regular, rareness, null);
     }
 
     public static Item helmet(
@@ -85,7 +129,7 @@ public class Item implements Serializable {
         ItemRareness rareness, 
         int benefit
     ){
-        return new Item(id, name, description, iconPath, ItemKind.Helmet, rareness, Optional.of((long)benefit));
+        return new Item(id, name, description, iconPath, ItemKind.Helmet, rareness, (long)benefit);
     }
 
     public static Item chestplate(
@@ -96,7 +140,7 @@ public class Item implements Serializable {
         ItemRareness rareness, 
         int benefit
     ){
-        return new Item(id, name, description, iconPath, ItemKind.Chestplate, rareness, Optional.of((long)benefit));
+        return new Item(id, name, description, iconPath, ItemKind.Chestplate, rareness, (long)benefit);
     }
 
     public static Item leggings(
@@ -107,7 +151,7 @@ public class Item implements Serializable {
         ItemRareness rareness, 
         int benefit
     ){
-        return new Item(id, name, description, iconPath, ItemKind.Leggings, rareness, Optional.of((long)benefit));
+        return new Item(id, name, description, iconPath, ItemKind.Leggings, rareness, (long)benefit);
     }
 
     public static Item boots(
@@ -118,7 +162,7 @@ public class Item implements Serializable {
         ItemRareness rareness, 
         int benefit
     ){
-        return new Item(id, name, description, iconPath, ItemKind.Boots, rareness, Optional.of((long)benefit));
+        return new Item(id, name, description, iconPath, ItemKind.Boots, rareness, (long)benefit);
     }
 
     public static Item weapon(
@@ -129,6 +173,10 @@ public class Item implements Serializable {
         ItemRareness rareness, 
         int benefit
     ){
-        return new Item(id, name, description, iconPath, ItemKind.Weapon, rareness, Optional.of((long)benefit));
+        return new Item(id, name, description, iconPath, ItemKind.Weapon, rareness, (long)benefit);
+    }
+
+    public Optional<Long> getBenefit() {
+        return Optional.ofNullable(benefit);
     }
 }

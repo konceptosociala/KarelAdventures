@@ -105,7 +105,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                 panel(new PanelBuilder("hint_panel") {{
                     childLayoutVertical();
                     visible(false);
-                    padding("30px,90px,30px,90px");
+                    padding("40px,90px,40px,90px");
                     backgroundColor(new Color("#000c"));
 
                     text(new TextBuilder("content") {{
