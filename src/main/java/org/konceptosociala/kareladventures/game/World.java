@@ -9,10 +9,11 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class World extends Node {
-    public World(String filename, AssetManager assetManager) {
+    public World(String worldPath, String colliderPath, AssetManager assetManager) {
         super();
-        Spatial scene = assetManager.loadModel(filename);
-        CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(scene);
+        Spatial scene = assetManager.loadModel(worldPath);
+        Spatial collisionScene = assetManager.loadModel(colliderPath);
+        CollisionShape sceneShape = CollisionShapeFactory.createMeshShape(collisionScene);
         RigidBodyControl landscape = new RigidBodyControl(sceneShape, 0);
         landscape.setKinematic(true);
         landscape.setGravity(new Vector3f(0,0,0));

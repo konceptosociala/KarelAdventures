@@ -207,7 +207,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
     private void loadPhysics() {
         bulletAppState = new BulletAppState();
-        // bulletAppState.setDebugEnabled(true);
+        bulletAppState.setDebugEnabled(true);
         stateManager.attach(bulletAppState);
         bulletAppState.setEnabled(false);
     }
@@ -226,7 +226,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                 }
             }
         );
-        probe.getArea().setRadius(200);
+        probe.getArea().setRadius(1000);
         rootNode.addLight(probe);
 
         rootNode.setShadowMode(ShadowMode.CastAndReceive);
@@ -242,7 +242,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void loadEnvironment() {
-        world = new World("Scenes/scene.glb", assetManager);
+        world = new World("Scenes/scene.glb", "Scenes/scene_collider.glb", assetManager);
         rootNode.attachChild(world);
         bulletAppState.getPhysicsSpace().addAll(world);
     }
