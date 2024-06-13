@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.dustcleaner"
+name = "Пилесос"
+description = "Зброя для очищення поля бою\nвід пилу та непотрібних ворогів."
+icon_path = "Interface/Items/Dustcleaner.png"
+item_kind = "Weapon"
+item_rareness = "Rare"
+benefit = 10

@@ -6,7 +6,6 @@ import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.scene.Spatial;
 import lombok.Setter;
 import org.konceptosociala.kareladventures.game.player.Player;
-import org.konceptosociala.kareladventures.state.GameState;
 
 public class BulletCollisionListener implements PhysicsCollisionListener {
     @Setter

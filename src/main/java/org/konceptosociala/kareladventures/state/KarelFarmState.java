@@ -5,6 +5,9 @@ import java.util.random.RandomGenerator;
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.inventory.Item;
+import org.konceptosociala.kareladventures.game.inventory.ItemRareness;
+import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.ImageButton;
 import org.konceptosociala.kareladventures.ui.InvalidCellIdException;
 import org.konceptosociala.kareladventures.ui.Logo;
@@ -35,11 +38,14 @@ import de.lessvoid.nifty.tools.Color;
 import javafx.util.Pair;
 
 public class KarelFarmState extends BaseAppState implements ScreenController {
+    private static final int MIN_FARM_BALANCE = 100;
+
     private final RandomGenerator rgen = RandomGenerator.getDefault();
 
     private KarelAdventures app;
     private InputManager inputManager;
     private Nifty nifty;
+    private Player player;
 
     private LabyrinthCell[][] cells;
     private LabyrinthCell[][] initialCells;
@@ -50,6 +56,10 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     private KarelDirection direction;
     private int karelX;
     private int karelY;
+
+    public KarelFarmState(Player player) {
+        this.player = player;
+    }
 
     @Override
     protected void initialize(Application app) {
@@ -78,7 +88,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                     childLayoutVertical();
 
                     panel(Margin.vertical("10%"));
-                    panel(new Logo("karel_farm_logo", "Interface/karel_farm_logo.png"));
+                    panel(new Logo("karel_farm_logo", "Interface/UI/karel_farm_logo.png"));
 
                     panel(new PanelBuilder("karel_farm_controls_main_panel") {{
                         childLayoutCenter();     
@@ -111,21 +121,35 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                                     text(new TextBuilder("code_field_label") {{
                                         height("50px");
                                         width("100%");
-                                        text("Code editor");
+                                        text("Консоль команд");
                                         color(Color.BLACK);
                                         font("Interface/Fonts/Ubuntu-C.ttf");
                                     }});
-    
-                                    text(new TextBuilder("code_field_history") {{
+
+                                    panel(new PanelBuilder("code_field_history_panel") {{
+                                        childLayoutCenter();
                                         height("100%");
                                         width("100%");
-                                        color(Color.BLACK);
-                                        backgroundColor(Color.WHITE);
-                                        font("Interface/Fonts/FiraCode-Bold.ttf");
-                                        textHAlign(Align.Left);
-                                        textVAlign(VAlign.Top);
-                                        align(Align.Left);
-                                        valign(VAlign.Top);
+
+                                        image(new ImageBuilder("code_editor_bg") {{
+                                            width("100%");
+                                            height("100%");
+                                            filename("Interface/UI/Panel/panel-009.png");
+                                            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                                        }});
+
+                                        text(new TextBuilder("code_field_history") {{
+                                            height("90%");
+                                            width("90%");
+                                            color(Color.BLACK);
+                                            backgroundColor(Color.WHITE);
+                                            font("Interface/Fonts/FiraCode-Bold.ttf");
+                                            textHAlign(Align.Left);
+                                            textVAlign(VAlign.Top);
+                                            align(Align.Center);
+                                            valign(VAlign.Center);
+                                            margin("5%");
+                                        }});
                                     }});
     
                                     panel(Margin.vertical("10px"));
@@ -149,7 +173,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                                     text(new TextBuilder("labyrinth_label") {{
                                         height("50px");
                                         width("100%");
-                                        text("Karel Labyrinth");
+                                        text("Лабіринт Карела");
                                         color(Color.BLACK);
                                         font("Interface/Fonts/Ubuntu-C.ttf");
                                     }});
@@ -178,8 +202,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                                         panel(new PanelBuilder("labyrinth_controls") {{
                                             childLayoutHorizontal();
 
-                                            panel(new ImageButton("labyrinth_controls_reset", "Reset", new Size(150, 50), "resetLabyrinth()"));
-                                            panel(new ImageButton("labyrinth_controls_rebuild", "Rebuild", new Size(150, 50), "rebuildLabyrinth()"));
+                                            panel(new ImageButton("labyrinth_controls_reset", "Скинути", new Size(150, 50), "resetLabyrinth()"));
+                                            panel(new ImageButton("labyrinth_controls_rebuild", "Перебудувати", new Size(150, 50), "rebuildLabyrinth()"));
                                         }});
                                     }});
                                 }});
@@ -200,6 +224,20 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     @SuppressWarnings("null")
     public void resetLabyrinth() {
         if (msgBoxVisible || won) return;
+
+        if (player.getBalance() < MIN_FARM_BALANCE) {
+            showMsgBox(
+                "Помилка", 
+                "Недостатньо коштів на балансі, щоб грати.\n"
+                + "Потрібно "+MIN_FARM_BALANCE+" одиниць (наявно "+player.getBalance()+")."
+            );
+            return;
+        }
+
+        if (player.getInventory().isFull()) {
+            showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
+            return;
+        }
 
         nifty
             .getScreen("karel_farm_screen")
@@ -224,6 +262,20 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     public void rebuildLabyrinth() {
         if (msgBoxVisible) return;
 
+        if (player.getBalance() < MIN_FARM_BALANCE) {
+            showMsgBox(
+                "Помилка", 
+                "Недостатньо коштів на балансі, щоб грати.\n"
+                + "Потрібно "+MIN_FARM_BALANCE+" одиниць (наявно "+player.getBalance()+")."
+            );
+            return;
+        }
+
+        if (player.getInventory().isFull()) {
+            showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
+            return;
+        }
+
         nifty
             .getScreen("karel_farm_screen")
             .findElementById("code_field_history")
@@ -232,11 +284,27 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
         rebuildCells();
         redrawLabyrinth();
+
+        player.setBalance(player.getBalance() - MIN_FARM_BALANCE);
     }
 
     @SuppressWarnings("null")
     public void enterCommand() {
         if (msgBoxVisible || gameOver || won) return;
+
+        if (player.getBalance() < MIN_FARM_BALANCE) {
+            showMsgBox(
+                "Помилка", 
+                "Недостатньо коштів на балансі, щоб грати.\n"
+                + "Потрібно "+MIN_FARM_BALANCE+" одиниць (наявно "+player.getBalance()+")."
+            );
+            return;
+        }
+
+        if (player.getInventory().isFull()) {
+            showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
+            return;
+        }
 
         var textField = nifty
             .getScreen("karel_farm_screen")
@@ -286,13 +354,13 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
             default -> {
                 showMsgBox(
-                    "Wrong command", 
-                    "Command `"+command+"` is wrong. List of available commands: \n"
-                    + "move() - move 1 step forward\n" 
-                    + "turnLeft() - rotate Karel counter clockwise\n" 
-                    + "turnRight() - rotate Karel clockwise\n" 
-                    + "turnAround() - turn Karel 180 degrees\n" 
-                    + "pickBeeper() - pick beeper to bag" 
+                    "Помилка", 
+                    "Команду `"+command+"` не знайдено. Список доступних команд: \n"
+                    + "move() - перейти на 1 крок вперед\n"
+                    + "turnLeft() - повернути Карела проти годинникової стрілки\n"
+                    + "turnRight() - повернути Карела за годинниковою стрілкою\n"
+                    + "turnAround() - повернути Карела на 180 градусів\n"
+                    + "pickBeeper() - підняти біпер в сумку"
                 );
 
                 return;
@@ -309,7 +377,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
             .split("\n")
             .length - 1;
 
-        if (newLineCount >= 12) {
+        if (newLineCount >= 10) {
             historyText = historyText.replaceFirst("^.*\\n", "");
         }
 
@@ -328,7 +396,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
         if (karelX <= 0 || karelY <= 0 || karelX > 4 || karelY > 4) {
             gameOver = true;
-            showMsgBox("Game Over", "Karel has fallen beyond the map");
+            showMsgBox("Гру закінчено", "Карел вийшов за межі карти");
             return;
         }
 
@@ -340,7 +408,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
         if (newCell.isBlocked()) {
             gameOver = true;
-            showMsgBox("Game Over", "Karel has stacked in a wall");
+            showMsgBox("Гру закінчено", "Карел застряг у стіні");
             return;
         }
     }
@@ -388,12 +456,11 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
             if (checkBeepers()) {
                 victory();
                 won = true;
-                showMsgBox("Victory!", "Karel has collected all the beepers!");
                 return;
             }
         } else {
             gameOver = true;
-            showMsgBox("Game Over", "No beeper to pick up");
+            showMsgBox("Гру закінчено", "Відсутній біпер, щоб підняти");
             return;
         }
     }
@@ -425,7 +492,37 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     }
 
     private void victory() {
-        // TODO: make victory
+        Item givenItem;
+
+        int chance = rgen.nextInt(0, 101);
+
+        if (chance == 100)
+            givenItem = getRandomItem(ItemRareness.Legendary);
+        else if (chance >= 95)
+            givenItem = getRandomItem(ItemRareness.Golden);
+        else if (chance >= 85)
+            givenItem = getRandomItem(ItemRareness.Silver);
+        else if (chance >= 60)
+            givenItem = getRandomItem(ItemRareness.Rare);
+        else
+            givenItem = getRandomItem(ItemRareness.Common);
+        
+        showMsgBox(
+            "Перемога!", 
+            "Карел зібрав усі біпери!\n"
+            + "Ви отримали: "+givenItem.getName()
+        );
+
+        player.setBalance(player.getBalance() - MIN_FARM_BALANCE);
+        if (!player.getInventory().addItem(givenItem)) {
+            showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
+            return;
+        }
+    }
+
+    private Item getRandomItem(ItemRareness rareness) {
+        var items = Item.getAllItems(rareness);
+        return items.get(rgen.nextInt(items.size()));
     }
 
     @SuppressWarnings("null")

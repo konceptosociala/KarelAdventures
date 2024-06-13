@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.lava_blade"
+name = "Вулканічний меч"
+description = "Меч, викований з лави, здатний\nспалювати ворогів до попелу."
+icon_path = "Interface/Items/Lava_Blade.png"
+item_kind = "Weapon"
+item_rareness = "Legendary"
+benefit = 40

@@ -24,7 +24,7 @@ public class KarelFarm extends InteractableNode {
     private RigidBodyControl rigidBodyControl;
 
     public KarelFarm(AssetManager assetManager, Vector3f position, BulletAppState bulletAppState) {
-        super();
+        super("karel_farm");
         setLocalTranslation(position);
         this.model = assetManager.loadModel(KAREL_FARM_MODEL_NAME);
         this.collider = new BoxCollisionShape(new Vector3f(5, 5, 5));

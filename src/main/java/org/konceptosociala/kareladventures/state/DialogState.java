@@ -66,28 +66,39 @@ public class DialogState extends BaseAppState implements ScreenController {
                 childLayoutCenter();
 
                 image(new ImageBuilder("dialog_image") {{
-                    filename("Interface/dialog.png");
-                    width("90%");
+                    filename("Interface/UI/Transparent center/panel-transparent-center-003.png");
+                    imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                    width("960px");
+                    height("360px");
                 }});
 
                 panel(new PanelBuilder("dialog_text") {{
                     childLayoutVertical();
+                    width("960px");
+                    height("360px");
 
                     text(new TextBuilder("dialog_author") {{
                         text(currentMessage.getAuthor());
+                        textHAlign(Align.Left);
+                        textVAlign(VAlign.Top);
                         width("100%");
-                        height("100px");
-                        color(Color.WHITE);
-                        font("Interface/Fonts/Default.fnt");
+                        height("25px");
+                        color(Color.BLACK);
+                        font("Interface/Fonts/Ubuntu-C.ttf");
+                        marginTop("25px");
+                        marginLeft("50px");
                     }});
 
                     text(new TextBuilder("dialog_message") {{
                         text(currentMessage.getMessage());
+                        textHAlign(Align.Left);
+                        textVAlign(VAlign.Top);
                         width("100%");
-                        height("100px");
-                        color(Color.WHITE);
-                        font("Interface/Fonts/Default.fnt");
+                        height("335px");
+                        color(Color.BLACK);
+                        font("Interface/Fonts/Ubuntu-C.ttf");
                         wrap(true);
+                        margin("30px");
                     }});
                 }});
             }});

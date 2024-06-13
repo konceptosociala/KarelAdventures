@@ -1,10 +1,14 @@
 package org.konceptosociala.kareladventures.game.player;
 
+import java.io.Serializable;
+
 import lombok.Getter;
 import lombok.ToString;
 
 @ToString
-public class Health {
+public class Health implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private static final int HP_MIN = 0;
     private static final int HP_MAX = 100;
 

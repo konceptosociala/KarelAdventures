@@ -50,6 +50,8 @@ public class MsgBox extends LayerBuilder {
             text(new TextBuilder(id+"_message") {{
                 align(Align.Left);
                 textHAlign(Align.Left);
+                valign(VAlign.Center);
+                textVAlign(VAlign.Top);
                 width("400px");
                 height("275px");
                 text("                                                            ");

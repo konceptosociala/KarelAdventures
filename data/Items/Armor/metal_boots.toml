@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.metal_boots"
+name = "Металеві чоботи"
+description = ""
+icon_path = "Interface/Items/Metal_Boots.png"
+item_kind = "Boots"
+item_rareness = "Common"
+benefit = 2

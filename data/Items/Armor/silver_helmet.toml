@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.silver_helmet"
+name = "Срібний шолом"
+description = ""
+icon_path = "Interface/Items/Silver_Helmet.png"
+item_kind = "Helmet"
+item_rareness = "Silver"
+benefit = 3

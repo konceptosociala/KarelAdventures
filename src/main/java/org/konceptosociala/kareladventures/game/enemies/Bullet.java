@@ -1,36 +1,19 @@
 package org.konceptosociala.kareladventures.game.enemies;
 
 import com.jme3.asset.AssetManager;
-import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.material.Material;
 import com.jme3.math.*;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-import com.jme3.scene.shape.Box;
-import lombok.extern.java.Log;
-import org.konceptosociala.kareladventures.game.player.Energy;
-import org.konceptosociala.kareladventures.game.player.Health;
-import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.state.GameState;
-import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Console;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 
 @Getter
 @Setter

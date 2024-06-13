@@ -19,8 +19,12 @@ import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.LoadingBarBuilder;
-import org.konceptosociala.kareladventures.ui.PauseBlur;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
+import org.konceptosociala.kareladventures.utils.Level;
+import org.konceptosociala.kareladventures.utils.SaveLoadException;
+import org.konceptosociala.kareladventures.utils.SaveLoader;
+import org.konceptosociala.kareladventures.utils.TomlException;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -79,6 +83,8 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         Saving,
     }
 
+    private SaveLoader saveLoader;
+
     private KarelAdventures app;
     private AssetManager assetManager;
     @Getter(AccessLevel.NONE)
@@ -95,11 +101,11 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private KarelFarmState karelFarmState;
     private DialogState dialogState;
     private InventoryState inventoryState;
-    private PauseState pauseState;
     private ChaseCamera chaseCam;
     private Sun sun;
     private World world;
     private Player player;
+    private Level currentLevel;
 
     private final LoadType loadType;
     private Element progressBarElement;
@@ -117,7 +123,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         this.inputManager = this.app.getInputManager();
         this.fpp = this.app.getFpp();
         this.viewPort = this.app.getViewPort();
-        this.bulletAppState = this.app.getBulletAppState();
         this.rootNode = this.app.getRootNode();
         this.nifty = this.app.getNifty();
     }
@@ -135,9 +140,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                 image(new ImageBuilder("load_game_bg") {{
                     width("100%");
                     height("100%");
-                    filename("Interface/load_bg.png");
+                    filename("Interface/UI/load_bg.png");
                 }});
-                
+
                 panel(new PanelBuilder("load_game_panel"){{
                     childLayoutVertical();
                     align(Align.Center);
@@ -154,6 +159,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
                     control(new LabelBuilder("loading_text"){{
                         align(Align.Center);
+                        font("Interface/Fonts/Ubuntu-C.ttf");
                         text("                                                  ");
                     }});
                 }});
@@ -167,15 +173,16 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     @Override
     public void update(float tpf) {
         switch (frameCount) {
-            case 1 -> setProgress(0.0f, "Loading player...",        this::loadTextRenderer);
-            case 2 -> setProgress(0.1f, "Loading NPC...",           this::loadPlayer);
-            case 3 -> setProgress(0.2f, "Loading enemies...",       this::loadNPC);
-            case 4 -> setProgress(0.3f, "Loading environment...",   this::loadEnemies);
-            case 5 -> setProgress(0.6f, "Initializing sky...",      this::loadEnvironment);
-            case 6 -> setProgress(0.9f, "Setting up lighting...",   this::loadSky); 
-            case 7 -> loadLighting();
+            case 1 -> setProgress(0.0f, "Завантаження фізики...",       this::loadTextRenderer);
+            case 2 -> setProgress(0.1f, "Завантаження гравця...",       this::loadPhysics);
+            case 3 -> setProgress(0.2f, "Завантаження НІПів...",        this::loadPlayer);
+            case 4 -> setProgress(0.3f, "Завантаження ворогів...",      this::loadNPC);
+            case 5 -> setProgress(0.4f, "Завантаження середовища...",   this::loadEnemies);
+            case 6 -> setProgress(0.6f, "Ініціалізація неба...",        this::loadEnvironment);
+            case 7 -> setProgress(0.9f, "Налаштування світла...",       this::loadSky); 
+            case 8 -> loadLighting();
         }
-        
+      
         if (lightsPrepared == true) {
             setProgress(1.0f, "Finished.", null);
             stateManager.attach(new GameState(this));
@@ -185,26 +192,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
         frameCount++;
     }
-
-/*<<<<<<< HEAD
-    private void initPlayer(){
-        player = new Player(assetManager,new Vector3f(10,10,10),this.app.getRootNode(),bulletAppState);
-        rootNode.attachChild(player);
-        bulletAppState.getPhysicsSpace().add(player.getCharacterCollider());
-        bulletAppState.getPhysicsSpace().addAll(player);
-        player.getCharacterCollider().setGravity(new Vector3f(0,-10,0));
-        player.getCharacterCollider().setAngularFactor(0f);
-        chaseCam = initChaseCam();
-    }*/
-    /*private void initEnemies(){
-        enemyRoot = new Node();
-        enemyRoot.setUserData("name","enemy_root");
-        this.app.getRootNode().attachChild(enemyRoot);
-        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(0,10,0), assetManager,this.app.getRootNode(),bulletAppState,100));
-        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(10,10,10), assetManager,this.app.getRootNode(),bulletAppState,100));
-        enemyRoot.attachChild(new Enemy("Bug",new Vector3f(-20,10,-20), assetManager,this.app.getRootNode(),bulletAppState,100));
-*/
-//=======
 
     private void setProgress(final float progress, String loadingText, Runnable loadMethod) {
         if (loadMethod != null)
@@ -216,7 +203,13 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         progressBarElement.getParent().layoutElements();
 
         textRenderer.setText(loadingText);
-//>>>>>>> ee0f99a7d91c8033ed06035936f98463a7f4ef5f
+    }
+
+    private void loadPhysics() {
+        bulletAppState = new BulletAppState();
+        bulletAppState.setDebugEnabled(true);
+        stateManager.attach(bulletAppState);
+        bulletAppState.setEnabled(false);
     }
 
     private void loadLighting() {
@@ -233,7 +226,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                 }
             }
         );
-        probe.getArea().setRadius(200);
+        probe.getArea().setRadius(1000);
         rootNode.addLight(probe);
 
         rootNode.setShadowMode(ShadowMode.CastAndReceive);
@@ -249,10 +242,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void loadEnvironment() {
-        switch (loadType) {
-            case NewGame -> initEnvironment();
-            case Saving -> initEnvironmentFromFile();
-        }
+        world = new World("Scenes/scene.glb", "Scenes/scene_collider.glb", assetManager);
+        rootNode.attachChild(world);
+        bulletAppState.getPhysicsSpace().addAll(world);
     }
 
     private void loadEnemies() {
@@ -269,7 +261,27 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     }
 
     private void loadPlayer() {
-        player = new Player(assetManager, new Vector3f(0,10,0), bulletAppState);
+        if (loadType == LoadType.Saving) {
+            try {
+                saveLoader = SaveLoader.load("data/Saves/karel.sav");
+            } catch (SaveLoadException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+
+            player = new Player(assetManager, saveLoader.getPlayerPosition(), bulletAppState);
+
+            player.setEnergy(saveLoader.getPlayerEnergy());
+            player.setHealth(saveLoader.getPlayerHealth());
+            player.setInventory(saveLoader.getPlayerInventory());
+            player.setBalance(saveLoader.getBalance());
+
+            currentLevel = saveLoader.getCurrentLevel();
+        } else {
+            player = new Player(assetManager, new Vector3f(0,10,0), bulletAppState);
+            currentLevel = Level.Village;
+        }
+
         rootNode.attachChild(player);
 
         inventoryState = new InventoryState(player.getInventory());
@@ -280,11 +292,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         stateManager.attach(dialogState);
         dialogState.setEnabled(false);
 
-        pauseState = new PauseState();
-        stateManager.attach(pauseState);
-        pauseState.setEnabled(false);
-
-        karelFarmState = new KarelFarmState();
+        karelFarmState = new KarelFarmState(player);
         stateManager.attach(karelFarmState);
         karelFarmState.setEnabled(false);
 
@@ -311,40 +319,39 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         interactableRoot.setUserData("name", "interactable_root");
         rootNode.attachChild(interactableRoot);
 
-        NPC pechkurova = new NPC(
-            "Models/pechkurova.glb",
-            "Pechkurova_idle",
-            new Dialog(
-                List.of(
-                    new DialogMessage("Sister Olena", "Hello, World!"),
-                    new DialogMessage("You", "Ok.")
-                ), 
-                new Dialog(
-                    List.of(
-                        new DialogMessage("Sister Olena", "Hello again!"),
-                        new DialogMessage("You", "Ok again...")
-                    ), 
-                    null
-                )
-            ), 
-            new Vector3f(0, 0, 0),
-            assetManager,
-            bulletAppState
-        );
-        interactableRoot.attachChild(pechkurova);
+        try {
+            NPC sisterOlena = new NPC(
+                "Sister Olena",
+                "Models/pechkurova.glb",
+                "Pechkurova_idle",
+
+                    new Dialog("data/Dialogs/sister_olena_1.toml", 
+                    new Dialog("data/Dialogs/sister_olena_2.toml", 
+                    new Dialog("data/Dialogs/sister_olena_3.toml", null))),
+
+                new Vector3f(0, 0, 0),
+                assetManager,
+                bulletAppState
+            );
+            interactableRoot.attachChild(sisterOlena);
+
+            sisterOlena.getLastDialog().setNextDialog(sisterOlena.getDialog());
+        } catch (TomlException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        if (loadType == LoadType.Saving) {
+            for (var entry : saveLoader.getDialogs().entrySet()) {
+                var npc = interactableRoot.getChild(entry.getKey());
+                if (npc != null && npc instanceof NPC) {
+                    ((NPC) npc).setDialog(entry.getValue());
+                }
+            }
+        }
 
         KarelFarm karelFarm = new KarelFarm(assetManager, new Vector3f(10, 0, 0), bulletAppState);
         interactableRoot.attachChild(karelFarm);
-    }
-
-    private void initEnvironment() {
-        world = new World("Scenes/scene.glb", assetManager);
-        rootNode.attachChild(world);
-        bulletAppState.getPhysicsSpace().addAll(world);
-    }
-
-    private void initEnvironmentFromFile() {
-        throw new UnsupportedOperationException("not implemented `saving/loading`");
     }
 
     private ChaseCamera initChaseCam() {

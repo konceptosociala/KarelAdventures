@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.silver_leggings"
+name = "Срібні поножі"
+description = ""
+icon_path = "Interface/Items/Silver_Leggings.png"
+item_kind = "Leggings"
+item_rareness = "Silver"
+benefit = 3

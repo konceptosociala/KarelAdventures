@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.silver_chestplate"
+name = "Срібний нагрудник"
+description = ""
+icon_path = "Interface/Items/Silver_Chestplate.png"
+item_kind = "Chestplate"
+item_rareness = "Silver"
+benefit = 4

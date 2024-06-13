@@ -8,7 +8,6 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.material.Material;
 import com.jme3.math.*;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
@@ -16,9 +15,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 
-import org.konceptosociala.kareladventures.game.enemies.EnemyTower;
 import org.konceptosociala.kareladventures.state.GameState;
-import org.konceptosociala.kareladventures.game.enemies.Enemy;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
@@ -36,13 +33,11 @@ public class Player extends Node implements IUpdatable {
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
+    private AssetManager thisAssetManager;
 
     private Spatial model;
     private CollisionShape characterCollider;
     private RigidBodyControl characterControl;
-    private Health health;
-    private Energy energy;
-    private Inventory inventory;
     private Box legs;
     private AnimComposer animComposer;
     private float speed = 8f;
@@ -51,7 +46,11 @@ public class Player extends Node implements IUpdatable {
     private boolean onGround = false;
     private Vector3f sidewardMovement = new Vector3f().zero();
     private Vector3f forwardMovement = new Vector3f().zero();
-    private AssetManager thisAssetManager;
+
+    private Health health;
+    private Energy energy;
+    private Inventory inventory;
+    private int balance = 150;
 
 
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state) {
@@ -65,7 +64,7 @@ public class Player extends Node implements IUpdatable {
         attachChild(model);
         characterCollider = new CapsuleCollisionShape(0.5f,1f);
         characterControl = new RigidBodyControl(characterCollider, 1);
-        characterControl.setFriction(1);
+        characterControl.setFriction(0);
         characterControl.setGravity(new Vector3f(0,-10,0));
         characterControl.setAngularFactor(0f);
         addControl(characterControl);
@@ -187,27 +186,27 @@ public class Player extends Node implements IUpdatable {
         return false;
     }
 
-    private void rotateInMovementDirection(){
-        if(characterControl.getLinearVelocity().mult(1,0,1).length()>0.1){
-            float XZVelocityVectorToYRotation = FastMath.atan2(characterControl.getLinearVelocity().x,characterControl.getLinearVelocity().z)+FastMath.HALF_PI;/**FastMath.sign(characterControl.getLinearVelocity().x*characterControl.getLinearVelocity().z);*/
-            //System.out.println(XZVelocityVectorToYRotation+";"+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)));
-            //float TORQUE = (XZVelocityVectorToYRotation-characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))/2);
-            //System.out.println(TORQUE);
-            //float a = (XZVelocityVectorToYRotation+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))*2-);
-            characterControl.setPhysicsRotation(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,new Vector3f(0,1,0)));
-            //characterControl.setAngularVelocity(new Vector3f(0,TORQUE,0));
-        } else {
-            //characterControl.setAngularVelocity(new Vector3f(0,0,0));
-        }
-    }
+    // private void rotateInMovementDirection(){
+    //     if(characterControl.getLinearVelocity().mult(1,0,1).length()>0.1){
+    //         float XZVelocityVectorToYRotation = FastMath.atan2(characterControl.getLinearVelocity().x,characterControl.getLinearVelocity().z)+FastMath.HALF_PI;/**FastMath.sign(characterControl.getLinearVelocity().x*characterControl.getLinearVelocity().z);*/
+    //         //System.out.println(XZVelocityVectorToYRotation+";"+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)));
+    //         //float TORQUE = (XZVelocityVectorToYRotation-characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))/2);
+    //         //System.out.println(TORQUE);
+    //         //float a = (XZVelocityVectorToYRotation+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))*2-);
+    //         characterControl.setPhysicsRotation(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,new Vector3f(0,1,0)));
+    //         //characterControl.setAngularVelocity(new Vector3f(0,TORQUE,0));
+    //     } else {
+    //         //characterControl.setAngularVelocity(new Vector3f(0,0,0));
+    //     }
+    // }
 
-    private void addRollImpulse(RigidBodyControl rollRigidBody){
-        rollRigidBody.applyImpulse(quaternionToDirection(rollRigidBody.getPhysicsRotation()).mult(10),new Vector3f(0,0,0));
-    }
+    // private void addRollImpulse(RigidBodyControl rollRigidBody){
+    //     rollRigidBody.applyImpulse(quaternionToDirection(rollRigidBody.getPhysicsRotation()).mult(10),new Vector3f(0,0,0));
+    // }
 
-    private void returnToNormalCollider(RigidBodyControl rollRigidBody){
-        rollRigidBody.setEnabled(false);
-    }
+    // private void returnToNormalCollider(RigidBodyControl rollRigidBody){
+    //     rollRigidBody.setEnabled(false);
+    // }
 
     private void performMeleeAttack(float length, float width, float height){
         Vector3f attackColliderOffset = new Vector3f();
@@ -225,38 +224,38 @@ public class Player extends Node implements IUpdatable {
         return new Vector3f((float)(vec.x*Math.cos(rad)+vec.z*Math.sin(rad)), vec.y, (float)(-vec.x*Math.sin(rad)+vec.z*Math.cos(rad)));
     }
 
-    private static Vector3f quaternionToDirection(Quaternion q) {
-        // Normalize the quaternion (assuming it might not be already)
-        double w = q.getW();
-        double x = q.getX();
-        double y = q.getY();
-        double z = q.getZ();
-        double norm = Math.sqrt(w * w + x * x + y * y + z * z);
-        w /= norm;
-        x /= norm;
-        y /= norm;
-        z /= norm;
+    // private static Vector3f quaternionToDirection(Quaternion q) {
+    //     // Normalize the quaternion (assuming it might not be already)
+    //     double w = q.getW();
+    //     double x = q.getX();
+    //     double y = q.getY();
+    //     double z = q.getZ();
+    //     double norm = Math.sqrt(w * w + x * x + y * y + z * z);
+    //     w /= norm;
+    //     x /= norm;
+    //     y /= norm;
+    //     z /= norm;
 
-        // Double the first 3 components for efficiency (common factor in rotation formula)
-        double x2 = 2.0 * x;
-        double y2 = 2.0 * y;
-        double z2 = 2.0 * z;
+    //     // Double the first 3 components for efficiency (common factor in rotation formula)
+    //     double x2 = 2.0 * x;
+    //     double y2 = 2.0 * y;
+    //     double z2 = 2.0 * z;
 
-        // Rotation formula (assuming a unit vector as input)
-        double[] direction = new double[3];
-        direction[0] = 1.0 - y2 * y - z2 * z;
-        direction[1] = 2.0 * (x * y + w * z);
-        direction[2] = 2.0 * (x * z - w * y);
+    //     // Rotation formula (assuming a unit vector as input)
+    //     double[] direction = new double[3];
+    //     direction[0] = 1.0 - y2 * y - z2 * z;
+    //     direction[1] = 2.0 * (x * y + w * z);
+    //     direction[2] = 2.0 * (x * z - w * y);
 
-        return new Vector3f((float)direction[0],(float)direction[1],(float)direction[2]);
-    }
+    //     return new Vector3f((float)direction[0],(float)direction[1],(float)direction[2]);
+    // }
 
-    private static void copyRigidBodyStats(RigidBodyControl to,RigidBodyControl from){
-        to.setPhysicsRotation(from.getPhysicsRotation());
-        to.setAngularVelocity(from.getAngularVelocity());
-        to.setGravity(from.getGravity());
-        to.setFriction(from.getFriction());
-        to.setPhysicsSpace(from.getPhysicsSpace());
-        to.setPhysicsLocation(from.getPhysicsLocation());
-    }
+    // private static void copyRigidBodyStats(RigidBodyControl to,RigidBodyControl from){
+    //     to.setPhysicsRotation(from.getPhysicsRotation());
+    //     to.setAngularVelocity(from.getAngularVelocity());
+    //     to.setGravity(from.getGravity());
+    //     to.setFriction(from.getFriction());
+    //     to.setPhysicsSpace(from.getPhysicsSpace());
+    //     to.setPhysicsLocation(from.getPhysicsLocation());
+    // }
 }

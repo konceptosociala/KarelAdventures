@@ -12,7 +12,7 @@ import lombok.Getter;
 
 @Getter
 public class InventoryCell extends PanelBuilder {
-    public static final String TRANSPARENT_ICON = "Interface/transparent.png";
+    public static final String TRANSPARENT_ICON = "Interface/UI/transparent.png";
 
     private final InventoryCellId cellId;
     private Optional<Item> cellItem;
@@ -63,7 +63,23 @@ public class InventoryCell extends PanelBuilder {
                 filename(item.get().getIconPath());
             else
                 filename(TRANSPARENT_ICON);
-                
+        }});
+
+        onHoverEffect(new HoverEffectBuilder("inventory-hint") {{
+            effectParameter("targetElement", "hint_panel");
+            effectParameter("hasItem", String.valueOf(item.isPresent()));
+            effectParameter("itemName", item.isPresent() ? item.get().getName() : "");
+            effectParameter("itemDescription", item.isPresent() ? item.get().getDescription() : "");
+            effectParameter("itemRareness", 
+                item.isPresent()
+                    ? item.get().getItemRareness().toString()
+                    : ""
+            );
+            effectParameter("itemBenefit", 
+                item.isPresent() && item.get().getBenefit().isPresent()
+                    ? String.valueOf(item.get().getBenefit().get())
+                    : ""
+            );
         }});
     }
 }

@@ -1,0 +1,8 @@
+[item]
+id = "karel.item.metal_sword"
+name = "Металічний меч"
+description = "Простий, але надійний меч\nдля основних бойових задач."
+icon_path = "Interface/Items/Metal_Sword.png"
+item_kind = "Weapon"
+item_rareness = "Common"
+benefit = 4

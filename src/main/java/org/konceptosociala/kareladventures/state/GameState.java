@@ -2,25 +2,34 @@ package org.konceptosociala.kareladventures.state;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import de.lessvoid.nifty.tools.Color;
 import lombok.Getter;
+
+import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
+
+import java.util.HashMap;
+
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
-import org.konceptosociala.kareladventures.game.enemies.Enemy;
-import org.konceptosociala.kareladventures.game.enemies.EnemyTower;
+import org.konceptosociala.kareladventures.game.npc.Dialog;
+import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Player;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
+import org.konceptosociala.kareladventures.utils.Level;
+import org.konceptosociala.kareladventures.utils.SaveLoadException;
+import org.konceptosociala.kareladventures.utils.SaveLoader;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.environment.EnvironmentCamera;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -29,6 +38,8 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.light.LightProbe;
+import com.jme3.math.Quaternion;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.LayerBuilder;
@@ -46,6 +57,8 @@ public class GameState extends BaseAppState  {
     private BulletAppState bulletAppState;
     private InputManager inputManager;
     private Nifty nifty;
+    private Node rootNode;
+    private InterfaceBlur interfaceBlur;
     
     private KarelFarmState karelFarmState;
     private PauseState pauseState;
@@ -53,16 +66,18 @@ public class GameState extends BaseAppState  {
     private InventoryState inventoryState;
     private ChaseCamera chaseCam;
     private Sun sun;
+    private LightProbe probe;
     private World world;
     private Player player;
-    private Node rootNode;
     private Node enemyRoot;
     private Node interactableRoot;
-    // private NavMesh navMesh;
+    private Level currentLevel;
+
+    private boolean gameOver = false;
 
     public GameState(LoadGameState loadGameState) {
+        bulletAppState = loadGameState.getBulletAppState();
         assetManager = loadGameState.getAssetManager();
-        pauseState = loadGameState.getPauseState();
         dialogState = loadGameState.getDialogState();
         inventoryState = loadGameState.getInventoryState();
         karelFarmState = loadGameState.getKarelFarmState();
@@ -73,6 +88,8 @@ public class GameState extends BaseAppState  {
         rootNode = loadGameState.getRootNode();
         enemyRoot = loadGameState.getEnemyRoot();
         interactableRoot = loadGameState.getInteractableRoot();
+        currentLevel = loadGameState.getCurrentLevel();
+        probe = loadGameState.getProbe();
     }
 
     @Override
@@ -80,20 +97,25 @@ public class GameState extends BaseAppState  {
         this.app = (KarelAdventures) app;
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
-        this.bulletAppState = this.app.getBulletAppState();
         this.nifty = this.app.getNifty();
+        this.interfaceBlur = new InterfaceBlur(this.app.getFpp());
         BulletCollisionListener bulletCollisionListener = new BulletCollisionListener();
         bulletCollisionListener.setBulletAppState(bulletAppState);
         bulletAppState.getPhysicsSpace().addCollisionListener(bulletCollisionListener);
         initPlayer();
         initEnemies();
         initControls();
+
+        pauseState = new PauseState(this);
+        appStateManager.attach(pauseState);
+        pauseState.setEnabled(false);
     }
 
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(false);
         bulletAppState.setEnabled(true);
+        chaseCam.setEnabled(true);
 
         nifty.addScreen("hud_screen", new ScreenBuilder("HUD screen") {{
             controller(new DefaultScreenController());
@@ -105,18 +127,13 @@ public class GameState extends BaseAppState  {
                     childLayoutVertical();
 
                     text(new TextBuilder("health"){{
-                        text("Health: ???");
-                        font("Interface/Fonts/Default.fnt");
+                        text("Життя: ???");
+                        font("Interface/Fonts/Ubuntu-C.ttf");
                     }});
 
                     text(new TextBuilder("energy"){{
-                        text("Energy: ???");
-                        font("Interface/Fonts/Default.fnt");
-                    }});
-                    text(new TextBuilder("data"){{
-                        text("Health: ???");
-                        color(Color.BLACK);
-                        font("Interface/Fonts/Default.fnt");
+                        text("Енергія: ???");
+                        font("Interface/Fonts/Ubuntu-C.ttf");
                     }});
 
                 }});
@@ -128,9 +145,31 @@ public class GameState extends BaseAppState  {
         nifty.gotoScreen("hud_screen");
     }
 
+    public void save() {
+        var saveLoader = new SaveLoader(
+            player.getHealth(), 
+            player.getEnergy(), 
+            player.getBalance(),
+            player.getInventory(), 
+            dialogsToMap(), 
+            player.getLocalTranslation(), 
+            currentLevel
+        );
+
+        try {
+            saveLoader.save("data/Saves/karel.sav");
+        } catch (SaveLoadException e) {
+            LOG.severe("Cannot save game: "+e.getMessage());
+        }
+
+        LOG.info("Game saved.");
+    }
+
     @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
+        if (gameOver) return;
+
         player.update(tpf);
         for (Spatial i : enemyRoot.getChildren()) {
             if (i instanceof IUpdatable) {
@@ -149,11 +188,32 @@ public class GameState extends BaseAppState  {
             .findElementById("energy")
             .getRenderer(TextRenderer.class)
             .setText("Energy: " + player.getEnergy().getValue());
+
+        if (player.getHealth().getValue() == 0) {
+            gameOver = true;
+            appStateManager.attach(new GameOverState(this));
+        }
     }
 
     @Override
     protected void cleanup(Application app) {
-        this.app.getRootNode().detachAllChildren();
+        if (!gameOver)
+            save();
+
+        bulletAppState.cleanup();
+        inputManager.clearMappings();
+        appStateManager.detach(karelFarmState);
+        appStateManager.detach(pauseState);
+        appStateManager.detach(dialogState);
+        appStateManager.detach(inventoryState);
+        appStateManager.detach(appStateManager.getState(EnvironmentCamera.class));
+        chaseCam.cleanupWithInput(inputManager);
+        rootNode.removeLight(probe);
+        rootNode.removeLight(sun);
+        sun.cleanup();
+        
+        rootNode.detachAllChildren();
+        app.getCamera().setRotation(new Quaternion());
     }
 
     @Override
@@ -197,6 +257,8 @@ public class GameState extends BaseAppState  {
 
     final private ActionListener actionListener = new ActionListener() {
         public void onAction(String action, boolean isPressed, float tpf) {
+            if (gameOver) return;
+
             if (action.equals("ESCAPE") && isPressed) {
                 if (inventoryState.isEnabled()) {
                     chaseCam.setEnabled(true);
@@ -208,7 +270,6 @@ public class GameState extends BaseAppState  {
                     chaseCam.setEnabled(true);
                     karelFarmState.setEnabled(false);
                 } else if (pauseState.isEnabled()) {
-                    chaseCam.setEnabled(true);
                     pauseState.setEnabled(false);
                     GameState.this.setEnabled(true);
                 } else {
@@ -271,6 +332,8 @@ public class GameState extends BaseAppState  {
     final private AnalogListener analogListener = new AnalogListener() {
         @Override
         public void onAnalog(String action, float value, float tpf) {
+            if (gameOver) return;
+
             if (inventoryState.isEnabled() 
                 || dialogState.isEnabled() 
                 || pauseState.isEnabled()
@@ -290,4 +353,17 @@ public class GameState extends BaseAppState  {
             }
         }
     };
+
+    private HashMap<String, Dialog> dialogsToMap() {
+        var dialogsMap = new HashMap<String, Dialog>();
+
+        for (var spatial : interactableRoot.getChildren()) {
+            if (spatial instanceof NPC) {
+                var npc = (NPC) spatial;
+                dialogsMap.put(npc.getName(), npc.getDialog());
+            }
+        }
+
+        return dialogsMap;
+    }
 }
