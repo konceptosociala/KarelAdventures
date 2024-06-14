@@ -63,7 +63,7 @@ public class Player extends Node implements IUpdatable {
         attachChild(model);
         characterCollider = new CapsuleCollisionShape(0.5f,1f);
         characterControl = new RigidBodyControl(characterCollider, 1);
-        characterControl.setFriction(1);
+        characterControl.setFriction(0);
         characterControl.setGravity(new Vector3f(0,-10,0));
         characterControl.setAngularFactor(0f);
         addControl(characterControl);
