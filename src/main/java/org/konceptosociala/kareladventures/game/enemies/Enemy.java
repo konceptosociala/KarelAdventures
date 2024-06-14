@@ -12,7 +12,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import com.jme3.scene.shape.Box;
-import org.konceptosociala.kareladventures.game.player.Energy;
 import org.konceptosociala.kareladventures.game.player.Health;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.state.GameState;
@@ -38,7 +37,6 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
     private CollisionShape characterCollider;
     private RigidBodyControl characterControl;
     private Health health;
-    private Energy energy;
     private float movementSpeed = 2f;
     private float XZVelocityVectorToYRotation;
     private AssetManager assetManager;
@@ -69,7 +67,6 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
         this.model.setName(name);
         this.attachChild(model);
         this.health = new Health(health);
-        this.energy = new Energy(10);
         this.characterCollider = new CapsuleCollisionShape(0.6f,1f);
         this.characterControl = new RigidBodyControl(this.characterCollider,0.3f);
         this.characterControl.setFriction(1);

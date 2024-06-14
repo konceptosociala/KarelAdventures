@@ -1,6 +1,5 @@
 package org.konceptosociala.kareladventures;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -42,11 +41,10 @@ public class KarelAdventures extends SimpleApplication {
 
     public KarelAdventures() {
         super();
-        // appSettings.setWindowSize(1024, 768);
-        setFullscreen();
+        appSettings.setMinResolution(1024, 768);
         setDisplayStatView(false);
         setDisplayFps(false);
-        setShowSettings(false);
+        setShowSettings(true);
         setSettings(appSettings);
     }
     
@@ -78,16 +76,6 @@ public class KarelAdventures extends SimpleApplication {
             path, 
             filterLinear
         );
-    }
-    
-    public void setFullscreen() {   
-        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        DisplayMode[] modes = device.getDisplayModes();
-        int i = 0;
-        appSettings.setResolution(modes[i].getWidth(), modes[i].getHeight());
-        appSettings.setFrequency(modes[i].getRefreshRate());
-        appSettings.setBitsPerPixel(modes[i].getBitDepth());
-        appSettings.setFullscreen(device.isFullScreenSupported());
     }
 
     private Nifty initNifty() {

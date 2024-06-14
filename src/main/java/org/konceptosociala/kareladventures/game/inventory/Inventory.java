@@ -83,6 +83,30 @@ public class Inventory implements Serializable {
         return false;
     }
 
+    public boolean hasItem(Item item) {
+        for (int i = 0; i < items.length; i++) {
+            for (int j = 0; j < items[i].length; j++) {
+                if (items[i][j] == item) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean hasItem(ItemRareness rareness) {
+        for (int i = 0; i < items.length; i++) {
+            for (int j = 0; j < items[i].length; j++) {
+                if (items[i][j].getItemRareness().equals(rareness)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public Optional<Item> getItem(InventoryCellId id) {
         var namedCell = id.getNamedCell();
         var gridCell = id.getGridCell();

@@ -14,6 +14,7 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
@@ -32,15 +33,17 @@ public class NPC extends InteractableNode {
         String npcName,
         String modelPath, 
         String idleAnimationName, 
-        Dialog dialog2, 
+        Dialog dialog, 
         Vector3f position,
+        Quaternion rotation,
         AssetManager assetManager,
         BulletAppState bulletAppState
     ){
         super(npcName);
         setLocalTranslation(position);
+        setLocalRotation(rotation);
         this.model = assetManager.loadModel(modelPath);
-        this.collider = new CapsuleCollisionShape(0.5f, 3f);
+        this.collider = new CapsuleCollisionShape(0.8f, 5f);
         this.rigidBodyControl = new RigidBodyControl(collider, 1);
         this.rigidBodyControl.setKinematic(true);
         this.rigidBodyControl.setGravity(new Vector3f(0,0,0));
@@ -49,7 +52,7 @@ public class NPC extends InteractableNode {
         bulletAppState.getPhysicsSpace().add(rigidBodyControl);
         bulletAppState.getPhysicsSpace().addAll(this);
 
-        this.dialog = dialog2;
+        this.dialog = dialog;
     }
 
     @Override

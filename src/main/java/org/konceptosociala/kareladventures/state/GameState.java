@@ -15,6 +15,7 @@ import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
 import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
+import org.konceptosociala.kareladventures.game.player.Health;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
@@ -42,12 +43,13 @@ import com.jme3.light.LightProbe;
 import com.jme3.math.Quaternion;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.builder.ImageBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
-import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.DefaultScreenController;
+import de.lessvoid.nifty.tools.Color;
 
 @Getter
 public class GameState extends BaseAppState  {
@@ -64,6 +66,7 @@ public class GameState extends BaseAppState  {
     private PauseState pauseState;
     private DialogState dialogState;
     private InventoryState inventoryState;
+    private GuideBookState guideBookState;
     private ChaseCamera chaseCam;
     private Sun sun;
     private LightProbe probe;
@@ -78,9 +81,6 @@ public class GameState extends BaseAppState  {
     public GameState(LoadGameState loadGameState) {
         bulletAppState = loadGameState.getBulletAppState();
         assetManager = loadGameState.getAssetManager();
-        dialogState = loadGameState.getDialogState();
-        inventoryState = loadGameState.getInventoryState();
-        karelFarmState = loadGameState.getKarelFarmState();
         chaseCam = loadGameState.getChaseCam();
         sun = loadGameState.getSun();
         world = loadGameState.getWorld();
@@ -109,6 +109,22 @@ public class GameState extends BaseAppState  {
         pauseState = new PauseState(this);
         appStateManager.attach(pauseState);
         pauseState.setEnabled(false);
+
+        inventoryState = new InventoryState(player.getInventory(), interfaceBlur);
+        appStateManager.attach(inventoryState);
+        inventoryState.setEnabled(false);
+
+        guideBookState = new GuideBookState(interfaceBlur);
+        appStateManager.attach(guideBookState);
+        guideBookState.setEnabled(false);
+
+        dialogState = new DialogState(interfaceBlur);
+        appStateManager.attach(dialogState);
+        dialogState.setEnabled(false);
+
+        karelFarmState = new KarelFarmState(player, interfaceBlur);
+        appStateManager.attach(karelFarmState);
+        karelFarmState.setEnabled(false);
     }
 
     @Override
@@ -121,23 +137,117 @@ public class GameState extends BaseAppState  {
             controller(new DefaultScreenController());
 
             layer(new LayerBuilder("hud_layer") {{
-                childLayoutHorizontal();
+                childLayoutVertical();
+                padding("20px");
 
                 panel(new PanelBuilder("hud_panel") {{
-                    childLayoutVertical();
+                    childLayoutHorizontal();
 
-                    text(new TextBuilder("health"){{
-                        text("Життя: ???");
-                        font("Interface/Fonts/Ubuntu-C.ttf");
+                    panel(new PanelBuilder("karel_hud") {{
+                        childLayoutCenter();
+
+                        image(new ImageBuilder("karel_hud_image"){{
+                            filename("Interface/UI/KarelHUD.png");
+                            width("128px");
+                            height("128px");
+                        }});
+
+                        image(new ImageBuilder("karel_hud_border"){{
+                            filename("Interface/UI/Border/panel-border-005.png");
+                            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                            width("128px");
+                            height("128px");
+                        }});
                     }});
 
-                    text(new TextBuilder("energy"){{
-                        text("Енергія: ???");
-                        font("Interface/Fonts/Ubuntu-C.ttf");
+                    panel(new PanelBuilder("health_bar") {{
+                        childLayoutCenter();
+                        marginLeft("20px");
+
+                        image(new ImageBuilder("karel_hud_border") {{
+                            filename("Interface/UI/Transparent center/panel-transparent-center-005.png");
+                            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                            width("384px");
+                            height("128px");
+                        }});
+
+                        panel(new PanelBuilder("health_params") {{
+                            childLayoutVertical();
+                            padding("20px");
+
+                            text(new TextBuilder("health_label") {{
+                                text("Показник життя");
+                                color(Color.BLACK);
+                                font("Interface/Fonts/Ubuntu-C.ttf");
+                                marginBottom("24px");
+                            }});
+
+                            panel(new PanelBuilder("health") {{
+                                childLayoutCenter();
+
+                                panel(new PanelBuilder("health_idle") {{
+                                    backgroundColor(new Color(0.4f, 0, 0, 1));
+                                    width("344px");
+                                    height("28px");
+                                }});
+                                
+                                panel(new PanelBuilder("health_active") {{
+                                    backgroundColor(new Color(0.8f, 0, 0, 1));
+                                    width("344px");
+                                    height("28px");
+                                }});
+
+                                image(new ImageBuilder("health_border") {{
+                                    filename("Interface/UI/Border/panel-border-007.png");
+                                    imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                                    width("344px");
+                                    height("28px");
+                                }});
+                            }});
+                        }});
                     }});
 
                 }});
                 
+                panel(new PanelBuilder("guidebook_bar") {{
+                    childLayoutCenter();
+                    marginTop("20px");
+
+                    image(new ImageBuilder("guidebook_bar_border") {{
+                        filename("Interface/UI/Transparent center/panel-transparent-center-005.png");
+                        imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                        width("168px");
+                        height("84px");
+                    }});
+
+                    panel(new PanelBuilder("guidebook_bar_icons") {{
+                        childLayoutHorizontal();
+                        align(Align.Center);
+                        valign(VAlign.Center);
+                        width("168px");
+                        height("84px");
+
+                        panel(new PanelBuilder() {{
+                            childLayoutCenter();
+                            width("50%");
+                            height("100%");
+
+                            image(new ImageBuilder("guidebook_book") {{
+                                filename("Interface/Items/Book.png");
+                            }});
+                        }});
+
+                        panel(new PanelBuilder() {{
+                            childLayoutCenter();
+                            width("50%");
+                            height("100%");
+
+                            image(new ImageBuilder("guidebook_key") {{
+                                filename("Interface/GuideBook/Keyboard_Dark/keyboard_g_outline.png");
+                            }});
+                        }});
+                    }});
+                }});
             }});
             
         }}.build(nifty));
@@ -148,7 +258,6 @@ public class GameState extends BaseAppState  {
     public void save() {
         var saveLoader = new SaveLoader(
             player.getHealth(), 
-            player.getEnergy(), 
             player.getBalance(),
             player.getInventory(), 
             dialogsToMap(), 
@@ -164,7 +273,7 @@ public class GameState extends BaseAppState  {
 
         LOG.info("Game saved.");
     }
-
+ 
     @SuppressWarnings("null")
     @Override
     public void update(float tpf) {
@@ -177,17 +286,32 @@ public class GameState extends BaseAppState  {
             }
         }
 
-        nifty
-            .getScreen("hud_screen")
-            .findElementById("health")
-            .getRenderer(TextRenderer.class)
-            .setText("Health: " + player.getHealth().getValue());
+        // if (currentLevel.equals(Level.Village)) {
+        //     if (player.getInventory().hasItem(ItemRareness.Silver)) {
+        //         for (Spatial i : interactableRoot.getChildren()) {
+        //             if (i instanceof NPC) {
+        //                 var npc = (NPC) i;
+        //                 if (npc.getName().equals("Мудрий Кущ")) {
+        //                     try {
+        //                         npc.setDialog(
+        //                             new Dialog("data/Dialogs/bush_3.toml", 
+        //                             new Dialog("data/Dialogs/bush_4.toml", null))
+        //                         );
+        //                     } catch (TomlException e) {
+        //                         e.printStackTrace();
+        //                         System.exit(-1);
+        //                     }
+        //                     currentLevel = Level.Wasteland;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         nifty
             .getScreen("hud_screen")
-            .findElementById("energy")
-            .getRenderer(TextRenderer.class)
-            .setText("Energy: " + player.getEnergy().getValue());
+            .findElementById("health_active")
+            .setWidth(player.getHealth().getValue() * 344 / Health.HP_MAX);
 
         if (player.getHealth().getValue() == 0) {
             gameOver = true;
@@ -249,9 +373,10 @@ public class GameState extends BaseAppState  {
         inputManager.addMapping("DASH", new KeyTrigger(KeyInput.KEY_LSHIFT));
         inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping("RETURN", new KeyTrigger(KeyInput.KEY_RETURN));
+        inputManager.addMapping("GUIDEBOOK", new KeyTrigger(KeyInput.KEY_G));
 
         // Enable listeners
-        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN"});
+        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN", "GUIDEBOOK"});
         inputManager.addListener(analogListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"});
     }
 
@@ -269,6 +394,9 @@ public class GameState extends BaseAppState  {
                 } else if (karelFarmState.isEnabled()) {
                     chaseCam.setEnabled(true);
                     karelFarmState.setEnabled(false);
+                } else if (guideBookState.isEnabled()) {
+                    chaseCam.setEnabled(true);
+                    guideBookState.setEnabled(false);
                 } else if (pauseState.isEnabled()) {
                     pauseState.setEnabled(false);
                     GameState.this.setEnabled(true);
@@ -300,6 +428,11 @@ public class GameState extends BaseAppState  {
 
             if (action.equals("INVENTORY") && isPressed) {
                 inventoryState.setEnabled(true);
+                chaseCam.setEnabled(false);
+            }
+
+            if (action.equals("GUIDEBOOK") && isPressed) {
+                guideBookState.setEnabled(true);
                 chaseCam.setEnabled(false);
             }
 

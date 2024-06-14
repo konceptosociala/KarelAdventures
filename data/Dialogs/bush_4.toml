@@ -1,0 +1,5 @@
+[dialog]
+messages = [
+    { author = "Мудрий Кущ", message = "Що тобі ще треба?" },
+    { author = "Карел", message = "Нічого." },
+]

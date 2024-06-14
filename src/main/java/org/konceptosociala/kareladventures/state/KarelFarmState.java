@@ -9,6 +9,7 @@ import org.konceptosociala.kareladventures.game.inventory.Item;
 import org.konceptosociala.kareladventures.game.inventory.ItemRareness;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.ImageButton;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 import org.konceptosociala.kareladventures.ui.InvalidCellIdException;
 import org.konceptosociala.kareladventures.ui.Logo;
 import org.konceptosociala.kareladventures.ui.Margin;
@@ -46,6 +47,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     private InputManager inputManager;
     private Nifty nifty;
     private Player player;
+    private InterfaceBlur interfaceBlur;
 
     private LabyrinthCell[][] cells;
     private LabyrinthCell[][] initialCells;
@@ -57,8 +59,9 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     private int karelX;
     private int karelY;
 
-    public KarelFarmState(Player player) {
+    public KarelFarmState(Player player, InterfaceBlur blur) {
         this.player = player;
+        this.interfaceBlur = blur;
     }
 
     @Override
@@ -77,6 +80,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         won = false;
         msgBoxVisible = false;
         direction = KarelDirection.Right;
+        interfaceBlur.setEnabled(true);
 
         nifty.addScreen("karel_farm_screen", new ScreenBuilder("Karel farm screen") {{
             controller(KarelFarmState.this);
@@ -604,6 +608,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     @Override
     protected void onDisable() {
         inputManager.setCursorVisible(false);
+        interfaceBlur.setEnabled(false);
         nifty.gotoScreen("hud_screen");
     }
 

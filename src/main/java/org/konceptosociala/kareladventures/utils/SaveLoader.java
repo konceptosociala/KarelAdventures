@@ -5,7 +5,6 @@ import java.util.*;
 
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
-import org.konceptosociala.kareladventures.game.player.Energy;
 import org.konceptosociala.kareladventures.game.player.Health;
 
 import com.jme3.math.Vector3f;
@@ -21,7 +20,6 @@ public class SaveLoader implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private final Health playerHealth;
-    private final Energy playerEnergy;
     private final int balance;
     private final Inventory playerInventory;  
     private final HashMap<String, Dialog> dialogs;

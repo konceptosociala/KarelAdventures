@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.npc.DialogMessage;
 import org.konceptosociala.kareladventures.game.npc.NPC;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
@@ -31,6 +32,7 @@ public class DialogState extends BaseAppState implements ScreenController {
     private KarelAdventures app;
     private InputManager inputManager;
     private Nifty nifty;
+    private InterfaceBlur interfaceBlur;
 
     private Optional<NPC> npc = Optional.empty();
     private DialogMessage currentMessage;
@@ -38,6 +40,10 @@ public class DialogState extends BaseAppState implements ScreenController {
 
     private TextRenderer authorText;
     private TextRenderer messageText;
+
+    public DialogState(InterfaceBlur blur) {
+        this.interfaceBlur = blur;
+    }
 
     @Override
     protected void initialize(Application app) {
@@ -53,6 +59,8 @@ public class DialogState extends BaseAppState implements ScreenController {
             setEnabled(false);
             return;
         }
+
+        interfaceBlur.setEnabled(true);
 
         var dialog = npc.get().getDialog();
         inputManager.setCursorVisible(true);
@@ -85,7 +93,7 @@ public class DialogState extends BaseAppState implements ScreenController {
                         height("25px");
                         color(Color.BLACK);
                         font("Interface/Fonts/Ubuntu-C.ttf");
-                        marginTop("25px");
+                        marginTop("30px");
                         marginLeft("50px");
                     }});
 
@@ -93,7 +101,7 @@ public class DialogState extends BaseAppState implements ScreenController {
                         text(currentMessage.getMessage());
                         textHAlign(Align.Left);
                         textVAlign(VAlign.Top);
-                        width("100%");
+                        width("95%");
                         height("335px");
                         color(Color.BLACK);
                         font("Interface/Fonts/Ubuntu-C.ttf");
@@ -147,6 +155,7 @@ public class DialogState extends BaseAppState implements ScreenController {
     @Override
     protected void onDisable() {
         inputManager.setCursorVisible(false);
+        interfaceBlur.setEnabled(false);
         nifty.gotoScreen("hud_screen");
     }
 

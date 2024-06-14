@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import static org.konceptosociala.kareladventures.KarelAdventures.createImage;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
+import org.konceptosociala.kareladventures.ui.InterfaceBlur;
 import org.konceptosociala.kareladventures.ui.InvalidCellIdException;
 import org.konceptosociala.kareladventures.ui.inventory.*;
 
@@ -32,12 +33,14 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     private KarelAdventures app;
     private InputManager inputManager;
     private Nifty nifty;
+    private InterfaceBlur interfaceBlur;
     private Inventory inventory;
     private Optional<InventoryCellId> selectedItemId;
 
-    public InventoryState(Inventory inventory) {
+    public InventoryState(Inventory inventory, InterfaceBlur blur) {
         this.inventory = inventory;
         this.selectedItemId = Optional.empty();
+        this.interfaceBlur = blur;
     }
 
     @Override
@@ -50,6 +53,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     @Override
     protected void onEnable() {
         inputManager.setCursorVisible(true);
+        interfaceBlur.setEnabled(true);
 
         nifty.addScreen("inventory_screen", new ScreenBuilder("Inventory screen") {{
             controller(InventoryState.this);
@@ -239,6 +243,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
     @Override
     protected void onDisable() {
         inputManager.setCursorVisible(false);
+        interfaceBlur.setEnabled(false);
         nifty.gotoScreen("hud_screen");
     }
 

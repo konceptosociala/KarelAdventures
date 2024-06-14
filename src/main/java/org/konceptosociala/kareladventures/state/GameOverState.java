@@ -31,6 +31,7 @@ public class GameOverState extends BaseAppState implements ScreenController {
     private InterfaceBlur interfaceBlur;
     private GameState gameState;
     private KarelFarmState karelFarmState;
+    private GuideBookState guideBookState;
     private DialogState dialogState;
     private InventoryState inventoryState;
     private ChaseCamera chaseCam;
@@ -44,10 +45,11 @@ public class GameOverState extends BaseAppState implements ScreenController {
         this.app = (KarelAdventures) app;
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
-        this.bulletAppState = gameState.getBulletAppState();
         this.nifty = this.app.getNifty();
+        this.bulletAppState = gameState.getBulletAppState();
         this.interfaceBlur = gameState.getInterfaceBlur();
         this.karelFarmState = gameState.getKarelFarmState();
+        this.guideBookState = gameState.getGuideBookState();
         this.dialogState = gameState.getDialogState();
         this.inventoryState = gameState.getInventoryState();
         this.chaseCam = gameState.getChaseCam();
@@ -61,6 +63,7 @@ public class GameOverState extends BaseAppState implements ScreenController {
         dialogState.setEnabled(false);
         inventoryState.setEnabled(false);
         chaseCam.setEnabled(false);
+        guideBookState.setEnabled(false);
         interfaceBlur.setEnabled(true);
 
         nifty.addScreen("game_over_screen", new ScreenBuilder("Game over screen") {{

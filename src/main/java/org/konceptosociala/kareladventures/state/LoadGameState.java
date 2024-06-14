@@ -48,6 +48,7 @@ import com.jme3.material.Material;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.scene.Geometry;
@@ -98,9 +99,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
     private Node interactableRoot;
     private Node enemyRoot;
-    private KarelFarmState karelFarmState;
-    private DialogState dialogState;
-    private InventoryState inventoryState;
     private ChaseCamera chaseCam;
     private Sun sun;
     private World world;
@@ -271,30 +269,17 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
             player = new Player(assetManager, saveLoader.getPlayerPosition(), bulletAppState);
 
-            player.setEnergy(saveLoader.getPlayerEnergy());
             player.setHealth(saveLoader.getPlayerHealth());
             player.setInventory(saveLoader.getPlayerInventory());
             player.setBalance(saveLoader.getBalance());
 
             currentLevel = saveLoader.getCurrentLevel();
         } else {
-            player = new Player(assetManager, new Vector3f(0,10,0), bulletAppState);
+            player = new Player(assetManager, new Vector3f(0,1,0), bulletAppState);
             currentLevel = Level.Village;
         }
 
         rootNode.attachChild(player);
-
-        inventoryState = new InventoryState(player.getInventory());
-        stateManager.attach(inventoryState);
-        inventoryState.setEnabled(false);
-
-        dialogState = new DialogState();
-        stateManager.attach(dialogState);
-        dialogState.setEnabled(false);
-
-        karelFarmState = new KarelFarmState(player);
-        stateManager.attach(karelFarmState);
-        karelFarmState.setEnabled(false);
 
         chaseCam = initChaseCam();
     }
@@ -321,7 +306,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
         try {
             NPC sisterOlena = new NPC(
-                "Sister Olena",
+                "Сестра Олена",
                 "Models/pechkurova.glb",
                 "Pechkurova_idle",
 
@@ -329,17 +314,35 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                     new Dialog("data/Dialogs/sister_olena_2.toml", 
                     new Dialog("data/Dialogs/sister_olena_3.toml", null))),
 
-                new Vector3f(0, 0, 0),
+                new Vector3f(9.7f, -0.2f, 3.5f),
+                new Quaternion().fromAngleAxis(-(float)Math.PI/2, Vector3f.UNIT_Y),
                 assetManager,
                 bulletAppState
             );
             interactableRoot.attachChild(sisterOlena);
-
             sisterOlena.getLastDialog().setNextDialog(sisterOlena.getDialog());
+
+            NPC bush = new NPC(
+                "Мудрий Кущ",
+                "Models/bush.glb",
+                null,
+
+                    new Dialog("data/Dialogs/bush_1.toml", 
+                    new Dialog("data/Dialogs/bush_2.toml", null)),
+
+                new Vector3f(-142, 0, -160),
+                Quaternion.IDENTITY,
+                assetManager,
+                bulletAppState
+            );
+            interactableRoot.attachChild(bush);
         } catch (TomlException e) {
             e.printStackTrace();
             System.exit(-1);
         }
+
+        // KarelFarm karelFarm = new KarelFarm(assetManager, new Vector3f(10, 0, 0), bulletAppState);
+        // interactableRoot.attachChild(karelFarm);
 
         if (loadType == LoadType.Saving) {
             for (var entry : saveLoader.getDialogs().entrySet()) {
@@ -349,9 +352,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                 }
             }
         }
-
-        KarelFarm karelFarm = new KarelFarm(assetManager, new Vector3f(10, 0, 0), bulletAppState);
-        interactableRoot.attachChild(karelFarm);
     }
 
     private ChaseCamera initChaseCam() {

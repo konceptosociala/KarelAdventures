@@ -9,8 +9,8 @@ import lombok.ToString;
 public class Health implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    private static final int HP_MIN = 0;
-    private static final int HP_MAX = 100;
+    public static final int HP_MIN = 0;
+    public static final int HP_MAX = 100;
 
     @Getter
     private int value;

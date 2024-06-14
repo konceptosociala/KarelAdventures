@@ -48,7 +48,6 @@ public class Player extends Node implements IUpdatable {
     private Vector3f forwardMovement = new Vector3f().zero();
 
     private Health health;
-    private Energy energy;
     private Inventory inventory;
     private int balance = 150;
 
@@ -70,7 +69,6 @@ public class Player extends Node implements IUpdatable {
         addControl(characterControl);
         legs = new Box(1,1,1);
         health = new Health(100);
-        energy = new Energy(100);
         inventory = Inventory.test();
         animComposer = model.getControl(AnimComposer.class);
         bulletAppState.getPhysicsSpace().add(characterControl);

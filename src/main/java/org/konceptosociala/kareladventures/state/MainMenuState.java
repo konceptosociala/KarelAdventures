@@ -87,7 +87,6 @@ public class MainMenuState extends BaseAppState implements ScreenController {
 
                             panel(new ImageButton("main_menu_new_button", "Нова гра", null, "newGame()"));
                             panel(new ImageButton("main_menu_load_button", "Завантажити гру", null, "loadGame()"));
-                            panel(new ImageButton("main_menu_settings_button", "Налаштування", null, "openSettings()"));
                             panel(new ImageButton("main_menu_quit_button", "Вийти", null, "quitGame()"));
                         }});
                     }});
@@ -142,12 +141,6 @@ public class MainMenuState extends BaseAppState implements ScreenController {
         } else {
             showMsgBox("Помилка", "Файл 'data/Saves/karel.sav' не знайдено.");
         }
-    }
-
-    public void openSettings() {
-        if (msgBoxVisible) return;
-
-
     }
 
     public void quitGame() {
