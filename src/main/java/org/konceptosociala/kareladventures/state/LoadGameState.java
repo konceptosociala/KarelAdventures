@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
+import org.konceptosociala.kareladventures.game.enemies.AntHill;
 import org.konceptosociala.kareladventures.game.enemies.Enemy;
 import org.konceptosociala.kareladventures.game.enemies.EnemyTower;
 import org.konceptosociala.kareladventures.game.enemies.RangedEnemy;
@@ -266,9 +267,11 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         Enemy e1 = new Enemy(new Vector3f(-45, 5, 5), assetManager, bulletAppState, 100);
         RangedEnemy re1 = new RangedEnemy(new Vector3f(-80, 5, -8), assetManager, bulletAppState, 100);
         EnemyTower et1 = new EnemyTower(new Vector3f(-90, 5, 10), assetManager, bulletAppState, 500);
+        AntHill ah1 = new AntHill(new Vector3f(-90, 5, 20), assetManager, bulletAppState);
         enemyRoot.attachChild(e1);
-        getEnemyRoot().attachChild(re1);
+        enemyRoot.attachChild(re1);
         enemyRoot.attachChild(et1);
+        enemyRoot.attachChild(ah1);
     }
 
     private void loadPlayer() {
