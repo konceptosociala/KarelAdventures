@@ -51,7 +51,6 @@ public class Player extends Node implements IUpdatable {
     private Inventory inventory;
     private int balance = 150;
 
-
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state) {
         super();
         thisAssetManager = assetManager;

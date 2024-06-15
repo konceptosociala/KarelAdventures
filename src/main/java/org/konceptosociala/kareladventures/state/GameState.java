@@ -18,6 +18,7 @@ import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Health;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.InterfaceBlur;
+import org.konceptosociala.kareladventures.utils.AudioManager;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
@@ -58,6 +59,7 @@ public class GameState extends BaseAppState  {
     private AppStateManager appStateManager;
     private BulletAppState bulletAppState;
     private InputManager inputManager;
+    private AudioManager audio;
     private Nifty nifty;
     private Node rootNode;
     private InterfaceBlur interfaceBlur;
@@ -99,6 +101,7 @@ public class GameState extends BaseAppState  {
         this.inputManager = this.app.getInputManager();
         this.nifty = this.app.getNifty();
         this.interfaceBlur = new InterfaceBlur(this.app.getFpp());
+        this.audio = this.app.getAudioManager();
         BulletCollisionListener bulletCollisionListener = new BulletCollisionListener();
         bulletCollisionListener.setBulletAppState(bulletAppState);
         bulletAppState.getPhysicsSpace().addCollisionListener(bulletCollisionListener);
@@ -386,21 +389,39 @@ public class GameState extends BaseAppState  {
 
             if (action.equals("ESCAPE") && isPressed) {
                 if (inventoryState.isEnabled()) {
+                    audio.fillUp.stop();
+                    audio.fillUp.play();
+
                     chaseCam.setEnabled(true);
                     inventoryState.setEnabled(false);
                 } else if (dialogState.isEnabled()) {
+                    audio.fillUp.stop();
+                    audio.fillUp.play();
+
                     chaseCam.setEnabled(true);
                     dialogState.setEnabled(false);
                 } else if (karelFarmState.isEnabled()) {
+                    audio.fillUp.stop();
+                    audio.fillUp.play();
+
                     chaseCam.setEnabled(true);
                     karelFarmState.setEnabled(false);
                 } else if (guideBookState.isEnabled()) {
+                    audio.fillUp.stop();
+                    audio.fillUp.play();
+
                     chaseCam.setEnabled(true);
                     guideBookState.setEnabled(false);
                 } else if (pauseState.isEnabled()) {
+                    audio.fillUp.stop();
+                    audio.fillUp.play();
+
                     pauseState.setEnabled(false);
                     GameState.this.setEnabled(true);
                 } else {
+                    audio.ui1.stop();
+                    audio.ui1.play();
+
                     chaseCam.setEnabled(false);
                     pauseState.setEnabled(true);
                     GameState.this.setEnabled(false);
@@ -427,11 +448,17 @@ public class GameState extends BaseAppState  {
                 return;
 
             if (action.equals("INVENTORY") && isPressed) {
+                audio.ui1.stop();
+                audio.ui1.play();
+                
                 inventoryState.setEnabled(true);
                 chaseCam.setEnabled(false);
             }
 
             if (action.equals("GUIDEBOOK") && isPressed) {
+                audio.ui1.stop();
+                audio.ui1.play();
+
                 guideBookState.setEnabled(true);
                 chaseCam.setEnabled(false);
             }
@@ -445,7 +472,7 @@ public class GameState extends BaseAppState  {
             }
 
             if (action.equals("EXIT") && !isPressed) {
-                System.exit(0);
+                app.stop();
             }
             
             if (action.equals("JUMP") && isPressed) {

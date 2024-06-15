@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.ui.ImageButton;
 import org.konceptosociala.kareladventures.ui.InterfaceBlur;
+import org.konceptosociala.kareladventures.utils.AudioManager;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -30,6 +31,7 @@ public class PauseState extends BaseAppState implements ScreenController {
     private Nifty nifty;
     private InterfaceBlur interfaceBlur;
     private GameState gameState;
+    private AudioManager audio;
 
     public PauseState(GameState gameState) {
         this.gameState = gameState;
@@ -43,6 +45,7 @@ public class PauseState extends BaseAppState implements ScreenController {
         this.bulletAppState = gameState.getBulletAppState();
         this.nifty = this.app.getNifty();
         this.interfaceBlur = gameState.getInterfaceBlur();
+        this.audio = this.app.getAudioManager();
     }
 
     @Override
@@ -75,8 +78,8 @@ public class PauseState extends BaseAppState implements ScreenController {
                         panel(new PanelBuilder("main_menu_panel_buttons"){{
                             childLayoutVertical();
 
-                            panel(new ImageButton("main_menu_resume_button", "Відновити", null, "resume()"));
-                            panel(new ImageButton("main_menu_quit_button", "Вийти в меню", null, "exitToMenu()"));
+                            panel(new ImageButton("main_menu_resume_button", "Відновити", null, "resume()", "hoverSound()"));
+                            panel(new ImageButton("main_menu_quit_button", "Вийти в меню", null, "exitToMenu()", "hoverSound()"));
                         }});
                     }});
                 }});
@@ -90,12 +93,21 @@ public class PauseState extends BaseAppState implements ScreenController {
 
     // UI callbacks
 
+    public void hoverSound() {
+        audio.button1.stop();
+        audio.button1.play();
+    }
+
     public void resume() {
+        audio.button2.stop();
+        audio.button2.play();
         gameState.setEnabled(true);
         setEnabled(false);
     }
 
     public void exitToMenu() {
+        audio.button2.stop();
+        audio.button2.play();
         appStateManager.detach(gameState);
         app.getMainMenuState().setEnabled(true);
         setEnabled(false);

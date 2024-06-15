@@ -10,7 +10,7 @@ import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.tools.Color;
 
 public class MsgBox extends LayerBuilder {
-    public MsgBox(String id, String hideCallback) {
+    public MsgBox(String id, String hideCallback, String hoverCallback) {
         super(id);
         childLayoutCenter();
         width("100%");
@@ -60,7 +60,7 @@ public class MsgBox extends LayerBuilder {
                 wrap(true);
             }});
 
-            panel(new ImageButton(id+"_okay", "Okay", new Size(150, 50), hideCallback));
+            panel(new ImageButton(id+"_okay", "Okay", new Size(150, 50), hideCallback, hoverCallback));
         }});
     }
 

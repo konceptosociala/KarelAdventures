@@ -45,6 +45,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.LightProbe;
 import com.jme3.material.Material;
+import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.math.ColorRGBA;
@@ -93,6 +94,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private InputManager inputManager;
     private ViewPort viewPort;
     private BulletAppState bulletAppState;
+    private Camera cam;
     private Node rootNode;
     private Nifty nifty;
     private FilterPostProcessor fpp;
@@ -123,6 +125,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         this.viewPort = this.app.getViewPort();
         this.rootNode = this.app.getRootNode();
         this.nifty = this.app.getNifty();
+        this.cam = this.app.getCamera();
     }
 
     @Override
@@ -183,7 +186,17 @@ public class LoadGameState extends BaseAppState implements ScreenController {
       
         if (lightsPrepared == true) {
             setProgress(1.0f, "Finished.", null);
-            stateManager.attach(new GameState(this));
+            
+            try {
+                stateManager.attach(switch (loadType) {
+                    case NewGame -> new FirstCutSceneState(this);
+                    case Saving -> new GameState(this);
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                app.stop();
+            }
+
             this.setEnabled(false);
             stateManager.detach(this);
         }
@@ -264,7 +277,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                 saveLoader = SaveLoader.load("data/Saves/karel.sav");
             } catch (SaveLoadException e) {
                 e.printStackTrace();
-                System.exit(-1);
+                app.stop();
             }
 
             player = new Player(assetManager, saveLoader.getPlayerPosition(), bulletAppState);
@@ -338,7 +351,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             interactableRoot.attachChild(bush);
         } catch (TomlException e) {
             e.printStackTrace();
-            System.exit(-1);
+            app.stop();
         }
 
         // KarelFarm karelFarm = new KarelFarm(assetManager, new Vector3f(10, 0, 0), bulletAppState);

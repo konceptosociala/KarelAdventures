@@ -18,6 +18,7 @@ import org.konceptosociala.kareladventures.ui.labyrinth.KarelDirection;
 import org.konceptosociala.kareladventures.ui.labyrinth.Labyrinth;
 import org.konceptosociala.kareladventures.ui.labyrinth.LabyrinthCell;
 import org.konceptosociala.kareladventures.ui.labyrinth.LabyrinthCellId;
+import org.konceptosociala.kareladventures.utils.AudioManager;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
@@ -48,6 +49,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     private Nifty nifty;
     private Player player;
     private InterfaceBlur interfaceBlur;
+    private AudioManager audio;
 
     private LabyrinthCell[][] cells;
     private LabyrinthCell[][] initialCells;
@@ -69,6 +71,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         this.app = (KarelAdventures) app;
         this.inputManager = this.app.getInputManager();
         this.nifty = this.app.getNifty();
+        this.audio = this.app.getAudioManager();
         rebuildCells();
     }
 
@@ -206,8 +209,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                                         panel(new PanelBuilder("labyrinth_controls") {{
                                             childLayoutHorizontal();
 
-                                            panel(new ImageButton("labyrinth_controls_reset", "Скинути", new Size(150, 50), "resetLabyrinth()"));
-                                            panel(new ImageButton("labyrinth_controls_rebuild", "Перебудувати", new Size(150, 50), "rebuildLabyrinth()"));
+                                            panel(new ImageButton("labyrinth_controls_reset", "Скинути", new Size(150, 50), "resetLabyrinth()", "hoverSound()"));
+                                            panel(new ImageButton("labyrinth_controls_rebuild", "Перебудувати", new Size(150, 50), "rebuildLabyrinth()", "hoverSound()"));
                                         }});
                                     }});
                                 }});
@@ -217,7 +220,7 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
                 }});
             }});
 
-            layer(new MsgBox("msgbox", "hideMsgBox()"));
+            layer(new MsgBox("msgbox", "hideMsgBox()", "hoverSound()"));
         }}.build(nifty));
 
         nifty.gotoScreen("karel_farm_screen");
@@ -225,11 +228,21 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
     // UI callbacks
 
+    public void hoverSound() {
+        audio.button1.stop();
+        audio.button1.play();
+    }
+
     @SuppressWarnings("null")
     public void resetLabyrinth() {
         if (msgBoxVisible || won) return;
 
+        audio.button2.stop();
+        audio.button2.play();
+
         if (player.getBalance() < MIN_FARM_BALANCE) {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox(
                 "Помилка", 
                 "Недостатньо коштів на балансі, щоб грати.\n"
@@ -239,6 +252,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         }
 
         if (player.getInventory().isFull()) {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
             return;
         }
@@ -266,7 +281,12 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     public void rebuildLabyrinth() {
         if (msgBoxVisible) return;
 
+        audio.button2.stop();
+        audio.button2.play();
+
         if (player.getBalance() < MIN_FARM_BALANCE) {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox(
                 "Помилка", 
                 "Недостатньо коштів на балансі, щоб грати.\n"
@@ -276,6 +296,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         }
 
         if (player.getInventory().isFull()) {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
             return;
         }
@@ -295,8 +317,10 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
     @SuppressWarnings("null")
     public void enterCommand() {
         if (msgBoxVisible || gameOver || won) return;
-
+        
         if (player.getBalance() < MIN_FARM_BALANCE) {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox(
                 "Помилка", 
                 "Недостатньо коштів на балансі, щоб грати.\n"
@@ -306,6 +330,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         }
 
         if (player.getInventory().isFull()) {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
             return;
         }
@@ -357,6 +383,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
             case "pickBeeper()" -> pickBeeper();
 
             default -> {
+                audio.uiError1.stop();
+                audio.uiError1.play();
                 showMsgBox(
                     "Помилка", 
                     "Команду `"+command+"` не знайдено. Список доступних команд: \n"
@@ -400,6 +428,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
         if (karelX <= 0 || karelY <= 0 || karelX > 4 || karelY > 4) {
             gameOver = true;
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Гру закінчено", "Карел вийшов за межі карти");
             return;
         }
@@ -412,6 +442,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
         if (newCell.isBlocked()) {
             gameOver = true;
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Гру закінчено", "Карел застряг у стіні");
             return;
         }
@@ -464,6 +496,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
             }
         } else {
             gameOver = true;
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Гру закінчено", "Відсутній біпер, щоб підняти");
             return;
         }
@@ -511,6 +545,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
         else
             givenItem = getRandomItem(ItemRareness.Common);
         
+        audio.victory.stop();
+        audio.victory.play();
         showMsgBox(
             "Перемога!", 
             "Карел зібрав усі біпери!\n"
@@ -519,6 +555,8 @@ public class KarelFarmState extends BaseAppState implements ScreenController {
 
         player.setBalance(player.getBalance() - MIN_FARM_BALANCE);
         if (!player.getInventory().addItem(givenItem)) {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Помилка", "Інвентар повний. Очистіть інвентар, щоб грати.");
             return;
         }

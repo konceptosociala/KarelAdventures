@@ -72,6 +72,10 @@ public class NPC extends InteractableNode {
 
         if (!shouldInteract) return;
 
+        var audio = gameState.getAudio();
+        audio.ui1.stop();
+        audio.ui1.play();
+
         gameState.getChaseCam().setEnabled(false);
 
         DialogState dialogState = gameState.getDialogState();

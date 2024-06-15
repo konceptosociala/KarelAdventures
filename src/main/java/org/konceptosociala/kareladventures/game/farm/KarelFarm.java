@@ -54,6 +54,10 @@ public class KarelFarm extends InteractableNode {
 
         if (!shouldInteract) return;
 
+        var audio = gameState.getAudio();
+        audio.ui1.stop();
+        audio.ui1.play();
+
         gameState.getChaseCam().setEnabled(false);
 
         KarelFarmState karelFarmState = gameState.getKarelFarmState();

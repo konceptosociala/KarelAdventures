@@ -11,13 +11,11 @@ import org.konceptosociala.kareladventures.ui.ImageButton;
 import org.konceptosociala.kareladventures.ui.Logo;
 import org.konceptosociala.kareladventures.ui.Margin;
 import org.konceptosociala.kareladventures.ui.MsgBox;
+import org.konceptosociala.kareladventures.utils.AudioManager;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.asset.AssetManager;
-import com.jme3.audio.AudioNode;
-import com.jme3.audio.AudioData.DataType;
 import com.jme3.input.InputManager;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.ImageBuilder;
@@ -33,8 +31,7 @@ public class MainMenuState extends BaseAppState implements ScreenController {
     private KarelAdventures app;
     private AppStateManager stateManager;
     private InputManager inputManager;
-    private AssetManager assetManager;
-    private AudioNode mainTheme;
+    private AudioManager audio;
     private Nifty nifty;
 
     private Optional<PanelRenderer> fadePanel;
@@ -46,11 +43,8 @@ public class MainMenuState extends BaseAppState implements ScreenController {
         this.app = (KarelAdventures) app;
         this.stateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
-        this.assetManager = this.app.getAssetManager();
+        this.audio = this.app.getAudioManager();
         this.nifty = this.app.getNifty();
-
-        mainTheme = new AudioNode(assetManager, "Music/Karel, my Karel (instrumental).ogg", DataType.Stream);
-        mainTheme.setPositional(false);
     }
 
     @Override
@@ -85,9 +79,9 @@ public class MainMenuState extends BaseAppState implements ScreenController {
                         panel(new PanelBuilder("main_menu_panel_buttons"){{
                             childLayoutVertical();
 
-                            panel(new ImageButton("main_menu_new_button", "Нова гра", null, "newGame()"));
-                            panel(new ImageButton("main_menu_load_button", "Завантажити гру", null, "loadGame()"));
-                            panel(new ImageButton("main_menu_quit_button", "Вийти", null, "quitGame()"));
+                            panel(new ImageButton("main_menu_new_button", "Нова гра", null, "newGame()", "hoverSound()"));
+                            panel(new ImageButton("main_menu_load_button", "Завантажити гру", null, "loadGame()", "hoverSound()"));
+                            panel(new ImageButton("main_menu_quit_button", "Вийти", null, "quitGame()", "hoverSound()"));
                         }});
                     }});
                 }});
@@ -96,13 +90,13 @@ public class MainMenuState extends BaseAppState implements ScreenController {
                 
             }});
 
-            layer(new MsgBox("msgbox", "hideMsgBox()"));
+            layer(new MsgBox("msgbox", "hideMsgBox()", "hoverSound()"));
             
         }}.build(nifty));
 
         nifty.gotoScreen("main_menu_screen");
 
-        mainTheme.play();
+        audio.mainTheme.play();
     }
 
     @SuppressWarnings("null")
@@ -125,8 +119,16 @@ public class MainMenuState extends BaseAppState implements ScreenController {
 
     // UI callbacks
 
+    public void hoverSound() {
+        audio.button1.stop();
+        audio.button1.play();
+    }
+
     public void newGame() {
         if (msgBoxVisible) return;
+
+        audio.button2.stop();
+        audio.button2.play();
 
         setEnabled(false);
         stateManager.attach(new LoadGameState(LoadType.NewGame));
@@ -135,16 +137,24 @@ public class MainMenuState extends BaseAppState implements ScreenController {
     public void loadGame() {
         if (msgBoxVisible) return;
 
+        audio.button2.stop();
+        audio.button2.play();
+
         if (new File("data/Saves/karel.sav").exists()) {
             setEnabled(false);
             stateManager.attach(new LoadGameState(LoadType.Saving));
         } else {
+            audio.uiError1.stop();
+            audio.uiError1.play();
             showMsgBox("Помилка", "Файл 'data/Saves/karel.sav' не знайдено.");
         }
     }
 
     public void quitGame() {
         if (msgBoxVisible) return;
+
+        audio.button2.stop();
+        audio.button2.play();
 
         app.stop();
     }
@@ -175,7 +185,7 @@ public class MainMenuState extends BaseAppState implements ScreenController {
 
     @Override
     protected void onDisable() {
-        mainTheme.stop();
+        audio.mainTheme.stop();
     }
     
     @Override

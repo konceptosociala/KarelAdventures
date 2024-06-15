@@ -127,7 +127,6 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
         Vector3f attackColliderOffset = new Vector3f();
         model.localToWorld(new Vector3f(0,0.5f,2),attackColliderOffset);
         var player = getPlayerInBox(attackColliderOffset,new Vector3f(0.5f,0.5f,0.2f),characterControl.getPhysicsRotation());
-        //LOG.info("a");
         if(player.isPresent()&&attackAvailable){
             attackAvailable = false;
             player.get().takeDamage(damage);

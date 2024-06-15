@@ -5,10 +5,10 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.konceptosociala.kareladventures.game.inventory.Item;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.state.IntroState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
+import org.konceptosociala.kareladventures.utils.AudioManager;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.niftygui.NiftyJmeDisplay;
@@ -24,6 +24,7 @@ public class KarelAdventures extends SimpleApplication {
     
     private Nifty nifty;
     private AppSettings appSettings = new AppSettings(true);
+    private AudioManager audioManager;
     private IntroState introState;
     private MainMenuState mainMenuState;
     private FilterPostProcessor fpp;
@@ -41,10 +42,11 @@ public class KarelAdventures extends SimpleApplication {
 
     public KarelAdventures() {
         super();
-        appSettings.setMinResolution(1024, 768);
-        setDisplayStatView(false);
-        setDisplayFps(false);
-        setShowSettings(true);
+        appSettings.setWindowSize(1024, 768);
+        setShowSettings(false);
+        // appSettings.setMinResolution(1024, 768);
+        // setDisplayStatView(false);
+        // setDisplayFps(false);
         setSettings(appSettings);
     }
     
@@ -53,18 +55,18 @@ public class KarelAdventures extends SimpleApplication {
         try {
             inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 
-            introState = new IntroState(cam.getWidth(), cam.getHeight());
+            audioManager = new AudioManager(assetManager);
+            
             mainMenuState = new MainMenuState();
+            introState = new IntroState(cam, mainMenuState);
             nifty = initNifty();
             fpp = new FilterPostProcessor(assetManager);
             viewPort.addProcessor(fpp);
 
-            LOG.info(Item.DARK_TINY_SWORD.toString());
-
             stateManager.attach(introState);
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(-1);
+            stop();
         }
     }
 

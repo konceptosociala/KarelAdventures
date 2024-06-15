@@ -10,7 +10,7 @@ import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.tools.Color;
 
 public class ImageButton extends PanelBuilder {
-    public ImageButton(String id, String label, @Nullable Size size, String onClick) {
+    public ImageButton(String id, String label, @Nullable Size size, String onClick, String onHover) {
         super(id+"_panel");
         childLayoutCenter();
 
@@ -34,6 +34,7 @@ public class ImageButton extends PanelBuilder {
                 effectParameter("active", "Interface/UI/Panel/panel-008.png");
                 effectParameter("inactive", "Interface/UI/Transparent border/panel-transparent-border-008.png");
                 effectParameter("imageMode", "resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                onStartEffectCallback(onHover);
             }});
         }});
 

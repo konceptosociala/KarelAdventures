@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.ui.ImageButton;
 import org.konceptosociala.kareladventures.ui.InterfaceBlur;
+import org.konceptosociala.kareladventures.utils.AudioManager;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -35,6 +36,7 @@ public class GameOverState extends BaseAppState implements ScreenController {
     private DialogState dialogState;
     private InventoryState inventoryState;
     private ChaseCamera chaseCam;
+    private AudioManager audio;
 
     public GameOverState(GameState gameState) {
         this.gameState = gameState;
@@ -46,6 +48,7 @@ public class GameOverState extends BaseAppState implements ScreenController {
         this.appStateManager = this.app.getStateManager();
         this.inputManager = this.app.getInputManager();
         this.nifty = this.app.getNifty();
+        this.audio = this.app.getAudioManager();
         this.bulletAppState = gameState.getBulletAppState();
         this.interfaceBlur = gameState.getInterfaceBlur();
         this.karelFarmState = gameState.getKarelFarmState();
@@ -91,10 +94,10 @@ public class GameOverState extends BaseAppState implements ScreenController {
                             childLayoutVertical();
 
                             if (new File("data/Saves/karel.sav").exists()) {
-                                panel(new ImageButton("main_menu_resume_button", "Завантажити збереження", null, "loadSaving()"));
+                                panel(new ImageButton("main_menu_resume_button", "Завантажити збереження", null, "loadSaving()", "hoverSound()"));
                             }
                             
-                            panel(new ImageButton("main_menu_quit_button", "Вийти в меню", null, "exitToMenu()"));
+                            panel(new ImageButton("main_menu_quit_button", "Вийти в меню", null, "exitToMenu()", "hoverSound()"));
                         }});
                     }});
                 }});
@@ -108,13 +111,24 @@ public class GameOverState extends BaseAppState implements ScreenController {
 
     // UI callbacks
 
+    public void hoverSound() {
+        audio.button1.stop();
+        audio.button1.play();
+    }
+
     public void loadSaving() {
+        audio.button2.stop();
+        audio.button2.play();
+
         appStateManager.detach(gameState);
         app.getMainMenuState().loadGame();
         setEnabled(false);
     }
 
     public void exitToMenu() {
+        audio.button2.stop();
+        audio.button2.play();
+
         appStateManager.detach(gameState);
         app.getMainMenuState().setEnabled(true);
         setEnabled(false);

@@ -135,7 +135,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
 
             if (selectedItemId.isPresent()) {
                 if (id.equals(selectedItemId.get())) {
-                    cell.setBackgroundColor(new Color(0, 0, 0, 0));
+                    cell.setBackgroundColor(Color.NONE);
                     selectedItemId = Optional.empty();
                 } else {
                     var selectedItem = inventory.getItem(selectedItemId.get()).get();
@@ -174,7 +174,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             inventory.setItem(selectedItem, id);
                             inventory.removeItem(selectedItemId.get());
 
-                            selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
+                            selectedItemCell.setBackgroundColor(Color.NONE);
                             selectedItemIcon.setImage(createImage(nifty, "inventory_screen", InventoryCell.TRANSPARENT_ICON, true));
                             newItemIcon.setImage(createImage(nifty, "inventory_screen", selectedItem.getIconPath(), true));
                             
@@ -198,7 +198,7 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
                             inventory.setItem(selectedItem, id);
                             inventory.setItem(itemToReplace.get(), selectedItemId.get());
 
-                            selectedItemCell.setBackgroundColor(new Color(0, 0, 0, 0));
+                            selectedItemCell.setBackgroundColor(Color.NONE);
                             
                             selectedItemIcon.setImage(createImage(nifty, "inventory_screen", itemToReplace.get().getIconPath(), true));
                             newItemIcon.setImage(createImage(nifty, "inventory_screen", selectedItem.getIconPath(), true));

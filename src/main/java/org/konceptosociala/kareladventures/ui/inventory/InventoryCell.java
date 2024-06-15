@@ -52,7 +52,7 @@ public class InventoryCell extends PanelBuilder {
         }
 
         panel(new PanelBuilder(id+"_select") {{
-            backgroundColor(new Color(0, 0, 0, 0));
+            backgroundColor(Color.NONE);
         }});
 
         image(new ImageBuilder(id+"_icon"){{
