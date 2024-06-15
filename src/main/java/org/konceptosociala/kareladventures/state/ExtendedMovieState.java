@@ -11,7 +11,7 @@ import jme.video.player.MovieSettings;
 import jme.video.player.MovieState;
 import lombok.Getter;
 
-public class ExtendedMovieState  extends MovieState {
+public class ExtendedMovieState extends MovieState {
     private KarelAdventures app;
     private AppStateManager stateManager;
     @Getter
@@ -45,10 +45,6 @@ public class ExtendedMovieState  extends MovieState {
         this.app = (KarelAdventures) app;
         this.stateManager = getStateManager();
         this.app.getFlyByCamera().setEnabled(false);
-
-        var scene = app.getGuiViewPort().getScenes().get(0);
-        var t = scene.getLocalTranslation();
-        scene.setLocalTranslation(t.x, t.y+((cam.getHeight()-movieHeight)/2), t.z);
     }
     
     @Override

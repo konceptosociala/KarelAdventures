@@ -16,6 +16,7 @@ import com.jme3.post.FilterPostProcessor;
 import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.render.NiftyImage;
+import javafx.application.Platform;
 import lombok.Getter;
 
 @Getter
@@ -53,15 +54,20 @@ public class KarelAdventures extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         try {
+            Platform.startup(() -> {});
+
             inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
 
             audioManager = new AudioManager(assetManager);
-            
             mainMenuState = new MainMenuState();
             introState = new IntroState(cam, mainMenuState);
             nifty = initNifty();
             fpp = new FilterPostProcessor(assetManager);
             viewPort.addProcessor(fpp);
+
+            var scene = guiViewPort.getScenes().get(0);
+            var t = scene.getLocalTranslation();
+            scene.setLocalTranslation(t.x, t.y+((cam.getHeight()-(int)(cam.getWidth()*9*1.75/16))/2), t.z);
 
             stateManager.attach(introState);
         } catch (Exception e) {
@@ -109,6 +115,8 @@ public class KarelAdventures extends SimpleApplication {
         if (gameState != null && gameState.isEnabled()) {
             gameState.save();
         }
+
+        Platform.exit();
 
         super.stop();
     }

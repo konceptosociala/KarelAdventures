@@ -6,6 +6,8 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.FXAAFilter;
+import com.jme3.post.filters.FogFilter;
+import com.jme3.post.filters.ToneMapFilter;
 import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.shadow.CompareMode;
 import com.jme3.shadow.DirectionalLightShadowFilter;
@@ -21,6 +23,8 @@ public class Sun extends DirectionalLight {
     private DirectionalLightShadowFilter dlsf;
     private SSAOFilter ssao;
     private FXAAFilter fxaa;
+    private FogFilter ff;
+    private ToneMapFilter tmf;
 
     public Sun(AssetManager assetManager, FilterPostProcessor fpp) {
         super();
@@ -40,16 +44,22 @@ public class Sun extends DirectionalLight {
 
         ssao = new SSAOFilter(0.2f, 1f, 1f, 0.1f);
         fxaa = new FXAAFilter();
+        ff = new FogFilter();
+        tmf = new ToneMapFilter();
 
         fpp.addFilter(dlsf);
         fpp.addFilter(ssao);
         fpp.addFilter(fxaa);
+        fpp.addFilter(ff);
+        fpp.addFilter(tmf);
     }
 
     public void cleanup() {
         dlsf.setEnabled(false);
         ssao.setEnabled(false);
         fxaa.setEnabled(false);
+        ff.setEnabled(false);
+        tmf.setEnabled(false);
         fpp.cleanup();
     }
 }
