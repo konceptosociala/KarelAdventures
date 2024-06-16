@@ -1,11 +1,8 @@
 package org.konceptosociala.kareladventures.ui.inventory;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
-import org.konceptosociala.kareladventures.game.inventory.Item;
 import de.lessvoid.nifty.builder.*;
 import de.lessvoid.nifty.tools.Color;
 import lombok.Getter;
@@ -15,12 +12,10 @@ public class InventoryCell extends PanelBuilder {
     public static final String TRANSPARENT_ICON = "Interface/UI/transparent.png";
 
     private final InventoryCellId cellId;
-    private Optional<Item> cellItem;
 
     public InventoryCell(InventoryCellId id, Inventory inventory, @Nullable String placeholderIcon) {
         super(id.toString());
         this.cellId = id;
-        this.cellItem = Optional.empty();
 
         childLayoutCenter();
         width("80px");
@@ -30,6 +25,7 @@ public class InventoryCell extends PanelBuilder {
         marginLeft("2px");
         marginRight("2px");
         interactOnClick("selectCell("+id+")");
+        interactOnSecondaryClick("removeItem("+id+")");
         
         image(new ImageBuilder(id+"_placeholder") {{
             width("75px");

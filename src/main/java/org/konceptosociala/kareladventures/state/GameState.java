@@ -12,6 +12,7 @@ import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
+import org.konceptosociala.kareladventures.game.inventory.ItemRareness;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
 import org.konceptosociala.kareladventures.game.npc.NPC;
 import org.konceptosociala.kareladventures.game.player.AttackType;
@@ -25,12 +26,14 @@ import org.konceptosociala.kareladventures.utils.InteractableNode;
 import org.konceptosociala.kareladventures.utils.Level;
 import org.konceptosociala.kareladventures.utils.SaveLoadException;
 import org.konceptosociala.kareladventures.utils.SaveLoader;
+import org.konceptosociala.kareladventures.utils.TomlException;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.environment.EnvironmentCamera;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.InputManager;
@@ -42,6 +45,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.LightProbe;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.ImageBuilder;
@@ -77,6 +81,9 @@ public class GameState extends BaseAppState  {
     private Node enemyRoot;
     private Node interactableRoot;
     private Level currentLevel;
+    private NPC sisterOlena;
+    private NPC bush;
+    private boolean bushMustMove;
 
     private boolean gameOver = false;
 
@@ -92,6 +99,9 @@ public class GameState extends BaseAppState  {
         interactableRoot = loadGameState.getInteractableRoot();
         currentLevel = loadGameState.getCurrentLevel();
         probe = loadGameState.getProbe();
+        sisterOlena = loadGameState.getSisterOlena();
+        bush = loadGameState.getBush();
+        bushMustMove = loadGameState.getBushMustMove();
     }
 
     @Override
@@ -265,7 +275,8 @@ public class GameState extends BaseAppState  {
             player.getInventory(), 
             dialogsToMap(), 
             player.getLocalTranslation(), 
-            currentLevel
+            currentLevel,
+            bushMustMove
         );
 
         try {
@@ -289,27 +300,42 @@ public class GameState extends BaseAppState  {
             }
         }
 
-        // if (currentLevel.equals(Level.Village)) {
-        //     if (player.getInventory().hasItem(ItemRareness.Silver)) {
-        //         for (Spatial i : interactableRoot.getChildren()) {
-        //             if (i instanceof NPC) {
-        //                 var npc = (NPC) i;
-        //                 if (npc.getName().equals("Мудрий Кущ")) {
-        //                     try {
-        //                         npc.setDialog(
-        //                             new Dialog("data/Dialogs/bush_3.toml", 
-        //                             new Dialog("data/Dialogs/bush_4.toml", null))
-        //                         );
-        //                     } catch (TomlException e) {
-        //                         e.printStackTrace();
-        //                         System.exit(-1);
-        //                     }
-        //                     currentLevel = Level.Wasteland;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        if (currentLevel.equals(Level.Village)) {
+            if (player.getInventory().hasItem(ItemRareness.Silver)
+                || player.getInventory().hasItem(ItemRareness.Golden)
+                || player.getInventory().hasItem(ItemRareness.Legendary)
+            ){
+                try {
+                    bush.setDialog(
+                        new Dialog("data/Dialogs/bush_3.toml", 
+                        new Dialog("data/Dialogs/bush_4.toml", null))
+                    );
+                } catch (TomlException e) {
+                    e.printStackTrace();
+                    System.exit(-1);
+                }
+                
+                currentLevel = Level.Wasteland;
+            }
+        }
+
+        if (currentLevel.equals(Level.Wasteland) && bush.getDialog().getNextDialog() == null)
+            bushMustMove = true;
+
+        var bushRigidBody = bush.getRigidBodyControl();
+
+        if (bushMustMove) {
+            bushRigidBody.setCollisionShape(new CapsuleCollisionShape(2f, 0.5f));
+            bushRigidBody.setLinearVelocity(new Vector3f(1, 0, -1)); 
+            bushRigidBody.setKinematic(false);
+            bushRigidBody.setFriction(0);
+        }
+
+        if (bushRigidBody.getPhysicsLocation().x > -150 || bushRigidBody.getPhysicsLocation().z < 140) {
+            bushRigidBody.setLinearVelocity(Vector3f.ZERO); 
+            bushRigidBody.setKinematic(true);
+            bushRigidBody.setFriction(0);
+        } 
 
         nifty
             .getScreen("hud_screen")
@@ -324,7 +350,7 @@ public class GameState extends BaseAppState  {
 
     @Override
     protected void cleanup(Application app) {
-        if (!gameOver)
+        if (!gameOver && !currentLevel.equals(Level.Boss))
             save();
 
         bulletAppState.cleanup();
@@ -365,6 +391,7 @@ public class GameState extends BaseAppState  {
 
     private void initControls() {
         inputManager.addMapping("ESCAPE", new KeyTrigger(KeyInput.KEY_ESCAPE));
+        inputManager.addMapping("SAVE", new KeyTrigger(KeyInput.KEY_F6));
         inputManager.addMapping("EXIT", new KeyTrigger(KeyInput.KEY_F4));
         inputManager.addMapping("INVENTORY", new KeyTrigger(KeyInput.KEY_I));
         inputManager.addMapping("INTERACT", new KeyTrigger(KeyInput.KEY_E));
@@ -379,7 +406,7 @@ public class GameState extends BaseAppState  {
         inputManager.addMapping("GUIDEBOOK", new KeyTrigger(KeyInput.KEY_G));
 
         // Enable listeners
-        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN", "GUIDEBOOK"});
+        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN", "GUIDEBOOK", "SAVE"});
         inputManager.addListener(analogListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"});
     }
 
@@ -446,6 +473,18 @@ public class GameState extends BaseAppState  {
                 || pauseState.isEnabled()
                 || karelFarmState.isEnabled())
                 return;
+
+            if (action.equals("SAVE") && isPressed) {
+                if (!currentLevel.equals(Level.Boss)) {
+                    audio.save.stop();
+                    audio.save.play();
+
+                    save();
+                } else {
+                    audio.uiError1.stop();
+                    audio.uiError1.play();
+                }
+            }
 
             if (action.equals("INVENTORY") && isPressed) {
                 audio.ui1.stop();

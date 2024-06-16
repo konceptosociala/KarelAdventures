@@ -8,14 +8,15 @@ import org.konceptosociala.kareladventures.state.DialogState;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.utils.InteractableNode;
 
+import com.jme3.anim.AnimComposer;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
-import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import lombok.Getter;
@@ -34,6 +35,7 @@ public class NPC extends InteractableNode {
         String modelPath, 
         String idleAnimationName, 
         Dialog dialog, 
+        CollisionShape collider,
         Vector3f position,
         Quaternion rotation,
         AssetManager assetManager,
@@ -43,14 +45,24 @@ public class NPC extends InteractableNode {
         setLocalTranslation(position);
         setLocalRotation(rotation);
         this.model = assetManager.loadModel(modelPath);
-        this.collider = new CapsuleCollisionShape(0.8f, 5f);
-        this.rigidBodyControl = new RigidBodyControl(collider, 1);
+
+        this.collider = collider;
+        this.rigidBodyControl = new RigidBodyControl(collider, 999);
         this.rigidBodyControl.setKinematic(true);
         this.rigidBodyControl.setGravity(new Vector3f(0,0,0));
+        this.rigidBodyControl.setAngularFactor(0);
         this.model.addControl(rigidBodyControl);
         attachChild(model);
+
         bulletAppState.getPhysicsSpace().add(rigidBodyControl);
         bulletAppState.getPhysicsSpace().addAll(this);
+
+        if (idleAnimationName != null) {
+            ((Node)this.model)
+                .getChild(0)
+                .getControl(AnimComposer.class)
+                .setCurrentAction(idleAnimationName);
+        }
 
         this.dialog = dialog;
     }

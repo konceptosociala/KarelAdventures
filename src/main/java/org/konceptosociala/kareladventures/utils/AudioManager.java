@@ -15,6 +15,7 @@ public class AudioManager {
     public final AudioNode ui1;
     public final AudioNode fillUp;
     public final AudioNode victory;
+    public final AudioNode save;
 
     public AudioManager(AssetManager assetManager) {
         mainTheme = new AudioNode(assetManager, "Music/Karel, my Karel (instrumental).ogg", DataType.Stream);
@@ -32,5 +33,7 @@ public class AudioManager {
         fillUp.setPositional(false);
         victory = new AudioNode(assetManager, "Sounds/victory.ogg", DataType.Buffer);
         victory.setPositional(false);
+        save = new AudioNode(assetManager, "Sounds/save.ogg", DataType.Buffer);
+        save.setPositional(false);
     }
 }

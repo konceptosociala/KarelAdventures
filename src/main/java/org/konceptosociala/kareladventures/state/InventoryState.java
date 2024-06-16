@@ -128,6 +128,23 @@ public class InventoryState extends BaseAppState implements ActionListener, Scre
 
     // UI callbacks
 
+    public void removeItem(String cellId) {
+        try {
+            var id = new InventoryCellId(cellId);
+            var itemIcon = getCellIcon(id.toString());
+            var newItemElementParams = getCellElement(id.toString())
+                .getEffects(EffectEventId.onHover, InventoryHint.class)
+                .get(0)
+                .getParameters();
+
+            newItemElementParams.setProperty("hasItem", "false");
+            itemIcon.setImage(createImage(nifty, "inventory_screen", InventoryCell.TRANSPARENT_ICON, true));
+            inventory.removeItem(id);            
+        } catch (InvalidCellIdException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void selectCell(String cellId) {
         try {
             var id = new InventoryCellId(cellId);

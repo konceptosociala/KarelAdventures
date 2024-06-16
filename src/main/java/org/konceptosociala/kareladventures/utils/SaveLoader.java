@@ -20,11 +20,12 @@ public class SaveLoader implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private final Health playerHealth;
-    private final int balance;
+    private final Integer balance;
     private final Inventory playerInventory;  
     private final HashMap<String, Dialog> dialogs;
     private final Vector3f playerPosition;
     private final Level currentLevel;
+    private final Boolean bushMustMove;
 
     public static SaveLoader load(String fileName) throws SaveLoadException {
         try {

@@ -32,6 +32,8 @@ import com.jme3.app.state.AppStateManager;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.BoxCollisionShape;
+import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.environment.EnvironmentCamera;
 import com.jme3.environment.LightProbeFactory;
 import com.jme3.environment.generation.JobProgressAdapter;
@@ -107,6 +109,9 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private World world;
     private Player player;
     private Level currentLevel;
+    private NPC sisterOlena;
+    private NPC bush;
+    private Boolean bushMustMove = false;
 
     private final LoadType loadType;
     private Element progressBarElement;
@@ -321,7 +326,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.attachChild(interactableRoot);
 
         try {
-            NPC sisterOlena = new NPC(
+            sisterOlena = new NPC(
                 "Сестра Олена",
                 "Models/pechkurova.glb",
                 "Pechkurova_idle",
@@ -330,6 +335,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                     new Dialog("data/Dialogs/sister_olena_2.toml", 
                     new Dialog("data/Dialogs/sister_olena_3.toml", null))),
 
+                new CapsuleCollisionShape(0.8f, 5f),
                 new Vector3f(9.7f, -0.2f, 3.5f),
                 new Quaternion().fromAngleAxis(-(float)Math.PI/2, Vector3f.UNIT_Y),
                 assetManager,
@@ -338,7 +344,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             interactableRoot.attachChild(sisterOlena);
             sisterOlena.getLastDialog().setNextDialog(sisterOlena.getDialog());
 
-            NPC bush = new NPC(
+            bush = new NPC(
                 "Мудрий Кущ",
                 "Models/bush.glb",
                 null,
@@ -346,7 +352,8 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                     new Dialog("data/Dialogs/bush_1.toml", 
                     new Dialog("data/Dialogs/bush_2.toml", null)),
 
-                new Vector3f(-142, 0, -160),
+                new CapsuleCollisionShape(4f, 3f),
+                new Vector3f(-161, 2, 145),
                 Quaternion.IDENTITY,
                 assetManager,
                 bulletAppState
@@ -367,6 +374,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                     ((NPC) npc).setDialog(entry.getValue());
                 }
             }
+            bushMustMove = saveLoader.getBushMustMove();
         }
     }
 

@@ -57,11 +57,12 @@ public class GuideBookState extends BaseAppState {
                         height("640px");
                         padding("50px");
 
-                        panel(new GuideBookTip("G", "відкрити довідник", "keyboard_g"));
                         panel(new GuideBookTip("W", "йти вперед", "keyboard_w"));
                         panel(new GuideBookTip("S", "йти назад", "keyboard_s"));
                         panel(new GuideBookTip("A", "йти вліво", "keyboard_a"));
                         panel(new GuideBookTip("D", "йти вправо", "keyboard_d"));
+                        panel(new GuideBookTip("G", "відкрити довідник", "keyboard_g"));
+                        panel(new GuideBookTip("F6", "зберегтися", "keyboard_f6"));
                     }});
 
                     panel(new PanelBuilder("guidebook_page_right") {{

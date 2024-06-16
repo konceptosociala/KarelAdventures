@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.state.IntroState;
 import org.konceptosociala.kareladventures.state.MainMenuState;
 import org.konceptosociala.kareladventures.utils.AudioManager;
@@ -103,19 +102,14 @@ public class KarelAdventures extends SimpleApplication {
 
         nifty.registerEffect("inventory-hint", "org.konceptosociala.kareladventures.ui.inventory.InventoryHint");
 
-        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.WARNING);
-        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.WARNING);
+        Logger.getLogger("de.lessvoid.nifty").setLevel(Level.SEVERE);
+        Logger.getLogger("NiftyInputEventHandlingLog").setLevel(Level.SEVERE);
 
         return nifty;
     }
 
     @Override
     public void stop() {
-        var gameState = stateManager.getState(GameState.class);
-        if (gameState != null && gameState.isEnabled()) {
-            gameState.save();
-        }
-
         Platform.exit();
 
         super.stop();
