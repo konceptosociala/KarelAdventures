@@ -7,6 +7,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.BossGhost;
+import org.konceptosociala.kareladventures.game.BossWall;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.AntHill;
@@ -34,6 +36,8 @@ import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
+import com.jme3.bullet.control.GhostControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.environment.EnvironmentCamera;
 import com.jme3.environment.LightProbeFactory;
 import com.jme3.environment.generation.JobProgressAdapter;
@@ -112,6 +116,8 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private NPC sisterOlena;
     private NPC bush;
     private Boolean bushMustMove = false;
+    private BossGhost bossGhost;
+    private BossWall bossWall;
 
     private final LoadType loadType;
     private Element progressBarElement;
@@ -303,6 +309,19 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.attachChild(player);
 
         chaseCam = initChaseCam();
+
+        bossGhost = new BossGhost(assetManager);
+        rootNode.attachChild(bossGhost);
+
+        bossWall = new BossWall(assetManager);
+        rootNode.attachChild(bossWall);
+        bulletAppState.getPhysicsSpace().addAll(bossWall);
+
+        new Enemy(Vector3f.ZERO, assetManager, bulletAppState, frameCount);
+        new Enemy(Vector3f.ZERO, assetManager, bulletAppState, frameCount);
+        new Enemy(Vector3f.ZERO, assetManager, bulletAppState, frameCount);
+        new Enemy(Vector3f.ZERO, assetManager, bulletAppState, frameCount);
+        new Enemy(Vector3f.ZERO, assetManager, bulletAppState, frameCount);
     }
 
     private void loadTextRenderer() {

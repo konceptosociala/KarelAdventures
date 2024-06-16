@@ -9,6 +9,8 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 import java.util.HashMap;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.BossGhost;
+import org.konceptosociala.kareladventures.game.BossWall;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
@@ -83,6 +85,8 @@ public class GameState extends BaseAppState  {
     private Level currentLevel;
     private NPC sisterOlena;
     private NPC bush;
+    private BossGhost bossGhost;
+    private BossWall bossWall;
     private boolean bushMustMove;
 
     private boolean gameOver = false;
@@ -94,6 +98,8 @@ public class GameState extends BaseAppState  {
         sun = loadGameState.getSun();
         world = loadGameState.getWorld();
         player = loadGameState.getPlayer();
+        bossGhost = loadGameState.getBossGhost();
+        bossWall = loadGameState.getBossWall();
         rootNode = loadGameState.getRootNode();
         enemyRoot = loadGameState.getEnemyRoot();
         interactableRoot = loadGameState.getInteractableRoot();
@@ -297,6 +303,19 @@ public class GameState extends BaseAppState  {
         for (Spatial i : enemyRoot.getChildren()) {
             if (i instanceof IUpdatable) {
                 ((IUpdatable) i).update(tpf);
+            }
+        }
+
+        if (bossGhost.enterPlayer(player) && currentLevel.equals(Level.Wasteland)) {
+            currentLevel = Level.Boss;
+            closingBoss = true;
+            bossWall.setColliderEnabled(true);
+        }
+
+        if (closingBoss) {
+            bossWall.getModel().move(0, 0.25f, 0);
+            if (bossWall.getModel().getLocalTranslation().y >= 20) {
+                closingBoss = false;
             }
         }
 
@@ -552,6 +571,7 @@ public class GameState extends BaseAppState  {
             }
         }
     };
+    private boolean closingBoss;
 
     private HashMap<String, Dialog> dialogsToMap() {
         var dialogsMap = new HashMap<String, Dialog>();
