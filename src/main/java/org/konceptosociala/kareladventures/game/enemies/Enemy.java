@@ -1,11 +1,16 @@
 package org.konceptosociala.kareladventures.game.enemies;
 
+import com.jme3.anim.AnimComposer;
+import com.jme3.anim.tween.Tween;
+import com.jme3.anim.tween.Tweens;
+import com.jme3.anim.tween.action.Action;
 import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.material.Material;
 import com.jme3.math.*;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -28,7 +33,7 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 @Getter
 @Setter
 public class Enemy extends Node implements IUpdatable, IAmEnemy {
-    private static final String ENEMY_MODEL_NAME = "Models/simple_bug.glb";//boppin_ariados.glb
+    private static final String ENEMY_MODEL_NAME = "Models/ram_bug.glb";//boppin_ariados.glb
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
@@ -47,6 +52,7 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
     private float agroRange = 15f;
     private Vector3f originPosition;
     private Vector3f target;
+    private AnimComposer animComposer;
 
     public Enemy(
         Vector3f position, 
@@ -61,10 +67,11 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
         this.setLocalTranslation(position);
         this.rotate(FastMath.HALF_PI,0,0);
         this.model = assetManager.loadModel(ENEMY_MODEL_NAME);
-        this.model.rotate(-FastMath.HALF_PI,0,0);
+        this.model.rotate(-FastMath.HALF_PI,0,FastMath.HALF_PI);
         this.model.setLocalTranslation(0,0,0.2f);
-
+        this.model.scale(0.3f);
         this.model.setName(name);
+        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
         this.attachChild(model);
         this.health = new Health(health);
         this.characterCollider = new CapsuleCollisionShape(0.6f,1f);
@@ -125,9 +132,14 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
     }
     private void performMeleeAttack(){
         Vector3f attackColliderOffset = new Vector3f();
-        model.localToWorld(new Vector3f(0,0.5f,2),attackColliderOffset);
+        model.localToWorld(new Vector3f(4,0.5f,0),attackColliderOffset);
         var player = getPlayerInBox(attackColliderOffset,new Vector3f(0.5f,0.5f,0.2f),characterControl.getPhysicsRotation());
         if(player.isPresent()&&attackAvailable){
+            //animComposer.setCurrentAction("AS_BlackOxBeetle_Attack_Basic_SK_BlackOxBeetle01");
+            Action attack = animComposer.action("AS_BlackOxBeetle_Attack_Basic_SK_BlackOxBeetle01");
+            Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "AS_BlackOxBeetle_Run_Forward_01_SK_BlackOxBeetle01");
+            Action attackOnce = animComposer.actionSequence("attackOnce", attack, doneTween);
+            animComposer.setCurrentAction("attackOnce");
             attackAvailable = false;
             player.get().takeDamage(damage);
             LOG.info(String.valueOf(player.get().getHealth().getValue()));
@@ -177,6 +189,10 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
 
     public void pushback(){
         characterControl.applyImpulse(rotateByYAxis(new Vector3f(-2f,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+        Action takeDamage = animComposer.action("AS_BlackOxBeetle_Stagger_F2B_01_SK_BlackOxBeetle01");
+        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "AS_BlackOxBeetle_Run_Forward_01_SK_BlackOxBeetle01");
+        Action takeDamageOnce = animComposer.actionSequence("takeDamageOnce", takeDamage, doneTween);
+        animComposer.setCurrentAction("takeDamageOnce");
     }
 
     @Override
