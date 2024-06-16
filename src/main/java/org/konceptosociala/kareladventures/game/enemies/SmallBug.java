@@ -37,38 +37,42 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
     private CollisionShape characterCollider;
     private RigidBodyControl characterControl;
     private Health health;
-    private float movementSpeed = 2f;
+    private float movementSpeed = 2.3f;
     private float XZVelocityVectorToYRotation;
     private AssetManager assetManager;
-    private int damage = 2;
-    private float attackCooldownTime = 1f;
+    private int damage = 1;
+    private float attackCooldownTime = 0.5f;
     private float attackCooldownTimer = 0.0f;
     private boolean attackAvailable = true;
     private float agroRange = 10f;
     private Vector3f originPosition;
     private Vector3f target;
-
+    private int index;
+    public boolean alive = true;
     public SmallBug(
             Vector3f position,
             AssetManager assetManager,
-            BulletAppState bulletAppState
+            BulletAppState bulletAppState,
+            int health,
+            int index
     ){
         super();
+        this.index = index;
         this.originPosition = position;
         this.assetManager = assetManager;
         this.bulletAppState = bulletAppState;
         this.setLocalTranslation(position);
         this.rotate(FastMath.HALF_PI,0,0);
         this.model = assetManager.loadModel(ENEMY_MODEL_NAME);
-        this.model.scale(0.5f);
         this.model.rotate(-FastMath.HALF_PI,0,0);
         this.model.setLocalTranslation(0,0,0.2f);
+        this.model.scale(0.5f);
 
         this.model.setName(name);
         this.attachChild(model);
-        this.health = new Health(20);
+        this.health = new Health(health);
         this.characterCollider = new CapsuleCollisionShape(0.3f,0.5f);
-        this.characterControl = new RigidBodyControl(this.characterCollider,0.1f);
+        this.characterControl = new RigidBodyControl(this.characterCollider,0.3f);
         this.characterControl.setFriction(1);
         this.characterControl.setAngularFactor(0);
         this.addControl(characterControl);
@@ -93,6 +97,7 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
     @Override
     public void update(float tpf) {
         if(!isAlive()){
+            alive = false;
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;
@@ -127,7 +132,6 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
         Vector3f attackColliderOffset = new Vector3f();
         model.localToWorld(new Vector3f(0,0.5f,2),attackColliderOffset);
         var player = getPlayerInBox(attackColliderOffset,new Vector3f(0.5f,0.5f,0.2f),characterControl.getPhysicsRotation());
-        //LOG.info("a");
         if(player.isPresent()&&attackAvailable){
             attackAvailable = false;
             player.get().takeDamage(damage);
@@ -185,4 +189,3 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
         thisGameState = gameState;
     }
 }
-

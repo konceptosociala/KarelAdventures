@@ -22,7 +22,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AntHill extends Node implements IUpdatable, IAmEnemy {
-    private static final String ENEMY_MODEL_NAME = "Models/tower.glb";//boppin_ariados.glb
+    private static final String ENEMY_MODEL_NAME = "Models/BugNest.glb";
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
@@ -55,11 +55,12 @@ public class AntHill extends Node implements IUpdatable, IAmEnemy {
         this.setLocalTranslation(position);
         this.model = assetManager.loadModel(ENEMY_MODEL_NAME);
         this.model.setLocalTranslation(0,-0.5f,0);
+        this.model.scale(3f);
 
         this.model.setName(name);
         this.attachChild(model);
         this.health = new Health(100);
-        this.characterCollider = new BoxCollisionShape(new Vector3f(2,1,2));
+        this.characterCollider = new BoxCollisionShape(new Vector3f(1.5f,1,1.5f));
         this.characterControl = new RigidBodyControl(this.characterCollider,10000f);
         this.characterControl.setFriction(1);
         this.characterControl.setAngularFactor(0);
@@ -108,7 +109,7 @@ public class AntHill extends Node implements IUpdatable, IAmEnemy {
         if(attackAvailable){
             var location = characterControl.getPhysicsLocation();
             for (int i = 0;i<spawnlings.length;i++){
-                if(spawnlings[i] == null){
+                if(spawnlings[i] == null||spawnlings[i].alive == false){
                     spawnBug(i,spawnlings.length);
                     attackAvailable = false;
                     attackCooldownTimer = 0.0f;
@@ -121,10 +122,10 @@ public class AntHill extends Node implements IUpdatable, IAmEnemy {
     private void spawnBug(int i, int length) {
         float angle = (FastMath.TWO_PI/length)*i;
         Vector3f pos = characterControl.getPhysicsLocation().add(new Vector3f(FastMath.sin(angle)*spawnRadius,0,FastMath.cos(angle)*spawnRadius));
-        SmallBug s = new SmallBug(pos,assetManager,bulletAppState);
-        s.setThisGameState(thisGameState);
+        SmallBug s = new SmallBug(pos,assetManager,bulletAppState,30,i);
         spawnlings[i]=s;
-        thisGameState.getRootNode().attachChild(s);
+        thisGameState.getEnemyRoot().attachChild(s);
+        s.setThisGameState(thisGameState);
     }
 
     public void pushback(){
