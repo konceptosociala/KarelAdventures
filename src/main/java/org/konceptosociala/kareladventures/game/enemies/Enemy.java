@@ -93,6 +93,8 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
     @Override
     public void update(float tpf) {
         if(!isAlive()){
+            thisGameState.getAudio().insectDeath.stop();
+            thisGameState.getAudio().insectDeath.play();
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;

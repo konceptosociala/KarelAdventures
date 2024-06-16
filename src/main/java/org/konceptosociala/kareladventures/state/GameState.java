@@ -7,6 +7,7 @@ import lombok.Getter;
 import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
 import org.konceptosociala.kareladventures.game.BossGhost;
@@ -87,8 +88,9 @@ public class GameState extends BaseAppState  {
     private NPC bush;
     private BossGhost bossGhost;
     private BossWall bossWall;
-    private boolean bushMustMove;
 
+    private boolean bushMustMove;
+    private boolean closingBoss;
     private boolean gameOver = false;
 
     public GameState(LoadGameState loadGameState) {
@@ -144,6 +146,8 @@ public class GameState extends BaseAppState  {
         karelFarmState = new KarelFarmState(player, interfaceBlur);
         appStateManager.attach(karelFarmState);
         karelFarmState.setEnabled(false);
+
+        sun.getFade().fadeIn();
     }
 
     @Override
@@ -151,6 +155,7 @@ public class GameState extends BaseAppState  {
         inputManager.setCursorVisible(false);
         bulletAppState.setEnabled(true);
         chaseCam.setEnabled(true);
+        setMusicTheme();
 
         nifty.addScreen("hud_screen", new ScreenBuilder("HUD screen") {{
             controller(new DefaultScreenController());
@@ -252,7 +257,7 @@ public class GameState extends BaseAppState  {
                             height("100%");
 
                             image(new ImageBuilder("guidebook_book") {{
-                                filename("Interface/items/Book.png");
+                                filename("Interface/Items/Book.png");
                             }});
                         }});
 
@@ -310,6 +315,7 @@ public class GameState extends BaseAppState  {
             currentLevel = Level.Boss;
             closingBoss = true;
             bossWall.setColliderEnabled(true);
+            setMusicTheme();
         }
 
         if (closingBoss) {
@@ -335,6 +341,7 @@ public class GameState extends BaseAppState  {
                 }
                 
                 currentLevel = Level.Wasteland;
+                setMusicTheme();
             }
         }
 
@@ -354,7 +361,7 @@ public class GameState extends BaseAppState  {
             bushRigidBody.setLinearVelocity(Vector3f.ZERO); 
             bushRigidBody.setKinematic(true);
             bushRigidBody.setFriction(0);
-        } 
+        }
 
         nifty
             .getScreen("hud_screen")
@@ -391,6 +398,10 @@ public class GameState extends BaseAppState  {
     @Override
     protected void onDisable() {
         bulletAppState.setEnabled(false);
+        audio.village.pause();
+        audio.wasteland.pause();
+        audio.boss.pause();
+        audio.walk.stop();
     }
 
     private void initPlayer(){
@@ -405,6 +416,26 @@ public class GameState extends BaseAppState  {
             /*if(i instanceof EnemyTower){
                 ((EnemyTower) i).setThisGameState(this);
             }*/
+        }
+    }
+
+    private void setMusicTheme() {
+        switch (currentLevel) {
+            case Village -> {
+                audio.village.play();
+                audio.wasteland.stop();
+                audio.boss.stop();
+            }
+            case Wasteland -> {
+                audio.village.stop();
+                audio.wasteland.play();
+                audio.boss.stop();
+            }
+            case Boss -> {
+                audio.village.stop();
+                audio.wasteland.stop();
+                audio.boss.play();
+            }
         }
     }
 
@@ -425,7 +456,7 @@ public class GameState extends BaseAppState  {
         inputManager.addMapping("GUIDEBOOK", new KeyTrigger(KeyInput.KEY_G));
 
         // Enable listeners
-        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN", "GUIDEBOOK", "SAVE"});
+        inputManager.addListener(actionListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD", "EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN", "GUIDEBOOK", "SAVE"});
         inputManager.addListener(analogListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"});
     }
 
@@ -543,6 +574,15 @@ public class GameState extends BaseAppState  {
 
             if (action.equals("ATTACK") && isPressed) {
                 player.attack(AttackType.Melee);
+                audio.attack.stop();
+                audio.attack.play();
+            }
+
+            if (Stream.of("FORWARD","BACKWARD","LEFTWARD","RIGHTWARD")
+                .anyMatch((c) -> action.equals(c)) && !isPressed
+            ) {
+                audio.walk.stop();
+                LOG.info(action+" released");
             }
         }
     };
@@ -569,9 +609,13 @@ public class GameState extends BaseAppState  {
             } else if (action.equals("LEFTWARD") && value>0) {
                 player.moveSideward(value,chaseCam.getHorizontalRotation());
             }
+
+            if (Stream.of("FORWARD","BACKWARD","LEFTWARD","RIGHTWARD")
+                .anyMatch((c) -> action.equals(c)) && value > 0 && player.isOnGround()
+            ) 
+                audio.walk.play();
         }
     };
-    private boolean closingBoss;
 
     private HashMap<String, Dialog> dialogsToMap() {
         var dialogsMap = new HashMap<String, Dialog>();

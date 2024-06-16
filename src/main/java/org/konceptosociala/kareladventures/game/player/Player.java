@@ -50,7 +50,7 @@ public class Player extends Node implements IUpdatable {
     private Inventory inventory;
     private int balance = 150;
 
-    public Player(AssetManager assetManager, Vector3f position, BulletAppState state) {
+    public Player(AssetManager assetManager, Vector3f position, BulletAppState state, boolean cheatsEnabled) {
         super();
         bulletAppState = state;
         setLocalTranslation(position);
@@ -66,7 +66,12 @@ public class Player extends Node implements IUpdatable {
         addControl(characterControl);
         legs = new Box(1,1,1);
         health = new Health(100);
-        inventory = Inventory.test();
+
+        if (cheatsEnabled)
+            inventory = Inventory.cheats();
+        else 
+            inventory = new Inventory();
+
         animComposer = model.getControl(AnimComposer.class);
         bulletAppState.getPhysicsSpace().add(characterControl);
         bulletAppState.getPhysicsSpace().addAll(this);
@@ -79,7 +84,16 @@ public class Player extends Node implements IUpdatable {
         health.subtract(amount);
     }
 
+    @Override
     public void update(float tpf) {
+        if (!isAlive()) {
+            thisGameState.getAudio().death.stop();
+            thisGameState.getAudio().death.play();
+            bulletAppState.getPhysicsSpace().remove(characterControl);
+            thisGameState.getRootNode().detachChild(this);
+            return;
+        }
+        
         onGround=checkIfOnGround(characterControl.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
         //rotateInMovementDirection();
         characterControl.setLinearVelocity((forwardMovement.add(sidewardMovement)).setY(characterControl.getLinearVelocity().y));
