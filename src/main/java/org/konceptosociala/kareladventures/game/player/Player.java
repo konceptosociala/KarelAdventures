@@ -33,7 +33,6 @@ public class Player extends Node implements IUpdatable {
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
-    private AssetManager thisAssetManager;
 
     private Spatial model;
     private CollisionShape characterCollider;
@@ -53,7 +52,6 @@ public class Player extends Node implements IUpdatable {
 
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state) {
         super();
-        thisAssetManager = assetManager;
         bulletAppState = state;
         setLocalTranslation(position);
         model = assetManager.loadModel(PLAYER_MODEL_NAME);
@@ -101,7 +99,7 @@ public class Player extends Node implements IUpdatable {
             return;
         }
 
-        characterControl.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
+        characterControl.applyImpulse(new Vector3f(0,6,0),new Vector3f(0,0,0));
     }
 
     public void roll(){

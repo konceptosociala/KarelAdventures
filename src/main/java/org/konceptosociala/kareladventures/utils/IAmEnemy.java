@@ -1,5 +1,6 @@
 package org.konceptosociala.kareladventures.utils;
 
+import org.konceptosociala.kareladventures.game.player.Health;
 import org.konceptosociala.kareladventures.state.GameState;
 
 public interface IAmEnemy {
@@ -10,4 +11,7 @@ public interface IAmEnemy {
     private void setTarget() {
 
     }
+    public boolean isAlive();
+    public int getHealth();
+    public void setHealth(int health);
 }

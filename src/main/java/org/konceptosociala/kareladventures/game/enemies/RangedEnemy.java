@@ -147,6 +147,10 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
         Bullet bullet =  new Bullet(characterControl.getPhysicsLocation().add(0,1,0),thisGameState.getPlayer().getCharacterControl().getPhysicsLocation().add(0,0,0),assetManager,bulletAppState,"Models/enemy_bullet.glb");
         thisGameState.getRootNode().attachChild(bullet);
     }
+    @Override
+    public void setHealth(int health) {
+        this.health.setValue(health);
+    }
 
     // private Optional<Player> getPlayerInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
     //     //List<Enemy> enemies = new ArrayList<>();

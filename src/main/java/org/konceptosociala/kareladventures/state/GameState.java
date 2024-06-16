@@ -9,6 +9,8 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 import java.util.HashMap;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.BossGhost;
+import org.konceptosociala.kareladventures.game.BossWall;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
 import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
@@ -19,14 +21,7 @@ import org.konceptosociala.kareladventures.game.player.AttackType;
 import org.konceptosociala.kareladventures.game.player.Health;
 import org.konceptosociala.kareladventures.game.player.Player;
 import org.konceptosociala.kareladventures.ui.InterfaceBlur;
-import org.konceptosociala.kareladventures.utils.AudioManager;
-import org.konceptosociala.kareladventures.utils.IAmEnemy;
-import org.konceptosociala.kareladventures.utils.IUpdatable;
-import org.konceptosociala.kareladventures.utils.InteractableNode;
-import org.konceptosociala.kareladventures.utils.Level;
-import org.konceptosociala.kareladventures.utils.SaveLoadException;
-import org.konceptosociala.kareladventures.utils.SaveLoader;
-import org.konceptosociala.kareladventures.utils.TomlException;
+import org.konceptosociala.kareladventures.utils.*;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AppStateManager;
@@ -83,6 +78,8 @@ public class GameState extends BaseAppState  {
     private Level currentLevel;
     private NPC sisterOlena;
     private NPC bush;
+    private BossGhost bossGhost;
+    private BossWall bossWall;
     private boolean bushMustMove;
 
     private boolean gameOver = false;
@@ -94,6 +91,8 @@ public class GameState extends BaseAppState  {
         sun = loadGameState.getSun();
         world = loadGameState.getWorld();
         player = loadGameState.getPlayer();
+        bossGhost = loadGameState.getBossGhost();
+        bossWall = loadGameState.getBossWall();
         rootNode = loadGameState.getRootNode();
         enemyRoot = loadGameState.getEnemyRoot();
         interactableRoot = loadGameState.getInteractableRoot();
@@ -246,7 +245,7 @@ public class GameState extends BaseAppState  {
                             height("100%");
 
                             image(new ImageBuilder("guidebook_book") {{
-                                filename("Interface/items/Book.png");
+                                filename("Interface/Items/Book.png");
                             }});
                         }});
 
@@ -297,6 +296,19 @@ public class GameState extends BaseAppState  {
         for (Spatial i : enemyRoot.getChildren()) {
             if (i instanceof IUpdatable) {
                 ((IUpdatable) i).update(tpf);
+            }
+        }
+
+        if (bossGhost.enterPlayer(player) && currentLevel.equals(Level.Wasteland)) {
+            currentLevel = Level.Boss;
+            closingBoss = true;
+            bossWall.setColliderEnabled(true);
+        }
+
+        if (closingBoss) {
+            bossWall.getModel().move(0, 0.25f, 0);
+            if (bossWall.getModel().getLocalTranslation().y >= 20) {
+                closingBoss = false;
             }
         }
 
@@ -383,6 +395,9 @@ public class GameState extends BaseAppState  {
             if(i instanceof IAmEnemy){
                 ((IAmEnemy) i).setThisGameState(this);
             }
+            if(i instanceof IAmEnemySpawner){
+                ((IAmEnemySpawner) i).setThisGameState(this);
+            }
             /*if(i instanceof EnemyTower){
                 ((EnemyTower) i).setThisGameState(this);
             }*/
@@ -404,9 +419,10 @@ public class GameState extends BaseAppState  {
         inputManager.addMapping("ATTACK", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping("RETURN", new KeyTrigger(KeyInput.KEY_RETURN));
         inputManager.addMapping("GUIDEBOOK", new KeyTrigger(KeyInput.KEY_G));
+        inputManager.addMapping("LOGCORDS", new KeyTrigger(KeyInput.KEY_L));
 
         // Enable listeners
-        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN", "GUIDEBOOK", "SAVE"});
+        inputManager.addListener(actionListener, new String[]{"EXIT","INVENTORY","JUMP","INTERACT","DASH","ATTACK","ESCAPE", "RETURN", "GUIDEBOOK", "SAVE","LOGCORDS"});
         inputManager.addListener(analogListener, new String[]{"FORWARD","BACKWARD","LEFTWARD","RIGHTWARD"});
     }
 
@@ -525,6 +541,10 @@ public class GameState extends BaseAppState  {
             if (action.equals("ATTACK") && isPressed) {
                 player.attack(AttackType.Melee);
             }
+
+            if(action.equals("LOGCORDS")){
+                LOG.info(player.getCharacterControl().getPhysicsLocation().toString());
+            }
         }
     };
 
@@ -552,6 +572,7 @@ public class GameState extends BaseAppState  {
             }
         }
     };
+    private boolean closingBoss;
 
     private HashMap<String, Dialog> dialogsToMap() {
         var dialogsMap = new HashMap<String, Dialog>();

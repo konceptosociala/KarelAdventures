@@ -50,7 +50,7 @@ public class Bullet extends Node implements IUpdatable {
         this.model.setName(name);
         this.attachChild(model);
         this.characterCollider = new CapsuleCollisionShape(0.3f,0.8f);
-        this.characterControl = new RigidBodyControl(this.characterCollider,0.3f);
+        this.characterControl = new RigidBodyControl(this.characterCollider,0.1f);
         this.characterControl.setFriction(0);
         this.characterControl.setAngularFactor(0);
         //this.characterControl.setGravity(new Vector3f().zero());

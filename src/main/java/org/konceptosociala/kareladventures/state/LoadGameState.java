@@ -7,12 +7,11 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 import org.konceptosociala.kareladventures.KarelAdventures;
+import org.konceptosociala.kareladventures.game.BossGhost;
+import org.konceptosociala.kareladventures.game.BossWall;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
-import org.konceptosociala.kareladventures.game.enemies.AntHill;
-import org.konceptosociala.kareladventures.game.enemies.Enemy;
-import org.konceptosociala.kareladventures.game.enemies.EnemyTower;
-import org.konceptosociala.kareladventures.game.enemies.RangedEnemy;
+import org.konceptosociala.kareladventures.game.enemies.*;
 import org.konceptosociala.kareladventures.game.farm.KarelFarm;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
 import org.konceptosociala.kareladventures.game.npc.DialogMessage;
@@ -34,6 +33,8 @@ import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
+import com.jme3.bullet.control.GhostControl;
+import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.environment.EnvironmentCamera;
 import com.jme3.environment.LightProbeFactory;
 import com.jme3.environment.generation.JobProgressAdapter;
@@ -112,6 +113,8 @@ public class LoadGameState extends BaseAppState implements ScreenController {
     private NPC sisterOlena;
     private NPC bush;
     private Boolean bushMustMove = false;
+    private BossGhost bossGhost;
+    private BossWall bossWall;
 
     private final LoadType loadType;
     private Element progressBarElement;
@@ -273,8 +276,8 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         RangedEnemy re1 = new RangedEnemy(new Vector3f(-80, 5, -8), assetManager, bulletAppState, 100);
         EnemyTower et1 = new EnemyTower(new Vector3f(-90, 5, 10), assetManager, bulletAppState, 500);
         AntHill ah1 = new AntHill(new Vector3f(-90, 5, 20), assetManager, bulletAppState);
-        enemyRoot.attachChild(e1);
-        enemyRoot.attachChild(re1);
+        enemyRoot.attachChild( e1);
+        enemyRoot.attachChild(new EnemySpawner(re1.getOriginPosition(),enemyRoot,re1,bulletAppState));
         enemyRoot.attachChild(et1);
         enemyRoot.attachChild(ah1);
     }
@@ -303,6 +306,13 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.attachChild(player);
 
         chaseCam = initChaseCam();
+
+        bossGhost = new BossGhost(assetManager);
+        rootNode.attachChild(bossGhost);
+
+        bossWall = new BossWall(assetManager);
+        rootNode.attachChild(bossWall);
+        bulletAppState.getPhysicsSpace().addAll(bossWall);
     }
 
     private void loadTextRenderer() {

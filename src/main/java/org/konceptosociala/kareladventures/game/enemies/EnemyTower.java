@@ -182,4 +182,9 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
     public void setThisGameState(GameState gameState) {
         thisGameState = gameState;
     }
+
+    @Override
+    public void setHealth(int health) {
+        this.health.setValue(health);
+    }
 }

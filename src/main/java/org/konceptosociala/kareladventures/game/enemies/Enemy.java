@@ -90,6 +90,11 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
         return health.getValue();
     }
 
+    @Override
+    public void setHealth(int health) {
+        this.health.setValue(health);
+    }
+
     public boolean isAlive() {
         return health.getValue() > 0;
     }

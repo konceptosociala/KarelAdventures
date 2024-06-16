@@ -3,6 +3,7 @@ package org.konceptosociala.kareladventures.game.player;
 import java.io.Serializable;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 @ToString
@@ -13,6 +14,7 @@ public class Health implements Serializable {
     public static final int HP_MAX = 100;
 
     @Getter
+    @Setter
     private int value;
 
     public Health(int value) {

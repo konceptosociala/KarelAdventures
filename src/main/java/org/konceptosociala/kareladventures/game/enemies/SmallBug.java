@@ -138,6 +138,10 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
             LOG.info(String.valueOf(player.get().getHealth().getValue()));
         }
     }
+    @Override
+    public void setHealth(int health) {
+        this.health.setValue(health);
+    }
 
     private Optional<Player> getPlayerInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
         //List<Enemy> enemies = new ArrayList<>();
