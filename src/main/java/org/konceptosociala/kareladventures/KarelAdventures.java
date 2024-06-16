@@ -28,6 +28,7 @@ public class KarelAdventures extends SimpleApplication {
     private IntroState introState;
     private MainMenuState mainMenuState;
     private FilterPostProcessor fpp;
+    private boolean cheatsEnabled;
 
     public static void main(String[] args) {
         try {
@@ -36,11 +37,11 @@ public class KarelAdventures extends SimpleApplication {
             e.printStackTrace();
         }
 
-        KarelAdventures app = new KarelAdventures();
+        KarelAdventures app = new KarelAdventures(args);
         app.start();
     }
 
-    public KarelAdventures() {
+    public KarelAdventures(String[] args) {
         super();
         appSettings.setWindowSize(1024, 768);
         setShowSettings(false);
@@ -48,6 +49,8 @@ public class KarelAdventures extends SimpleApplication {
         // setDisplayStatView(false);
         // setDisplayFps(false);
         setSettings(appSettings);
+
+        cheatsEnabled = args.length > 0 && args[0].equals("iamdumbass");
     }
     
     @Override

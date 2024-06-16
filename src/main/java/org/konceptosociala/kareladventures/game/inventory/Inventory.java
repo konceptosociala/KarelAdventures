@@ -34,29 +34,14 @@ public class Inventory implements Serializable {
         items = new Item[4][5];
     }
 
-    public static Inventory test() {
-            var inventory = new Inventory();
-            inventory.items[0][0] = Item.METAL_HELMET;
-            inventory.items[0][1] = Item.METAL_CHESTPLATE;
-            inventory.items[0][2] = Item.METAL_LEGGINGS;
-            inventory.items[0][3] = Item.METAL_BOOTS;
-            inventory.items[0][4] = Item.SILVER_HELMET;
-            inventory.items[1][0] = Item.SILVER_CHESTPLATE;
-            inventory.items[1][1] = Item.SILVER_LEGGINGS;
-            inventory.items[1][2] = Item.SILVER_BOOTS;
-            inventory.items[1][3] = Item.GOLDEN_HELMET;
-            inventory.items[1][4] = Item.GOLDEN_CHESTPLATE;
-            inventory.items[2][0] = Item.GOLDEN_LEGGINGS;
-            inventory.items[2][1] = Item.GOLDEN_BOOTS;
-            inventory.items[2][2] = Item.LAVA_BLADE;
-            inventory.items[2][3] = Item.METAL_SWORD;
-            inventory.items[2][4] = Item.PYTHON_SABER;
-            inventory.weapon = Item.SLITHER;
-            inventory.helmet = Item.JAVA_HELMET;
-            inventory.chestplate = Item.JAVA_CHESTPLATE;
-            inventory.leggings = Item.JAVA_LEGGINGS;
-            inventory.boots = Item.JAVA_BOOTS;
-            return inventory;
+    public static Inventory cheats() {
+        var inventory = new Inventory();
+        inventory.weapon = Item.PYTHON_SABER;
+        inventory.helmet = Item.JAVA_HELMET;
+        inventory.chestplate = Item.JAVA_CHESTPLATE;
+        inventory.leggings = Item.JAVA_LEGGINGS;
+        inventory.boots = Item.JAVA_BOOTS;
+        return inventory;
     }
 
     public boolean isFull() {
@@ -92,19 +77,30 @@ public class Inventory implements Serializable {
             }
         }
 
-        return false;
+        return
+            (weapon != null && weapon == item)
+            || (helmet != null && helmet == item)
+            || (chestplate != null && chestplate == item)
+            || (leggings != null && leggings == item)
+            || (boots != null && boots == item);
     }
 
     public boolean hasItem(ItemRareness rareness) {
         for (int i = 0; i < items.length; i++) {
             for (int j = 0; j < items[i].length; j++) {
-                if (items[i][j].getItemRareness().equals(rareness)) {
+                if (items[i][j] != null && items[i][j].getItemRareness().equals(rareness)) {
                     return true;
                 }
             }
         }
 
-        return false;
+        return
+            (weapon != null && weapon.getItemRareness().equals(rareness))
+            || (helmet != null && helmet.getItemRareness().equals(rareness))
+            || (chestplate != null && chestplate.getItemRareness().equals(rareness))
+            || (leggings != null && leggings.getItemRareness().equals(rareness))
+            || (boots != null && boots.getItemRareness().equals(rareness));
+
     }
 
     public Optional<Item> getItem(InventoryCellId id) {

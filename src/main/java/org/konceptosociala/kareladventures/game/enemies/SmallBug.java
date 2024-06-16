@@ -98,6 +98,8 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
     public void update(float tpf) {
         if(!isAlive()){
             alive = false;
+            thisGameState.getAudio().insectDeath.stop();
+            thisGameState.getAudio().insectDeath.play();
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;

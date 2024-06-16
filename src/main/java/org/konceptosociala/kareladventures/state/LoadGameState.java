@@ -252,6 +252,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         rootNode.setShadowMode(ShadowMode.CastAndReceive);
         sun = new Sun(assetManager, fpp);
         rootNode.addLight(sun);
+        sun.getFade().fadeOut();
     }
 
     private void loadSky() {
@@ -291,7 +292,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
                 app.stop();
             }
 
-            player = new Player(assetManager, saveLoader.getPlayerPosition(), bulletAppState);
+            player = new Player(assetManager, saveLoader.getPlayerPosition(), bulletAppState, app.isCheatsEnabled());
 
             player.setHealth(saveLoader.getPlayerHealth());
             player.setInventory(saveLoader.getPlayerInventory());
@@ -299,7 +300,7 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
             currentLevel = saveLoader.getCurrentLevel();
         } else {
-            player = new Player(assetManager, new Vector3f(0,1,0), bulletAppState);
+            player = new Player(assetManager, new Vector3f(0,1,0), bulletAppState, app.isCheatsEnabled());
             currentLevel = Level.Village;
         }
 
