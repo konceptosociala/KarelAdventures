@@ -252,7 +252,7 @@ public class GameState extends BaseAppState  {
                             height("100%");
 
                             image(new ImageBuilder("guidebook_book") {{
-                                filename("Interface/Items/Book.png");
+                                filename("Interface/items/Book.png");
                             }});
                         }});
 
