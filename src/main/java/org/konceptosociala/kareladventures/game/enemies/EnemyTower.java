@@ -124,7 +124,6 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
             var location = characterControl.getPhysicsLocation();
             var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
             if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))<agroRange){
-                LOG.info("a");
                 shoot();
                 attackAvailable = false;
                 attackCooldownTimer = 0.0f;

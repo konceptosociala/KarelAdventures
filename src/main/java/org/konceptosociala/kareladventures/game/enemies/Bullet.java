@@ -26,7 +26,7 @@ public class Bullet extends Node implements IUpdatable {
     private Spatial model;
     private CollisionShape characterCollider;
     private RigidBodyControl characterControl;
-    private float speed = 15f;
+    private float speed = 20f;
     private AssetManager assetManager;
     private int damage = 3;
 
@@ -78,7 +78,7 @@ public class Bullet extends Node implements IUpdatable {
 
     }
     private void moveTowardsPlayer(Vector3f playerPos){
-        characterControl.applyImpulse((playerPos.subtract(characterControl.getPhysicsLocation())).normalize().mult(speed),new Vector3f().zero());
+        characterControl.setLinearVelocity((playerPos.subtract(characterControl.getPhysicsLocation())).normalize().mult(speed));
     }
     /*private static Vector3f rotateByYAxis(Vector3f vec, float rad){
         return new Vector3f((float)(vec.x*Math.cos(rad)+vec.z*Math.sin(rad)), vec.y, (float)(-vec.x*Math.sin(rad)+vec.z*Math.cos(rad)));

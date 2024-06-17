@@ -1,11 +1,14 @@
 package org.konceptosociala.kareladventures.game.enemies;
 
+import com.jme3.anim.AnimComposer;
+import com.jme3.animation.AnimControl;
 import com.jme3.asset.AssetManager;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.material.Material;
 import com.jme3.math.*;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -28,7 +31,7 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 @Getter
 @Setter
 public class SmallBug extends Node implements IUpdatable, IAmEnemy {
-    private static final String ENEMY_MODEL_NAME = "Models/simple_bug.glb";//boppin_ariados.glb
+    private static final String ENEMY_MODEL_NAME = "Models/small_bug.glb";//boppin_ariados.glb
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
@@ -66,10 +69,17 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
         this.model = assetManager.loadModel(ENEMY_MODEL_NAME);
         this.model.rotate(-FastMath.HALF_PI,0,0);
         this.model.setLocalTranslation(0,0,0.2f);
-        this.model.scale(0.5f);
-
+        this.model.scale(0.035f);
         this.model.setName(name);
         this.attachChild(model);
+        ((Node)this.model)
+                .getChild(0)
+                .getControl(AnimComposer.class)
+                .setGlobalSpeed(3);
+        ((Node)this.model)
+                .getChild(0)
+                .getControl(AnimComposer.class)
+                .setCurrentAction("Take 001");
         this.health = new Health(health);
         this.characterCollider = new CapsuleCollisionShape(0.3f,0.5f);
         this.characterControl = new RigidBodyControl(this.characterCollider,0.3f);
@@ -132,7 +142,7 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
     }
     private void performMeleeAttack(){
         Vector3f attackColliderOffset = new Vector3f();
-        model.localToWorld(new Vector3f(0,0.5f,2),attackColliderOffset);
+        model.localToWorld(new Vector3f(0,0.5f,20),attackColliderOffset);
         var player = getPlayerInBox(attackColliderOffset,new Vector3f(0.5f,0.5f,0.2f),characterControl.getPhysicsRotation());
         if(player.isPresent()&&attackAvailable){
             attackAvailable = false;
@@ -175,10 +185,11 @@ public class SmallBug extends Node implements IUpdatable, IAmEnemy {
     }
     private void moveTowardsTarget(){
         var location = characterControl.getPhysicsLocation();
-        var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
-        if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>0.2f){
+        //var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
+        if(FastMath.sqrt(FastMath.pow(location.x - target.x,2)+FastMath.pow(location.z - target.z,2))>1f){
             characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
         }else{
+            //LOG.info("dist");
             characterControl.setLinearVelocity(new Vector3f().zero().setY(characterControl.getLinearVelocity().y));
         }
     }

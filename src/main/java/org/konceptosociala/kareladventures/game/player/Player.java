@@ -58,6 +58,14 @@ public class Player extends Node implements IUpdatable {
         model.setLocalTranslation(0,-1f,0);
         model.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI,new Vector3f(0,1,0)));
         attachChild(model);
+        ((Node)this.model)
+                .getChild(0)
+                .getControl(AnimComposer.class)
+                .setGlobalSpeed(3);
+        ((Node)this.model)
+                .getChild(0)
+                .getControl(AnimComposer.class)
+                .setCurrentAction("walk");
         characterCollider = new CapsuleCollisionShape(0.5f,1f);
         characterControl = new RigidBodyControl(characterCollider, 1);
         characterControl.setFriction(0);
@@ -81,7 +89,12 @@ public class Player extends Node implements IUpdatable {
         return health.getValue() > 0;
     }
     public void takeDamage(int amount){
-        health.subtract(amount);
+        int boots = (int)(inventory.getBoots()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
+        int legs = (int)(inventory.getLeggings()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
+        int chest = (int)(inventory.getChestplate()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
+        int head = (int)(inventory.getHelmet()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
+        amount = (amount-(boots+legs+chest+head)/4);
+        health.subtract(Math.max(amount, 0));
     }
 
     @Override
@@ -95,7 +108,6 @@ public class Player extends Node implements IUpdatable {
         }
         
         onGround=checkIfOnGround(characterControl.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
-        //rotateInMovementDirection();
         characterControl.setLinearVelocity((forwardMovement.add(sidewardMovement)).setY(characterControl.getLinearVelocity().y));
         sidewardMovement = new Vector3f().zero();
         forwardMovement = new Vector3f().zero();
@@ -103,8 +115,6 @@ public class Player extends Node implements IUpdatable {
         movingForward=0;
     }
     private void rotateInMovementDirection(float a){
-            //float XZVelocityVectorToYRotation = FastMath.atan2(characterCollider.getLinearVelocity().x,characterCollider.getLinearVelocity().z)+FastMath.HALF_PI;/**FastMath.sign(characterCollider.getLinearVelocity().x*characterCollider.getLinearVelocity().z);*/
-            //float XZVelocityVectorToYRotation = a;
             characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().slerp(characterControl.getPhysicsRotation(),new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)),0.1f));
     }
 
@@ -117,12 +127,6 @@ public class Player extends Node implements IUpdatable {
     }
 
     public void roll(){
-        /*RigidBodyControl rollRigidBody = new RigidBodyControl(new SphereCollisionShape(1),1);
-        //copyRigidBodyStats(rollRigidBody,characterControl);
-        model.removeControl(characterControl);
-        characterControl.setEnabled(false);
-        copyRigidBodyStats(rollRigidBody,characterControl);
-        model.addControl(rollRigidBody);*/
         Tweens.sequence(Tweens.delay(1),Tweens.callMethod(this,"jump"/*,rollRigidBody*/),Tweens.delay(1)/*,Tweens.callMethod(this,"returnToNormalCollider",rollRigidBody)*/);
 
     }
@@ -132,8 +136,6 @@ public class Player extends Node implements IUpdatable {
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
         rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
-        //characterControl.applyForce(rotateByYAxis(new Vector3f(0,0,appliedForce),yGlobalMovementAngle),new Vector3f(0,0,0));
-        //characterControl.setLinearVelocity(rotateByYAxis(new Vector3f(0,characterControl.getLinearVelocity().y,appliedForce),yGlobalMovementAngle));
         forwardMovement = rotateByYAxis(new Vector3f(0,characterControl.getLinearVelocity().y,appliedForce),yGlobalMovementAngle);
     }
 
@@ -142,8 +144,6 @@ public class Player extends Node implements IUpdatable {
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI+FastMath.HALF_PI*Math.signum(value*2-1);
         rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
-        //characterControl.applyForce(rotateByYAxis(new Vector3f(appliedForce,0,0),yGlobalMovementAngle-FastMath.HALF_PI),new Vector3f(0,0,0));
-        //characterControl.setLinearVelocity(rotateByYAxis(new Vector3f(appliedForce,characterControl.getLinearVelocity().y,0),yGlobalMovementAngle-FastMath.HALF_PI));
         sidewardMovement = rotateByYAxis(new Vector3f(appliedForce,characterControl.getLinearVelocity().y,0),yGlobalMovementAngle-FastMath.HALF_PI);
     }
 
@@ -195,28 +195,6 @@ public class Player extends Node implements IUpdatable {
         return false;
     }
 
-    // private void rotateInMovementDirection(){
-    //     if(characterControl.getLinearVelocity().mult(1,0,1).length()>0.1){
-    //         float XZVelocityVectorToYRotation = FastMath.atan2(characterControl.getLinearVelocity().x,characterControl.getLinearVelocity().z)+FastMath.HALF_PI;/**FastMath.sign(characterControl.getLinearVelocity().x*characterControl.getLinearVelocity().z);*/
-    //         //System.out.println(XZVelocityVectorToYRotation+";"+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0)));
-    //         //float TORQUE = (XZVelocityVectorToYRotation-characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))/2);
-    //         //System.out.println(TORQUE);
-    //         //float a = (XZVelocityVectorToYRotation+characterControl.getPhysicsRotation().toAngleAxis(new Vector3f(0,1,0))*2-);
-    //         characterControl.setPhysicsRotation(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,new Vector3f(0,1,0)));
-    //         //characterControl.setAngularVelocity(new Vector3f(0,TORQUE,0));
-    //     } else {
-    //         //characterControl.setAngularVelocity(new Vector3f(0,0,0));
-    //     }
-    // }
-
-    // private void addRollImpulse(RigidBodyControl rollRigidBody){
-    //     rollRigidBody.applyImpulse(quaternionToDirection(rollRigidBody.getPhysicsRotation()).mult(10),new Vector3f(0,0,0));
-    // }
-
-    // private void returnToNormalCollider(RigidBodyControl rollRigidBody){
-    //     rollRigidBody.setEnabled(false);
-    // }
-
     private void performMeleeAttack(float length, float width, float height){
         Vector3f attackColliderOffset = new Vector3f();
         model.localToWorld(new Vector3f(0,1,length),attackColliderOffset);
@@ -232,39 +210,4 @@ public class Player extends Node implements IUpdatable {
     private static Vector3f rotateByYAxis(Vector3f vec, float rad){
         return new Vector3f((float)(vec.x*Math.cos(rad)+vec.z*Math.sin(rad)), vec.y, (float)(-vec.x*Math.sin(rad)+vec.z*Math.cos(rad)));
     }
-
-    // private static Vector3f quaternionToDirection(Quaternion q) {
-    //     // Normalize the quaternion (assuming it might not be already)
-    //     double w = q.getW();
-    //     double x = q.getX();
-    //     double y = q.getY();
-    //     double z = q.getZ();
-    //     double norm = Math.sqrt(w * w + x * x + y * y + z * z);
-    //     w /= norm;
-    //     x /= norm;
-    //     y /= norm;
-    //     z /= norm;
-
-    //     // Double the first 3 components for efficiency (common factor in rotation formula)
-    //     double x2 = 2.0 * x;
-    //     double y2 = 2.0 * y;
-    //     double z2 = 2.0 * z;
-
-    //     // Rotation formula (assuming a unit vector as input)
-    //     double[] direction = new double[3];
-    //     direction[0] = 1.0 - y2 * y - z2 * z;
-    //     direction[1] = 2.0 * (x * y + w * z);
-    //     direction[2] = 2.0 * (x * z - w * y);
-
-    //     return new Vector3f((float)direction[0],(float)direction[1],(float)direction[2]);
-    // }
-
-    // private static void copyRigidBodyStats(RigidBodyControl to,RigidBodyControl from){
-    //     to.setPhysicsRotation(from.getPhysicsRotation());
-    //     to.setAngularVelocity(from.getAngularVelocity());
-    //     to.setGravity(from.getGravity());
-    //     to.setFriction(from.getFriction());
-    //     to.setPhysicsSpace(from.getPhysicsSpace());
-    //     to.setPhysicsLocation(from.getPhysicsLocation());
-    // }
 }

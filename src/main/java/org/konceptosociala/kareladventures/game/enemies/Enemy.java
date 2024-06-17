@@ -130,6 +130,9 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
         if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>agroRange){
             target=originPosition;
         }else{
+            if(animComposer.getCurrentAction()==null||animComposer.getCurrentAction()==animComposer.getAction("AS_BlackOxBeetle_Idle_NC_01_SK_BlackOxBeetle01")){
+                animComposer.setCurrentAction("AS_BlackOxBeetle_Run_Forward_01_SK_BlackOxBeetle01");
+            }
             target=playerLocation;
         }
     }
@@ -183,8 +186,8 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
     }
     private void moveTowardsTarget(){
         var location = characterControl.getPhysicsLocation();
-        var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
-        if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>0.2f){
+        //var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
+        if(FastMath.sqrt(FastMath.pow(location.x - target.x,2)+FastMath.pow(location.z - target.z,2))>1f){
             characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
         }else{
             characterControl.setLinearVelocity(new Vector3f().zero().setY(characterControl.getLinearVelocity().y));

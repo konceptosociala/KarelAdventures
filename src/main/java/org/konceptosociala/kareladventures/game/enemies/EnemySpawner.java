@@ -27,7 +27,7 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 public class EnemySpawner extends Node implements IUpdatable, IAmEnemySpawner {
     private static final String ENEMY_MODEL_NAME = "Models/tower.glb";//boppin_ariados.glb
 
-    private float spawnCooldownTime = 10f;
+    private static float spawnCooldownTime = 60f;
     private float spawnCooldownTimer = 0.0f;
     private boolean spawnAvailable = false;
     private int enemyHealth;

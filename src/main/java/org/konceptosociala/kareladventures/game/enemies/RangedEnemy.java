@@ -1,5 +1,9 @@
 package org.konceptosociala.kareladventures.game.enemies;
 
+import com.jme3.anim.AnimComposer;
+import com.jme3.anim.tween.Tween;
+import com.jme3.anim.tween.Tweens;
+import com.jme3.anim.tween.action.Action;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
@@ -22,7 +26,7 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 @Getter
 @Setter
 public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
-    private static final String ENEMY_MODEL_NAME = "Models/simple_bug.glb";//boppin_ariados.glb
+    private static final String ENEMY_MODEL_NAME = "Models/ranged_bug.glb";
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
@@ -42,6 +46,7 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
     private float attackRange = 30f;
     private Vector3f originPosition;
     private Vector3f target;
+    private AnimComposer animComposer;
 
     public RangedEnemy(
             Vector3f position,
@@ -58,8 +63,9 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
         this.model = assetManager.loadModel(ENEMY_MODEL_NAME);
         this.model.rotate(-FastMath.HALF_PI,0,0);
         this.model.setLocalTranslation(0,0,0.2f);
-
+        this.model.scale(0.01f);
         this.model.setName(name);
+        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
         this.attachChild(model);
         this.health = new Health(health);
         this.characterCollider = new CapsuleCollisionShape(0.6f,1f);
@@ -136,7 +142,10 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
             var location = characterControl.getPhysicsLocation();
             var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
             if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))<attackRange){
-                LOG.info("a");
+                Action attack = animComposer.action("Spider_Attack_2_Object_4");
+                Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk_Object_4");
+                Action attackOnce = animComposer.actionSequence("attackOnce", attack, doneTween);
+                animComposer.setCurrentAction("attackOnce");
                 shoot();
                 attackAvailable = false;
                 attackCooldownTimer = 0.0f;
@@ -154,30 +163,6 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
         this.health.setValue(health);
     }
 
-    // private Optional<Player> getPlayerInBox(Vector3f center, Vector3f extents, Quaternion rotation) {
-    //     //List<Enemy> enemies = new ArrayList<>();
-    //     //Player player = null;
-    //     Optional<Player> pl = Optional.empty();
-    //     Box boxShape = new Box(extents.x, extents.y, extents.z);
-    //     Geometry collider = new Geometry("Collider", boxShape);
-    //     collider.setLocalTranslation(center);
-    //     collider.setLocalRotation(rotation);
-    //     Transform transform = new Transform(center, rotation);
-    //     BoundingBox boundingBox = new BoundingBox(center, extents.x, extents.y, extents.z);
-    //     boundingBox.transform(transform);
-    //     // Create a material with an unshaded definition
-    //     //Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-
-    //     // Set the material color to blue
-    //     //mat.setColor("Color", ColorRGBA.Blue);
-    //     //collider.setMaterial(mat);
-    //     if (boundingBox.intersects(thisGameState.getPlayer().getWorldBound())) {
-    //         pl = Optional.of(thisGameState.getPlayer());
-    //     }
-    //     //thisGameState.getRootNode().attachChild(collider);
-    //     return pl;
-    // }
-
     private void rotateTowardsTarget(){
         //characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().add(new Quaternion().fromAngleAxis(XZVelocityVectorToYRotation,Vector3f.UNIT_Y)));
         characterControl.setPhysicsRotation(new Quaternion().fromAngles(FastMath.HALF_PI,XZVelocityVectorToYRotation+FastMath.PI,0));
@@ -185,10 +170,18 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
     private void moveTowardsTarget(){
         var location = characterControl.getPhysicsLocation();
         var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
-        if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>attackRange){
-            characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+        if(target.equals(originPosition)){
+            if(FastMath.sqrt(FastMath.pow(location.x - target.x,2)+FastMath.pow(location.z - target.z,2))>2){
+                characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+            }else{
+                characterControl.setLinearVelocity(new Vector3f().zero().setY(characterControl.getLinearVelocity().y));
+            }
         }else{
-            characterControl.setLinearVelocity(new Vector3f().zero().setY(characterControl.getLinearVelocity().y));
+            if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))>attackRange){
+                characterControl.applyForce(rotateByYAxis(new Vector3f(movementSpeed,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
+            }else{
+                characterControl.setLinearVelocity(new Vector3f().zero().setY(characterControl.getLinearVelocity().y));
+            }
         }
     }
     private static Vector3f rotateByYAxis(Vector3f vec, float rad){
@@ -196,6 +189,10 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
     }
 
     public void pushback(){
+        Action takeDamage = animComposer.action("Spider_Damage_Object_4");
+        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk_Object_4");
+        Action takeDamageOnce = animComposer.actionSequence("takeDamageOnce", takeDamage, doneTween);
+        animComposer.setCurrentAction("takeDamageOnce");
         characterControl.applyImpulse(rotateByYAxis(new Vector3f(-2f,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
     }
 
