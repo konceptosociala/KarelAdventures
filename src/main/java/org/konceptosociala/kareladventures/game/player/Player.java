@@ -52,6 +52,8 @@ public class Player extends Node implements IUpdatable {
     private Vector3f forwardMovement = new Vector3f().zero();
 
     private Health health;
+    private float regenCooldownTime = 10;
+    private float regenCooldownTimer = 0;
     private Inventory inventory;
     private int balance = 150;
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state, boolean cheatsEnabled) {
@@ -98,7 +100,7 @@ public class Player extends Node implements IUpdatable {
         int legs = (int)(inventory.getLeggings()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
         int chest = (int)(inventory.getChestplate()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
         int head = (int)(inventory.getHelmet()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
-        int a = (amount-(boots+legs+chest+head)/4);
+        int a = Math.max(1,(amount/((boots+legs+chest+head)/4)));
         LOG.info(String.valueOf(a));
         health.subtract(Math.max(a, 0));
     }
@@ -111,6 +113,11 @@ public class Player extends Node implements IUpdatable {
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getRootNode().detachChild(this);
             return;
+        }
+        regenCooldownTimer += tpf;
+        if (regenCooldownTimer>= regenCooldownTime) {
+            regenCooldownTimer = 0.0f;
+            health.add(2);
         }
         
         onGround=checkIfOnGround(characterControl.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
@@ -154,7 +161,7 @@ public class Player extends Node implements IUpdatable {
             return;
         }
         jump1Time();
-        characterControl.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
+        characterControl.applyImpulse(new Vector3f(0,8,0),new Vector3f(0,0,0));
     }
 
     public void roll(){
@@ -218,7 +225,6 @@ public class Player extends Node implements IUpdatable {
             case Melee:
                 performMeleeAttack(2,1f,0.5f);
                 break;
-
             case Ranged:
                 break;
         }

@@ -1,6 +1,9 @@
 package org.konceptosociala.kareladventures.game.enemies;
 
 import com.jme3.anim.AnimComposer;
+import com.jme3.anim.tween.Tween;
+import com.jme3.anim.tween.Tweens;
+import com.jme3.anim.tween.action.Action;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
@@ -23,7 +26,7 @@ import java.util.Random;
 @Getter
 @Setter
 public class Boss extends Node implements IUpdatable, IAmEnemy {
-    private static final String ENEMY_MODEL_NAME = "Models/tower.glb";
+    private static final String ENEMY_MODEL_NAME = "Models/boss.glb";
 
     private BulletAppState bulletAppState;
     private GameState thisGameState;
@@ -60,11 +63,13 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
         this.bulletAppState = bulletAppState;
         this.setLocalTranslation(position);
         this.model = assetManager.loadModel(ENEMY_MODEL_NAME);
-        this.model.setLocalTranslation(0,-4f,0);
+        this.model.setLocalTranslation(0,-3.5f,0);
         this.model.scale(1f);
         this.model.setName(name);
-        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
         this.attachChild(model);
+        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
+        animComposer.setCurrentAction("big_spell");
+
         this.health = new Health(200);
         wasHealth = 200;
         this.characterCollider = new CapsuleCollisionShape(2f,4f);
@@ -93,17 +98,24 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
     @Override
     public void update(float tpf) {
         target = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
-        if(wasHealth-health.getValue()>healthThreshold){
-            wasHealth = health.getValue();
-            teleport();
-        }
         if(!isAlive()){
             thisGameState.getAudio().insectDeath.stop();
             thisGameState.getAudio().insectDeath.play();
-            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+2);
-            bulletAppState.getPhysicsSpace().remove(characterControl);
-            thisGameState.getEnemyRoot().detachChild(this);
+            //Action attack = animComposer.action("death");
+            //Tween doneTween = Tweens.callMethod(animComposer.getCurrentAction(), "setSpeed", "0");
+            //Action attackOnce = animComposer.actionSequence("attackOnce", attack, at);
+            Action die = animComposer.action("death");
+            Action dying =  animComposer.actionSequence("dying",
+                    die, Tweens.callMethod(this, "onDeath"));
+            animComposer.setCurrentAction("dying");
+
+            //bulletAppState.getPhysicsSpace().remove(characterControl);
+            //thisGameState.getEnemyRoot().detachChild(this);
             return;
+        }
+        if(wasHealth-health.getValue()>healthThreshold){
+            wasHealth = health.getValue();
+            teleport();
         }
         calculateYRotation(target);
         rotateTowardsTarget();
@@ -134,9 +146,18 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
         }
         performAttack();
     }
+    public void onDeath(){
+        thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+1000);
+        bulletAppState.getPhysicsSpace().remove(characterControl);
+        thisGameState.getEnemyRoot().detachChild(this);
+    }
 
     private void teleport() {
         int i = rand.nextInt(teleportingPositions.length);
+        Action attack = animComposer.action("jump");
+        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "big_spell");
+        Action attackOnce = animComposer.actionSequence("attackOnce", attack, doneTween);
+        animComposer.setCurrentAction("attackOnce");
         while(i == pos){
             i = rand.nextInt(teleportingPositions.length);
         }
@@ -153,6 +174,10 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
             var location = characterControl.getPhysicsLocation();
             var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
             //if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))<attackRange){
+            Action attack = animComposer.action("medium_spell");
+            Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "big_spell");
+            Action attackOnce = animComposer.actionSequence("attackOnce", attack, doneTween);
+            animComposer.setCurrentAction("attackOnce");
             switch (currentAtack){
                 case 0:
                     nimbusAttack();
