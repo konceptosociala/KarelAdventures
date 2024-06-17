@@ -105,20 +105,6 @@ public class Player extends Node implements IUpdatable {
 
     @Override
     public void update(float tpf) {
-        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
-        if(movingForward+movingSideward!=0){
-            if(animComposer.getCurrentAction()==animComposer.getAction("walk")){
-
-            }else{
-                animComposer.setCurrentAction("walk").setSpeed(4);
-            }
-        }else {
-            if(animComposer.getCurrentAction()==animComposer.getAction("idle")){
-
-            }else{
-                animComposer.setCurrentAction("idle");
-            }
-        }
         if (!isAlive()) {
             thisGameState.getAudio().death.stop();
             thisGameState.getAudio().death.play();
@@ -128,11 +114,36 @@ public class Player extends Node implements IUpdatable {
         }
         
         onGround=checkIfOnGround(characterControl.getPhysicsLocation(),new Vector3f(0.01f,0.01f,0.01f));
+        determineAnimation();
         characterControl.setLinearVelocity((forwardMovement.add(sidewardMovement)).setY(characterControl.getLinearVelocity().y));
         sidewardMovement = new Vector3f().zero();
         forwardMovement = new Vector3f().zero();
         movingSideward=0;
         movingForward=0;
+    }
+    private void determineAnimation(){
+        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
+        if(onGround){
+            if(movingForward+movingSideward!=0){
+                if(animComposer.getCurrentAction()==animComposer.getAction("walk")){
+
+                }else{
+                    animComposer.setCurrentAction("walk").setSpeed(4);
+                }
+            }else {
+                if(animComposer.getCurrentAction()==animComposer.getAction("idle")){
+
+                }else{
+                    animComposer.setCurrentAction("idle");
+                }
+            }
+        }else{
+            if(animComposer.getCurrentAction()==animComposer.getAction("fly")){
+
+            }else{
+                animComposer.setCurrentAction("fly");
+            }
+        }
     }
     private void rotateInMovementDirection(float a){
             characterControl.setPhysicsRotation(characterControl.getPhysicsRotation().slerp(characterControl.getPhysicsRotation(),new Quaternion().fromAngleAxis(a,new Vector3f(0,1,0)),0.1f));
@@ -142,7 +153,7 @@ public class Player extends Node implements IUpdatable {
         if(!onGround){
             return;
         }
-
+        jump1Time();
         characterControl.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
     }
 
@@ -150,12 +161,12 @@ public class Player extends Node implements IUpdatable {
         Tweens.sequence(Tweens.delay(1),Tweens.callMethod(this,"jump"/*,rollRigidBody*/),Tweens.delay(1)/*,Tweens.callMethod(this,"returnToNormalCollider",rollRigidBody)*/);
 
     }
-    private void walk1Time(){
+    private void jump1Time(){
         animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
         //animComposer.setGlobalSpeed(3);
-        Action walk = animComposer.action("walk");
+        Action walk = animComposer.action("jump");
         //walk.setSpeed(1000);
-        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "idle");
+        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "fly");
         Action walkOnce = animComposer.actionSequence("walkOnce", walk, doneTween);
         animComposer.setCurrentAction("walkOnce").setSpeed(4);
         //animComposer.setGlobalSpeed(1);
