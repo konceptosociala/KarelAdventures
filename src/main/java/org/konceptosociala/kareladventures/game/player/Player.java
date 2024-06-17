@@ -15,6 +15,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 
+import com.sun.media.jfxmedia.logging.Logger;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
@@ -25,6 +26,8 @@ import lombok.Getter;
 
 import java.util.List;
 import java.util.ArrayList;
+
+import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 
 @Getter
 @Setter
@@ -93,8 +96,9 @@ public class Player extends Node implements IUpdatable {
         int legs = (int)(inventory.getLeggings()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
         int chest = (int)(inventory.getChestplate()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
         int head = (int)(inventory.getHelmet()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
-        amount = (amount-(boots+legs+chest+head)/4);
-        health.subtract(Math.max(amount, 0));
+        int a = (amount-(boots+legs+chest+head)/4);
+        LOG.info(String.valueOf(a));
+        health.subtract(Math.max(a, 0));
     }
 
     @Override
@@ -123,7 +127,7 @@ public class Player extends Node implements IUpdatable {
             return;
         }
 
-        characterControl.applyImpulse(new Vector3f(0,6,0),new Vector3f(0,0,0));
+        characterControl.applyImpulse(new Vector3f(0,10,0),new Vector3f(0,0,0));
     }
 
     public void roll(){
@@ -201,7 +205,8 @@ public class Player extends Node implements IUpdatable {
         List<Spatial> enemiesToAffect = getEnemiesInBox(attackColliderOffset,new Vector3f(length,height,width),characterControl.getPhysicsRotation());
         for (Spatial i: enemiesToAffect) {
             if(i instanceof IAmEnemy){
-                ((IAmEnemy) i).receiveDamage(10);
+                int sword = (int)(inventory.getWeapon()!=null?(inventory.getWeapon().getBenefit().orElse(0L)) :0L);
+                ((IAmEnemy) i).receiveDamage(10+sword*3);
                 ((IAmEnemy) i).pushback();
             }
         }

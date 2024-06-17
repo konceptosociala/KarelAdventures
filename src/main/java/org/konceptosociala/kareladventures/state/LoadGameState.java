@@ -277,10 +277,11 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         RangedEnemy re1 = new RangedEnemy(new Vector3f(-80, 5, -8), assetManager, bulletAppState, 100);
         EnemyTower et1 = new EnemyTower(new Vector3f(-90, 5, 10), assetManager, bulletAppState, 500);
         AntHill ah1 = new AntHill(new Vector3f(-90, 5, 20), assetManager, bulletAppState);
-        enemyRoot.attachChild(new EnemySpawner(re1.getOriginPosition(),enemyRoot,e1,bulletAppState));
+        enemyRoot.attachChild(new EnemySpawner(e1.getOriginPosition(),enemyRoot,e1,bulletAppState));
         enemyRoot.attachChild(new EnemySpawner(re1.getOriginPosition(),enemyRoot,re1,bulletAppState));
-        enemyRoot.attachChild(new EnemySpawner(re1.getOriginPosition(),enemyRoot,et1,bulletAppState));
-        enemyRoot.attachChild(new EnemySpawner(re1.getOriginPosition(),enemyRoot,ah1,bulletAppState));
+        enemyRoot.attachChild(new EnemySpawner(et1.getOriginPosition(),enemyRoot,et1,bulletAppState));
+        enemyRoot.attachChild(new EnemySpawner(ah1.getOriginPosition(),enemyRoot,ah1,bulletAppState));
+        //enemyRoot.attachChild(new EnemySpawner(new Vector3f(-27.150446f, 2.4794924f, 157.56384f),enemyRoot,boss,bulletAppState));
     }
 
     private void loadPlayer() {

@@ -89,6 +89,7 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
     @Override
     public void update(float tpf) {
         if(!isAlive()){
+            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+10);
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;
@@ -133,7 +134,7 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
     }
 
     private void shoot() {
-        Bullet bullet =  new Bullet(this.getOriginPosition().add(0,5,0),thisGameState.getPlayer().getCharacterControl().getPhysicsLocation().add(0,-1,0),assetManager,bulletAppState,"Models/enemy_bullet.glb");
+        Bullet bullet =  new Bullet(this.getOriginPosition().add(0,5,0),thisGameState.getPlayer().getCharacterControl().getPhysicsLocation().add(0,-1,0),assetManager,bulletAppState,"Models/enemy_bullet.glb",30,damage,0.3f,0.8f);
         thisGameState.getRootNode().attachChild(bullet);
     }
 

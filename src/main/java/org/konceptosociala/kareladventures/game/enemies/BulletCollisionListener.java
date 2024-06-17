@@ -27,6 +27,9 @@ public class BulletCollisionListener implements PhysicsCollisionListener {
             if (nodeA instanceof Player){
                 ((Player)nodeA).takeDamage(((Bullet)nodeB).getDamage());
             }
+        } else if ((nodeB != null && nodeB instanceof Bullet)&&(nodeA != null && nodeA instanceof Bullet)) {
+        destroyRigidBody(nodeB);
+        destroyRigidBody(nodeA);
         }
     }
 

@@ -96,6 +96,7 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
         if(!isAlive()){
             thisGameState.getAudio().insectDeath.stop();
             thisGameState.getAudio().insectDeath.play();
+            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+2);
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;
@@ -142,20 +143,19 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
             var location = characterControl.getPhysicsLocation();
             var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
             if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))<attackRange){
-                Action attack = animComposer.action("Spider_Attack_2");
+                /*Action attack = animComposer.action("Spider_Attack_2");
                 Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk");
                 Action attackOnce = animComposer.actionSequence("attackOnce", attack, doneTween);
-                animComposer.setCurrentAction("attackOnce");
+                animComposer.setCurrentAction("attackOnce");*/
                 shoot();
                 attackAvailable = false;
                 attackCooldownTimer = 0.0f;
-
             }
         }
     }
 
     private void shoot() {
-        Bullet bullet =  new Bullet(characterControl.getPhysicsLocation().add(0,1,0),thisGameState.getPlayer().getCharacterControl().getPhysicsLocation().add(0,0,0),assetManager,bulletAppState,"Models/enemy_bullet.glb");
+        Bullet bullet =  new Bullet(characterControl.getPhysicsLocation().add(0,1,0),thisGameState.getPlayer().getCharacterControl().getPhysicsLocation().add(0,0,0),assetManager,bulletAppState,"Models/enemy_bullet.glb",20,damage,0.3f,0.8f);
         thisGameState.getRootNode().attachChild(bullet);
     }
     @Override
@@ -189,10 +189,10 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
     }
 
     public void pushback(){
-        Action takeDamage = animComposer.action("Spider_Damage");
+        /*Action takeDamage = animComposer.action("Spider_Damage");
         Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk");
         Action takeDamageOnce = animComposer.actionSequence("takeDamageOnce", takeDamage, doneTween);
-        animComposer.setCurrentAction("takeDamageOnce");
+        animComposer.setCurrentAction("takeDamageOnce");*/
         characterControl.applyImpulse(rotateByYAxis(new Vector3f(-2f,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
     }
 

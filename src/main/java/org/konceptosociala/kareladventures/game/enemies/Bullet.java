@@ -35,9 +35,15 @@ public class Bullet extends Node implements IUpdatable {
             Vector3f target,
             AssetManager assetManager,
             BulletAppState bulletAppState,
-            String MODEL_NAME
+            String MODEL_NAME,
+            int speed,
+            int damage,
+            float radius,
+            float size
     ){
         super();
+        this.speed = speed;
+        this.damage = damage;
         ENEMY_MODEL_NAME = MODEL_NAME;
         this.assetManager = assetManager;
         this.bulletAppState = bulletAppState;
@@ -49,7 +55,7 @@ public class Bullet extends Node implements IUpdatable {
 
         this.model.setName(name);
         this.attachChild(model);
-        this.characterCollider = new CapsuleCollisionShape(0.3f,0.8f);
+        this.characterCollider = new CapsuleCollisionShape(radius,size);
         this.characterControl = new RigidBodyControl(this.characterCollider,0.1f);
         this.characterControl.setFriction(0);
         this.characterControl.setAngularFactor(0);
@@ -68,7 +74,9 @@ public class Bullet extends Node implements IUpdatable {
 
     @Override
     public void update(float tpf) {
-
+        if(characterControl.getLinearVelocity().length()<10){
+            destroyRigidBody(this);
+        }
     }
 
     private void rotateTowardsPlayer(Vector3f playerPos){
@@ -103,5 +111,19 @@ public class Bullet extends Node implements IUpdatable {
         quaternion.fromAngleAxis(angle, axis);
 
         return quaternion;
+    }
+
+    private void destroyRigidBody(Spatial spatial) {
+        RigidBodyControl rigidBody = spatial.getControl(RigidBodyControl.class);
+        if (rigidBody != null) {
+            // Remove the control from the physics space
+            spatial.removeControl(rigidBody);
+
+            // Assuming you have access to the physics space
+            bulletAppState.getPhysicsSpace().remove(rigidBody);
+
+            // Detach the spatial from its parent (scene graph)
+            spatial.removeFromParent();
+        }
     }
 }

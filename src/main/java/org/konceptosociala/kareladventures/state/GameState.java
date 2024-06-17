@@ -14,6 +14,7 @@ import org.konceptosociala.kareladventures.game.BossGhost;
 import org.konceptosociala.kareladventures.game.BossWall;
 import org.konceptosociala.kareladventures.game.Sun;
 import org.konceptosociala.kareladventures.game.World;
+import org.konceptosociala.kareladventures.game.enemies.Boss;
 import org.konceptosociala.kareladventures.game.enemies.BulletCollisionListener;
 import org.konceptosociala.kareladventures.game.inventory.ItemRareness;
 import org.konceptosociala.kareladventures.game.npc.Dialog;
@@ -308,6 +309,9 @@ public class GameState extends BaseAppState  {
             currentLevel = Level.Boss;
             closingBoss = true;
             bossWall.setColliderEnabled(true);
+            Boss boss = new Boss(new Vector3f(-27.150446f, 2.4794924f, 157.56384f), assetManager, bulletAppState);
+            enemyRoot.attachChild(boss);
+            boss.setThisGameState(this);
             setMusicTheme();
         }
 
@@ -359,7 +363,7 @@ public class GameState extends BaseAppState  {
         nifty
             .getScreen("hud_screen")
             .findElementById("health_active")
-            .setWidth(player.getHealth().getValue() * 344 / Health.HP_MAX);
+            .setWidth(player.getHealth().getValue() * 344 / player.getHealth().HP_MAX);
 
         if (player.getHealth().getValue() == 0) {
             gameOver = true;
