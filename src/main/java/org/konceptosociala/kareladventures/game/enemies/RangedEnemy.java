@@ -142,8 +142,8 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
             var location = characterControl.getPhysicsLocation();
             var playerLocation = thisGameState.getPlayer().getCharacterControl().getPhysicsLocation();
             if(FastMath.sqrt(FastMath.pow(location.x - playerLocation.x,2)+FastMath.pow(location.z - playerLocation.z,2))<attackRange){
-                Action attack = animComposer.action("Spider_Attack_2_Object_4");
-                Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk_Object_4");
+                Action attack = animComposer.action("Spider_Attack_2");
+                Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk");
                 Action attackOnce = animComposer.actionSequence("attackOnce", attack, doneTween);
                 animComposer.setCurrentAction("attackOnce");
                 shoot();
@@ -189,8 +189,8 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
     }
 
     public void pushback(){
-        Action takeDamage = animComposer.action("Spider_Damage_Object_4");
-        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk_Object_4");
+        Action takeDamage = animComposer.action("Spider_Damage");
+        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "Spider_Walk");
         Action takeDamageOnce = animComposer.actionSequence("takeDamageOnce", takeDamage, doneTween);
         animComposer.setCurrentAction("takeDamageOnce");
         characterControl.applyImpulse(rotateByYAxis(new Vector3f(-2f,0,0),XZVelocityVectorToYRotation+FastMath.HALF_PI),new Vector3f().zero());
