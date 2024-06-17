@@ -1,7 +1,9 @@
 package org.konceptosociala.kareladventures.game.player;
 
 import com.jme3.anim.AnimComposer;
+import com.jme3.anim.tween.Tween;
 import com.jme3.anim.tween.Tweens;
+import com.jme3.anim.tween.action.Action;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
@@ -52,7 +54,6 @@ public class Player extends Node implements IUpdatable {
     private Health health;
     private Inventory inventory;
     private int balance = 150;
-
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state, boolean cheatsEnabled) {
         super();
         bulletAppState = state;
@@ -61,14 +62,15 @@ public class Player extends Node implements IUpdatable {
         model.setLocalTranslation(0,-1f,0);
         model.setLocalRotation(new Quaternion().fromAngleAxis(-FastMath.HALF_PI,new Vector3f(0,1,0)));
         attachChild(model);
-        ((Node)this.model)
-                .getChild(0)
-                .getControl(AnimComposer.class)
-                .setGlobalSpeed(3);
-        ((Node)this.model)
-                .getChild(0)
-                .getControl(AnimComposer.class)
-                .setCurrentAction("walk");
+        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
+        //animComposer.setGlobalSpeed(3);
+        animComposer.setCurrentAction("idle");
+
+        /*Action walk = animComposer.action("walk");
+        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "idle");
+        Action walkOnce = animComposer.actionSequence("walkOnce", walk, doneTween);
+        animComposer.setCurrentAction("walkOnce");*/
+
         characterCollider = new CapsuleCollisionShape(0.5f,1f);
         characterControl = new RigidBodyControl(characterCollider, 1);
         characterControl.setFriction(0);
@@ -103,6 +105,20 @@ public class Player extends Node implements IUpdatable {
 
     @Override
     public void update(float tpf) {
+        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
+        if(movingForward+movingSideward!=0){
+            if(animComposer.getCurrentAction()==animComposer.getAction("walk")){
+
+            }else{
+                animComposer.setCurrentAction("walk").setSpeed(4);
+            }
+        }else {
+            if(animComposer.getCurrentAction()==animComposer.getAction("idle")){
+
+            }else{
+                animComposer.setCurrentAction("idle");
+            }
+        }
         if (!isAlive()) {
             thisGameState.getAudio().death.stop();
             thisGameState.getAudio().death.play();
@@ -134,9 +150,19 @@ public class Player extends Node implements IUpdatable {
         Tweens.sequence(Tweens.delay(1),Tweens.callMethod(this,"jump"/*,rollRigidBody*/),Tweens.delay(1)/*,Tweens.callMethod(this,"returnToNormalCollider",rollRigidBody)*/);
 
     }
-
+    private void walk1Time(){
+        animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
+        //animComposer.setGlobalSpeed(3);
+        Action walk = animComposer.action("walk");
+        //walk.setSpeed(1000);
+        Tween doneTween = Tweens.callMethod(animComposer, "setCurrentAction", "idle");
+        Action walkOnce = animComposer.actionSequence("walkOnce", walk, doneTween);
+        animComposer.setCurrentAction("walkOnce").setSpeed(4);
+        //animComposer.setGlobalSpeed(1);
+    }
     public void moveForward(float value,float rad) {
         movingForward = 1;
+        //walk1Time();
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI;
         rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
@@ -145,6 +171,7 @@ public class Player extends Node implements IUpdatable {
 
     public void moveSideward(float value,float rad) {
         movingSideward = 1;
+        //walk1Time();
         float yGlobalMovementAngle = (-rad-FastMath.HALF_PI)+(Math.signum(value)+1)*FastMath.HALF_PI+FastMath.HALF_PI*Math.signum(value*2-1);
         rotateInMovementDirection(yGlobalMovementAngle+FastMath.HALF_PI);
         float appliedForce = speed/Math.max(FastMath.sqrt(movingForward+movingSideward),1);
