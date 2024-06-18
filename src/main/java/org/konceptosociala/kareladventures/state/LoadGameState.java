@@ -273,15 +273,78 @@ public class LoadGameState extends BaseAppState implements ScreenController {
         enemyRoot.setUserData("name", "enemy_root");
         rootNode.attachChild(enemyRoot);
 
-        Enemy e1 = new Enemy(new Vector3f(-45, 5, 5), assetManager, bulletAppState, 100);
+        /*Enemy e1 = new Enemy(new Vector3f(-45, 5, 5), assetManager, bulletAppState, 100);
         RangedEnemy re1 = new RangedEnemy(new Vector3f(-80, 5, -8), assetManager, bulletAppState, 100);
         EnemyTower et1 = new EnemyTower(new Vector3f(-90, 5, 10), assetManager, bulletAppState, 500);
         AntHill ah1 = new AntHill(new Vector3f(-90, 5, 20), assetManager, bulletAppState);
         enemyRoot.attachChild(new EnemySpawner(e1.getOriginPosition(),enemyRoot,e1,bulletAppState));
         enemyRoot.attachChild(new EnemySpawner(re1.getOriginPosition(),enemyRoot,re1,bulletAppState));
         enemyRoot.attachChild(new EnemySpawner(et1.getOriginPosition(),enemyRoot,et1,bulletAppState));
-        enemyRoot.attachChild(new EnemySpawner(ah1.getOriginPosition(),enemyRoot,ah1,bulletAppState));
+        enemyRoot.attachChild(new EnemySpawner(ah1.getOriginPosition(),enemyRoot,ah1,bulletAppState));*/
+        createEnemy(-45, 5, 5,0);
+        createEnemy(-56.213577, 0.8148966, 26.757452,0);
+        createEnemy(-69.513954, 0.84021306, 17.923168,0);
+        createEnemy(-83.89922, 0.8646046, 13.196015,0);
+        createEnemy(-100.35614, 0.8571707, 27.882511,1);
+        createEnemy(-90.36897, 0.8193734, 40.286793,1);
+        createEnemy(-79.89893, 0.78665656, 49.400143,0);
+        createEnemy(-71.60787, 0.93057656, 69.65063,0);
+        createEnemy(-64.93981, 0.90151113, 85.28901,0);
+        createEnemy(-57.93912, 0.8861605, 95.21203,1);
+        createEnemy(-73.62337, 0.8814889, 101.66067,1);
+        createEnemy(-90.188156, 0.88725847, 91.75832,1);
+        createEnemy(-99.95612, 0.8830095, 114.66111,0);
+        createEnemy(-100.352394, 0.88247186, 115.180405,1);
+        createEnemy(-119.688545, 0.88874424, 116.461525,1);
+        createEnemy(-126.17286, 0.8955843, 99.76962,0);
+        //2 location
+        createEnemy(-130.87419, 0.90010136, 84.75497,0);
+        createEnemy(-135.37619, 0.9051469, 70.37654,0);
+        createEnemy(-155.94522, 1.2079129, 69.699974,1);
+        createEnemy(-158.87033, 0.99764496, 86.207664,1);
+        createEnemy(-167.06851, 1.0491141, 100.0358,2);
+        createEnemy(-150.40384, 0.90058833, 102.64406,0);
+        createEnemy(-161.13013, 0.89796346, 122.15946,3);
+        createEnemy(-133.95052, 1.6911106, 168.91486,0);
+        createEnemy(-115.93468, 1.4439273, 158.83202,1);
+        createEnemy(-101.67684, 1.4723389, 152.94794,3);
+        createEnemy(-84.608025, 1.0396366, 142.06146,0);
+        createEnemy(-74.756836, 1.0648528, 134.64093,0);
+        createEnemy(-64.92424, 1.1222289, 121.53815,3);
+        createEnemy(-63.388958, 1.280792, 129.21825,2);
+        createEnemy(-54.177517, 1.5337558, 128.95424,1);
+        createEnemy(-61.734127, 1.4568063, 147.84303,2);
+        createEnemy(-76.49186, 1.6200085, 157.63002,3);
+        createEnemy(-90.360115, 2.2446053, 167.91463,0);
+        createEnemy(-97.09541, 2.0370765, 179.76788,1);
+        createEnemy(-97.49046, 2.2390916, 192.27995,1);
+        createEnemy(-83.84998, 2.5859475, 192.76271,3);
+        createEnemy(-63.990486, 1.8309368, 188.77266,0);
+        createEnemy(-67.41489, 1.9447441, 200.31801,3);
+        createEnemy(-83.19197, 3.2839832, 213.13231,2);
+        createEnemy(-71.85981, 2.3460867, 236.36139,2);
+
         //enemyRoot.attachChild(new EnemySpawner(new Vector3f(-27.150446f, 2.4794924f, 157.56384f),enemyRoot,boss,bulletAppState));
+    }
+    private void createEnemy(double x,double y,double z,int enemyType){
+        switch (enemyType){
+            case 0:
+                Enemy e = new Enemy(new Vector3f((float) x, (float) (5), (float) z), assetManager, bulletAppState, 100);
+                enemyRoot.attachChild(new EnemySpawner(e.getOriginPosition(),enemyRoot,e,bulletAppState));
+                break;
+            case 1:
+                RangedEnemy re = new RangedEnemy(new Vector3f((float) x, (float) (5), (float) z), assetManager, bulletAppState, 100);
+                enemyRoot.attachChild(new EnemySpawner(re.getOriginPosition(),enemyRoot,re,bulletAppState));
+                break;
+            case 2:
+                EnemyTower t = new EnemyTower(new Vector3f((float) x, (float) (5), (float) z), assetManager, bulletAppState, 100);
+                enemyRoot.attachChild(new EnemySpawner(t.getOriginPosition(),enemyRoot,t,bulletAppState));
+                break;
+            case 3:
+                AntHill a = new AntHill(new Vector3f((float) x, (float) (5), (float) z), assetManager, bulletAppState);
+                enemyRoot.attachChild(new EnemySpawner(a.getOriginPosition(),enemyRoot,a,bulletAppState));
+                break;
+        }
     }
 
     private void loadPlayer() {

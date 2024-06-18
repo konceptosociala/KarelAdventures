@@ -108,6 +108,7 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
             Action dying =  animComposer.actionSequence("dying",
                     die, Tweens.callMethod(this, "onDeath"));
             animComposer.setCurrentAction("dying");
+            thisGameState.setEnabled(false);
 
             //bulletAppState.getPhysicsSpace().remove(characterControl);
             //thisGameState.getEnemyRoot().detachChild(this);
