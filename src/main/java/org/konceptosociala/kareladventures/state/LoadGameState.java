@@ -227,7 +227,6 @@ public class LoadGameState extends BaseAppState implements ScreenController {
 
     private void loadPhysics() {
         bulletAppState = new BulletAppState();
-        bulletAppState.setDebugEnabled(true);
         stateManager.attach(bulletAppState);
         bulletAppState.setEnabled(false);
     }
@@ -439,8 +438,13 @@ public class LoadGameState extends BaseAppState implements ScreenController {
             app.stop();
         }
 
-        // KarelFarm karelFarm = new KarelFarm(assetManager, new Vector3f(10, 0, 0), bulletAppState);
-        // interactableRoot.attachChild(karelFarm);
+        KarelFarm karelFarm = new KarelFarm(
+            assetManager, 
+            new Vector3f(-14, 0, 15),
+            new Quaternion().fromAngleAxis((float)(-Math.PI/2), Vector3f.UNIT_Y),
+            bulletAppState
+        );
+        interactableRoot.attachChild(karelFarm);
 
         if (loadType == LoadType.Saving) {
             for (var entry : saveLoader.getDialogs().entrySet()) {

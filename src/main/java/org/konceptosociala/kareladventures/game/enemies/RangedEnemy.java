@@ -96,7 +96,7 @@ public class RangedEnemy extends Node implements IUpdatable, IAmEnemy {
         if(!isAlive()){
             thisGameState.getAudio().insectDeath.stop();
             thisGameState.getAudio().insectDeath.play();
-            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+2);
+            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+100);
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;

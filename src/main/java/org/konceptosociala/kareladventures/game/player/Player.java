@@ -17,7 +17,6 @@ import com.jme3.scene.Geometry;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 
-import com.sun.media.jfxmedia.logging.Logger;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
@@ -52,10 +51,10 @@ public class Player extends Node implements IUpdatable {
     private Vector3f forwardMovement = new Vector3f().zero();
 
     private Health health;
-    private float regenCooldownTime = 10;
+    private float regenCooldownTime = 3;
     private float regenCooldownTimer = 0;
     private Inventory inventory;
-    private int balance = 150;
+    private int balance = 500;
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state, boolean cheatsEnabled) {
         super();
         bulletAppState = state;
@@ -100,7 +99,11 @@ public class Player extends Node implements IUpdatable {
         int legs = (int)(inventory.getLeggings()!=null?(inventory.getLeggings().getBenefit().orElse(0L)) :0L);
         int chest = (int)(inventory.getChestplate()!=null?(inventory.getChestplate().getBenefit().orElse(0L)) :0L);
         int head = (int)(inventory.getHelmet()!=null?(inventory.getHelmet().getBenefit().orElse(0L)) :0L);
-        int a = Math.max(1,(amount/Math.max(1,((boots+legs+chest+head)/4))));
+        int a = Math.max(1,(amount/(
+            (boots+legs+chest+head)/4 > 0
+                ? (boots+legs+chest+head)/4
+                : 1
+        )));
         LOG.info(String.valueOf(a));
         health.subtract(Math.max(a, 0));
     }

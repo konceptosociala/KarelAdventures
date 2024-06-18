@@ -43,11 +43,12 @@ public class KarelAdventures extends SimpleApplication {
 
     public KarelAdventures(String[] args) {
         super();
-        appSettings.setWindowSize(1024, 768);
-        setShowSettings(false);
-        // appSettings.setMinResolution(1024, 768);
-        // setDisplayStatView(false);
-        // setDisplayFps(false);
+        // appSettings.setWindowSize(1024, 768);
+        // setShowSettings(false);
+        appSettings.setSettingsDialogImage("Interface/MOSHED-2024-5-25-1-43-6.gif");
+        appSettings.setMinResolution(1024, 768);
+        setDisplayStatView(false);
+        setDisplayFps(false);
         setSettings(appSettings);
 
         cheatsEnabled = args.length > 0 && args[0].equals("iamdumbass");

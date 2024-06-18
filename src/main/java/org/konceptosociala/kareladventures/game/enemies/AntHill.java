@@ -91,7 +91,7 @@ public class AntHill extends Node implements IUpdatable, IAmEnemy {
     @Override
     public void update(float tpf) {
         if(!isAlive()){
-            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+20);
+            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+200);
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;
