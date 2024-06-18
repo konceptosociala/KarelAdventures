@@ -2,11 +2,7 @@ package org.konceptosociala.kareladventures.game.enemies;
 
 //package org.konceptosociala.kareladventures.game.enemies;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.*;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -27,7 +23,7 @@ import static org.konceptosociala.kareladventures.KarelAdventures.LOG;
 public class EnemySpawner extends Node implements IUpdatable, IAmEnemySpawner {
     private static final String ENEMY_MODEL_NAME = "Models/tower.glb";//boppin_ariados.glb
 
-    private static float spawnCooldownTime = 60f;
+    private static float spawnCooldownTime = 20f;
     private float spawnCooldownTimer = 0.0f;
     private boolean spawnAvailable = false;
     private int enemyHealth;

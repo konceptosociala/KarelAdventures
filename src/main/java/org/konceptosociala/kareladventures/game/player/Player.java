@@ -17,7 +17,6 @@ import com.jme3.scene.Geometry;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 
-import com.sun.media.jfxmedia.logging.Logger;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.game.inventory.Inventory;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
@@ -52,10 +51,10 @@ public class Player extends Node implements IUpdatable {
     private Vector3f forwardMovement = new Vector3f().zero();
 
     private Health health;
-    private float regenCooldownTime = 10;
+    private float regenCooldownTime = 3;
     private float regenCooldownTimer = 0;
     private Inventory inventory;
-    private int balance = 150;
+    private int balance = 500;
     public Player(AssetManager assetManager, Vector3f position, BulletAppState state, boolean cheatsEnabled) {
         super();
         bulletAppState = state;
@@ -254,7 +253,7 @@ public class Player extends Node implements IUpdatable {
         for (Spatial i: enemiesToAffect) {
             if(i instanceof IAmEnemy){
                 int sword = (int)(inventory.getWeapon()!=null?(inventory.getWeapon().getBenefit().orElse(0L)) :0L);
-                ((IAmEnemy) i).receiveDamage(10+sword*3);
+                ((IAmEnemy) i).receiveDamage(10+sword);
                 ((IAmEnemy) i).pushback();
             }
         }

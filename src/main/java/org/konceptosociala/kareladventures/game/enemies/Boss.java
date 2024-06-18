@@ -38,7 +38,7 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
     private Health health;
     private float XZVelocityVectorToYRotation;
     private AssetManager assetManager;
-    private int damage = 4;
+    private int damage = 20;
     private float attackChangeCooldownTime = 5f;
     private float attackChangeCooldownTimer = 0.0f;
     private float attackCooldownTime = 100f;
@@ -48,7 +48,7 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
     private Vector3f target;
     private AnimComposer animComposer;
     private int wasHealth;
-    private int healthThreshold = 30;
+    private int healthThreshold = 100;
     private int pos = 0;
     private int currentAtack = 1;
     private int numberOfAttacks = 3;
@@ -71,8 +71,8 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
         animComposer = ((Node)this.model).getChild(0).getControl(AnimComposer.class);
         animComposer.setCurrentAction("big_spell");
 
-        this.health = new Health(200);
-        wasHealth = 200;
+        this.health = new Health(1000);
+        wasHealth = 1000;
         this.characterCollider = new CapsuleCollisionShape(2f,4f);
         this.characterControl = new RigidBodyControl(this.characterCollider,9999f);
         this.characterControl.setFriction(1);

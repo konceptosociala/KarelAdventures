@@ -50,6 +50,7 @@ import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.DefaultScreenController;
 import de.lessvoid.nifty.tools.Color;
 
@@ -225,6 +226,25 @@ public class GameState extends BaseAppState  {
                         }});
                     }});
 
+
+                    panel(new PanelBuilder("karel_balance") {{
+                        childLayoutCenter();
+                        marginLeft("20px");
+
+                        image(new ImageBuilder("karel_hud_border"){{
+                            filename("Interface/UI/Transparent center/panel-transparent-center-005.png");
+                            imageMode("resize:16,16,16,16,16,16,16,16,16,16,16,16");
+                            width("200px");
+                            height("64px");
+                        }});
+
+                        text(new TextBuilder("karel_balance_text") {{
+                            text("Balance:             ");
+                            font("Interface/Fonts/Ubuntu-C.ttf");
+                            color(Color.BLACK);
+                        }});
+                    }});
+
                 }});
                 
                 panel(new PanelBuilder("guidebook_bar") {{
@@ -365,10 +385,22 @@ public class GameState extends BaseAppState  {
             .findElementById("health_active")
             .setWidth(player.getHealth().getValue() * 344 / player.getHealth().HP_MAX);
 
+        nifty
+            .getScreen("hud_screen")
+            .findElementById("karel_balance_text")
+            .getRenderer(TextRenderer.class)
+            .setText("Balance: "+player.getBalance());
+
         LOG.info(player.getCharacterControl().getPhysicsLocation()+"");
 
         if (player.getHealth().getValue() == 0) {
             gameOver = true;
+            bulletAppState.setEnabled(false);
+            karelFarmState.setEnabled(false);
+            dialogState.setEnabled(false);
+            inventoryState.setEnabled(false);
+            chaseCam.setEnabled(false);
+            guideBookState.setEnabled(false);
             appStateManager.attach(new GameOverState(this));
         }
     }

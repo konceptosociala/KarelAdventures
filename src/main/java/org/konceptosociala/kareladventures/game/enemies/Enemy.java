@@ -107,7 +107,7 @@ public class Enemy extends Node implements IUpdatable, IAmEnemy {
         if(!isAlive()){
             thisGameState.getAudio().insectDeath.stop();
             thisGameState.getAudio().insectDeath.play();
-            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+1);
+            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+50);
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;

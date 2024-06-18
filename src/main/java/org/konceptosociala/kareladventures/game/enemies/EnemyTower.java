@@ -89,7 +89,7 @@ public class EnemyTower extends Node implements IUpdatable, IAmEnemy {
     @Override
     public void update(float tpf) {
         if(!isAlive()){
-            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+10);
+            thisGameState.getPlayer().setBalance(thisGameState.getPlayer().getBalance()+75);
             bulletAppState.getPhysicsSpace().remove(characterControl);
             thisGameState.getEnemyRoot().detachChild(this);
             return;
