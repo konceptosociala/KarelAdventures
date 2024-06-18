@@ -97,10 +97,14 @@ public class Player extends Node implements IUpdatable {
     }
     public void takeDamage(int amount){
         int boots = (int)(inventory.getBoots()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
-        int legs = (int)(inventory.getLeggings()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
-        int chest = (int)(inventory.getChestplate()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
-        int head = (int)(inventory.getHelmet()!=null?(inventory.getBoots().getBenefit().orElse(0L)) :0L);
-        int a = Math.max(1,(amount/((boots+legs+chest+head)/4)));
+        int legs = (int)(inventory.getLeggings()!=null?(inventory.getLeggings().getBenefit().orElse(0L)) :0L);
+        int chest = (int)(inventory.getChestplate()!=null?(inventory.getChestplate().getBenefit().orElse(0L)) :0L);
+        int head = (int)(inventory.getHelmet()!=null?(inventory.getHelmet().getBenefit().orElse(0L)) :0L);
+        int a = Math.max(1,(amount/(
+            (boots+legs+chest+head)/4 > 0
+                ? (boots+legs+chest+head)/4
+                : 1
+        )));
         LOG.info(String.valueOf(a));
         health.subtract(Math.max(a, 0));
     }

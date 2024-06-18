@@ -14,6 +14,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import org.konceptosociala.kareladventures.game.player.Health;
+import org.konceptosociala.kareladventures.state.CreditsGameState;
 import org.konceptosociala.kareladventures.state.GameState;
 import org.konceptosociala.kareladventures.utils.IAmEnemy;
 import org.konceptosociala.kareladventures.utils.IUpdatable;
@@ -108,7 +109,13 @@ public class Boss extends Node implements IUpdatable, IAmEnemy {
             Action dying =  animComposer.actionSequence("dying",
                     die, Tweens.callMethod(this, "onDeath"));
             animComposer.setCurrentAction("dying");
-            thisGameState.setEnabled(false);
+            try {
+                thisGameState.getAppStateManager().attach(new CreditsGameState(thisGameState)); 
+                thisGameState.getAppStateManager().detach(thisGameState);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
 
             //bulletAppState.getPhysicsSpace().remove(characterControl);
             //thisGameState.getEnemyRoot().detachChild(this);

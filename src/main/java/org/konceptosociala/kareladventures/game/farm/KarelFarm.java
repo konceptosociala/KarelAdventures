@@ -13,6 +13,7 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
@@ -23,9 +24,10 @@ public class KarelFarm extends InteractableNode {
     private CollisionShape collider;
     private RigidBodyControl rigidBodyControl;
 
-    public KarelFarm(AssetManager assetManager, Vector3f position, BulletAppState bulletAppState) {
+    public KarelFarm(AssetManager assetManager, Vector3f position, Quaternion rotation, BulletAppState bulletAppState) {
         super("karel_farm");
         setLocalTranslation(position);
+        setLocalRotation(rotation);
         this.model = assetManager.loadModel(KAREL_FARM_MODEL_NAME);
         this.collider = new BoxCollisionShape(new Vector3f(5, 5, 5));
         this.rigidBodyControl = new RigidBodyControl(collider, 1);

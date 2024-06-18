@@ -52,7 +52,10 @@ public class ExtendedMovieState extends MovieState {
         super.update(tpf);
         if (isStopped()) {
             stateManager.detach(this);
-            stateManager.attach(nextState);
+            if (stateManager.hasState(nextState))
+                nextState.setEnabled(true);
+            else
+                stateManager.attach(nextState);
         }
     }
 }

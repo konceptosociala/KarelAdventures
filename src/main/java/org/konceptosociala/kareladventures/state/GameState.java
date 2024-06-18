@@ -365,6 +365,8 @@ public class GameState extends BaseAppState  {
             .findElementById("health_active")
             .setWidth(player.getHealth().getValue() * 344 / player.getHealth().HP_MAX);
 
+        LOG.info(player.getCharacterControl().getPhysicsLocation()+"");
+
         if (player.getHealth().getValue() == 0) {
             gameOver = true;
             appStateManager.attach(new GameOverState(this));
